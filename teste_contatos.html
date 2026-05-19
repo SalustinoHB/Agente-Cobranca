@@ -1,0 +1,497 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Pratika - Teste de Envio - Contatos</title>
+<style>
+  * { box-sizing: border-box; }
+  body {
+    font-family: -apple-system, system-ui, 'Segoe UI', Roboto, sans-serif;
+    margin: 0;
+    background: #0a0a0a;
+    color: #fff;
+    padding: 24px;
+  }
+  .header {
+    max-width: 1100px;
+    margin: 0 auto 24px;
+    padding: 20px 24px;
+    background: linear-gradient(135deg, #25D366 0%, #1ba551 100%);
+    border-radius: 14px;
+    color: #000;
+  }
+  .header h1 { margin: 0 0 6px; font-size: 24px; }
+  .header .sub { font-size: 14px; opacity: 0.85; }
+  .stats {
+    display: flex;
+    gap: 16px;
+    max-width: 1100px;
+    margin: 0 auto 20px;
+  }
+  .stat {
+    flex: 1;
+    background: #1a1a1a;
+    padding: 16px 20px;
+    border-radius: 10px;
+    border-left: 4px solid #25D366;
+  }
+  .stat .num { font-size: 26px; font-weight: 700; color: #25D366; }
+  .stat .label { font-size: 13px; color: #aaa; margin-top: 4px; }
+  .container {
+    max-width: 1100px;
+    margin: 0 auto;
+  }
+  .card {
+    background: #1a1a1a;
+    border-radius: 12px;
+    margin-bottom: 16px;
+    overflow: hidden;
+    border-left: 4px solid #25D366;
+  }
+  .card-header {
+    padding: 18px 22px;
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    gap: 20px;
+  }
+  .card-info h3 {
+    margin: 0 0 6px;
+    font-size: 17px;
+    color: #fff;
+  }
+  .card-info .meta {
+    font-size: 13px;
+    color: #aaa;
+    line-height: 1.6;
+  }
+  .card-info .meta b { color: #fff; }
+  .tag {
+    display: inline-block;
+    padding: 3px 10px;
+    border-radius: 12px;
+    font-size: 11px;
+    font-weight: 600;
+    margin-left: 6px;
+  }
+  .tag-blue { background: #4a9eff; color: #000; }
+  .card-value {
+    text-align: right;
+    flex-shrink: 0;
+  }
+  .card-value .valor {
+    font-size: 22px;
+    font-weight: 700;
+    color: #25D366;
+  }
+  .message {
+    padding: 0 22px;
+    margin-bottom: 14px;
+  }
+  .message-preview {
+    background: #0a0a0a;
+    padding: 14px 16px;
+    border-radius: 8px;
+    font-size: 13px;
+    line-height: 1.55;
+    white-space: pre-wrap;
+    color: #ddd;
+    border: 1px solid #2a2a2a;
+    font-family: inherit;
+  }
+  .actions {
+    padding: 14px 22px 18px;
+    display: flex;
+    gap: 10px;
+    flex-wrap: wrap;
+    border-top: 1px solid #2a2a2a;
+  }
+  .btn {
+    padding: 9px 18px;
+    border-radius: 7px;
+    border: none;
+    font-size: 13px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.15s;
+  }
+  .btn-approve {
+    background: #25D366;
+    color: #000;
+  }
+  .btn-approve:hover { background: #1ba551; }
+  .btn-edit {
+    background: #333;
+    color: #fff;
+  }
+  .btn-edit:hover { background: #444; }
+  .btn-skip {
+    background: transparent;
+    color: #888;
+    border: 1px solid #333;
+  }
+  .btn-skip:hover { color: #fff; border-color: #555; }
+  .footer-actions {
+    max-width: 1100px;
+    margin: 30px auto;
+    padding: 24px;
+    background: #1a1a1a;
+    border-radius: 12px;
+    display: flex;
+    gap: 14px;
+    justify-content: center;
+  }
+  .btn-big {
+    padding: 14px 32px;
+    font-size: 15px;
+    font-weight: 700;
+  }
+  .btn-big.approve-all {
+    background: #25D366;
+    color: #000;
+  }
+  .btn-big.cancel-all {
+    background: #ff4444;
+    color: #fff;
+  }
+  .status-badge {
+    display: inline-block;
+    padding: 4px 10px;
+    border-radius: 12px;
+    font-size: 11px;
+    font-weight: 600;
+    margin-left: 8px;
+  }
+  .approved { background: #25D366; color: #000; }
+  .skipped { background: #555; color: #fff; }
+  #toast {
+    position: fixed;
+    bottom: 24px;
+    right: 24px;
+    background: #25D366;
+    color: #000;
+    padding: 14px 20px;
+    border-radius: 10px;
+    font-weight: 600;
+    box-shadow: 0 6px 24px rgba(0,0,0,0.4);
+    display: none;
+    z-index: 100;
+  }
+  .api-config {
+    max-width: 1100px;
+    margin: 0 auto 20px;
+    padding: 16px 20px;
+    background: #1a1a1a;
+    border-radius: 10px;
+    border-left: 4px solid #4a9eff;
+  }
+  .api-config h3 {
+    margin: 0 0 10px;
+    font-size: 14px;
+    color: #4a9eff;
+  }
+  .api-config input {
+    width: 100%;
+    padding: 10px 12px;
+    background: #0a0a0a;
+    border: 1px solid #333;
+    border-radius: 6px;
+    color: #fff;
+    font-size: 13px;
+    margin-bottom: 8px;
+  }
+  .api-config input:focus {
+    outline: none;
+    border-color: #4a9eff;
+  }
+  .api-config .row {
+    display: flex;
+    gap: 10px;
+  }
+  .api-config .row input {
+    flex: 1;
+  }
+</style>
+</head>
+<body>
+
+<div class="header">
+  <h1>🧪 Pratika - Teste de Envio Z-API</h1>
+  <div class="sub">Contatos de teste · 18/05/2026 · Z-API Conectada ✅</div>
+</div>
+
+<div class="stats">
+  <div class="stat">
+    <div class="num" id="stat-total">4</div>
+    <div class="label">Contatos de teste</div>
+  </div>
+  <div class="stat">
+    <div class="num" id="stat-approved">0</div>
+    <div class="label">Enviadas</div>
+  </div>
+  <div class="stat">
+    <div class="num" id="stat-skipped">0</div>
+    <div class="label">Puladas</div>
+  </div>
+  <div class="stat">
+    <div class="num" id="stat-status">🟢</div>
+    <div class="label">Z-API Status</div>
+  </div>
+</div>
+
+<div class="api-config">
+  <h3>⚙️ Configuração Z-API (preencha para enviar de verdade)</h3>
+  <div class="row">
+    <input type="text" id="clientToken" placeholder="Client-Token (ex: F45886bf7d2c54c2385c46c92e3c5c259S)" value="">
+    <input type="text" id="instanceId" placeholder="Instance ID (ex: 3F3504716F44324E0D095EE982B712E3)" value="">
+  </div>
+  <input type="text" id="instanceToken" placeholder="Instance Token (ex: EB69BCFE629B94E3AAC8D8E9)" value="">
+</div>
+
+<div class="container">
+
+  <!-- Card 1 - Thaynan -->
+  <div class="card" data-id="1" data-phone="5584999656443">
+    <div class="card-header">
+      <div class="card-info">
+        <h3>THAYNAN <span class="tag tag-blue">Teste</span></h3>
+        <div class="meta">
+          <b>Contato de teste</b> · WhatsApp: <b>+55 84 99965-6443</b>
+        </div>
+      </div>
+      <div class="card-value">
+        <div class="valor">Teste 1</div>
+      </div>
+    </div>
+    <div class="message">
+      <div class="message-preview" id="msg-1">Oi Thaynan! Tudo bem?
+
+Este é um teste do sistema de cobrança do Condomínio Renaissance via Z-API.
+
+Se você recebeu esta mensagem, significa que a integração está funcionando perfeitamente! ✅
+
+Obrigado por ajudar nos testes.
+
+Pratika Administradora</div>
+    </div>
+    <div class="actions">
+      <button class="btn btn-approve" onclick="aprovar(1)">✅ Enviar mensagem</button>
+      <button class="btn btn-edit" onclick="editar(1)">✏️ Editar mensagem</button>
+      <button class="btn btn-skip" onclick="pular(1)">❌ Pular</button>
+    </div>
+  </div>
+
+  <!-- Card 2 - Nathan -->
+  <div class="card" data-id="2" data-phone="5584988712914">
+    <div class="card-header">
+      <div class="card-info">
+        <h3>NATHAN <span class="tag tag-blue">Teste</span></h3>
+        <div class="meta">
+          <b>Contato de teste</b> · WhatsApp: <b>+55 84 98871-2914</b>
+        </div>
+      </div>
+      <div class="card-value">
+        <div class="valor">Teste 2</div>
+      </div>
+    </div>
+    <div class="message">
+      <div class="message-preview" id="msg-2">Oi Nathan! Tudo bem?
+
+Este é um teste do sistema de cobrança do Condomínio Renaissance via Z-API.
+
+Se você recebeu esta mensagem, significa que a integração está funcionando perfeitamente! ✅
+
+Obrigado por ajudar nos testes.
+
+Pratika Administradora</div>
+    </div>
+    <div class="actions">
+      <button class="btn btn-approve" onclick="aprovar(2)">✅ Enviar mensagem</button>
+      <button class="btn btn-edit" onclick="editar(2)">✏️ Editar mensagem</button>
+      <button class="btn btn-skip" onclick="pular(2)">❌ Pular</button>
+    </div>
+  </div>
+
+  <!-- Card 3 - Mauricio -->
+  <div class="card" data-id="3" data-phone="5584988150857">
+    <div class="card-header">
+      <div class="card-info">
+        <h3>MAURICIO <span class="tag tag-blue">Teste</span></h3>
+        <div class="meta">
+          <b>Contato de teste</b> · WhatsApp: <b>+55 84 98815-0857</b>
+        </div>
+      </div>
+      <div class="card-value">
+        <div class="valor">Teste 3</div>
+      </div>
+    </div>
+    <div class="message">
+      <div class="message-preview" id="msg-3">Oi Mauricio! Tudo bem?
+
+Este é um teste do sistema de cobrança do Condomínio Renaissance via Z-API.
+
+Se você recebeu esta mensagem, significa que a integração está funcionando perfeitamente! ✅
+
+Obrigado por ajudar nos testes.
+
+Pratika Administradora</div>
+    </div>
+    <div class="actions">
+      <button class="btn btn-approve" onclick="aprovar(3)">✅ Enviar mensagem</button>
+      <button class="btn btn-edit" onclick="editar(3)">✏️ Editar mensagem</button>
+      <button class="btn btn-skip" onclick="pular(3)">❌ Pular</button>
+    </div>
+  </div>
+
+  <!-- Card 4 - Joao -->
+  <div class="card" data-id="4" data-phone="5584999209430">
+    <div class="card-header">
+      <div class="card-info">
+        <h3>JOÃO <span class="tag tag-blue">Teste</span></h3>
+        <div class="meta">
+          <b>Contato de teste</b> · WhatsApp: <b>+55 84 99920-9430</b>
+        </div>
+      </div>
+      <div class="card-value">
+        <div class="valor">Teste 4</div>
+      </div>
+    </div>
+    <div class="message">
+      <div class="message-preview" id="msg-4">Oi João! Tudo bem?
+
+Este é um teste do sistema de cobrança do Condomínio Renaissance via Z-API.
+
+Se você recebeu esta mensagem, significa que a integração está funcionando perfeitamente! ✅
+
+Obrigado por ajudar nos testes.
+
+Pratika Administradora</div>
+    </div>
+    <div class="actions">
+      <button class="btn btn-approve" onclick="aprovar(4)">✅ Enviar mensagem</button>
+      <button class="btn btn-edit" onclick="editar(4)">✏️ Editar mensagem</button>
+      <button class="btn btn-skip" onclick="pular(4)">❌ Pular</button>
+    </div>
+  </div>
+
+</div>
+
+<div class="footer-actions">
+  <button class="btn btn-big approve-all" onclick="aprovarTodas()">✅ Enviar TODAS (4)</button>
+  <button class="btn btn-big cancel-all" onclick="cancelarTodas()">❌ Pular TODAS</button>
+</div>
+
+<div id="toast"></div>
+
+<script>
+function toast(msg, isError) {
+  const t = document.getElementById('toast');
+  t.textContent = msg;
+  t.style.display = 'block';
+  t.style.background = isError ? '#ff4444' : '#25D366';
+  t.style.color = isError ? '#fff' : '#000';
+  setTimeout(() => { t.style.display = 'none'; }, 4000);
+}
+
+function getConfig() {
+  return {
+    clientToken: document.getElementById('clientToken').value.trim(),
+    instanceId: document.getElementById('instanceId').value.trim(),
+    instanceToken: document.getElementById('instanceToken').value.trim()
+  };
+}
+
+async function aprovar(id) {
+  const card = document.querySelector('.card[data-id="' + id + '"]');
+  if (!card) return;
+  
+  const phone = card.getAttribute('data-phone');
+  const msgEl = document.getElementById('msg-' + id);
+  const message = msgEl.textContent;
+  const config = getConfig();
+  
+  const actions = card.querySelector('.actions');
+  actions.innerHTML = '<span class="status-badge approved">⏳ Enviando...</span>';
+  
+  // Se tiver configuração, envia de verdade pela Z-API
+  if (config.clientToken && config.instanceId && config.instanceToken) {
+    try {
+      const baseUrl = `https://api.z-api.io/instances/${config.instanceId}/token/${config.instanceToken}`;
+      const response = await fetch(`${baseUrl}/send-text`, {
+        method: 'POST',
+        headers: {
+          'Client-Token': config.clientToken,
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({
+          phone: phone,
+          message: message,
+          delayMessage: 1
+        })
+      });
+      
+      if (response.ok) {
+        const data = await response.json();
+        actions.innerHTML = '<span class="status-badge approved">✅ Enviada! ID: ' + (data.messageId || data.id || '').substring(0, 12) + '</span>';
+        card.style.opacity = '0.6';
+        toast('Mensagem enviada com sucesso via Z-API!');
+      } else {
+        const err = await response.text();
+        actions.innerHTML = '<span class="status-badge" style="background:#ff4444;color:#fff">❌ Erro ' + response.status + '</span>';
+        toast('Erro ao enviar: ' + err, true);
+      }
+    } catch (e) {
+      actions.innerHTML = '<span class="status-badge" style="background:#ff4444;color:#fff">❌ Falha na conexão</span>';
+      toast('Erro de conexão: ' + e.message, true);
+    }
+  } else {
+    // Modo simulação (sem config)
+    actions.innerHTML = '<span class="status-badge approved">✅ Simulado (sem config Z-API)</span>';
+    card.style.opacity = '0.6';
+    toast('Mensagem ' + id + ' aprovada (simulação - preencha a configuração Z-API para enviar de verdade)');
+  }
+  
+  atualizarStats();
+}
+
+function pular(id) {
+  const card = document.querySelector('.card[data-id="' + id + '"]');
+  if (!card) return;
+  const actions = card.querySelector('.actions');
+  actions.innerHTML = '<span class="status-badge skipped">❌ Pulada</span>';
+  card.style.opacity = '0.4';
+  toast('Mensagem ' + id + ' pulada');
+  atualizarStats();
+}
+
+function editar(id) {
+  const preview = document.getElementById('msg-' + id);
+  const atual = preview.textContent;
+  const novo = prompt('Editar mensagem ' + id + ':', atual);
+  if (novo && novo !== atual) {
+    preview.textContent = novo;
+    toast('Mensagem ' + id + ' editada - clique Enviar quando quiser');
+  }
+}
+
+function aprovarTodas() {
+  if (!confirm('Enviar TODAS as 4 mensagens?')) return;
+  for (let i = 1; i <= 4; i++) aprovar(i);
+}
+
+function cancelarTodas() {
+  if (!confirm('Pular TODAS as 4 mensagens?')) return;
+  for (let i = 1; i <= 4; i++) pular(i);
+}
+
+function atualizarStats() {
+  const approved = document.querySelectorAll('.status-badge.approved').length;
+  const skipped = document.querySelectorAll('.status-badge.skipped').length;
+  document.getElementById('stat-approved').textContent = approved;
+  document.getElementById('stat-skipped').textContent = skipped;
+}
+</script>
+
+</body>
+</html>

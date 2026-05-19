@@ -1,0 +1,1276 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Pratika - Painel de Cobrança - Renaissance</title>
+<style>
+  * { box-sizing: border-box; }
+  body {
+    font-family: -apple-system, system-ui, 'Segoe UI', Roboto, sans-serif;
+    margin: 0;
+    background: #0a0a0a;
+    color: #fff;
+    padding: 24px;
+  }
+  .header {
+    max-width: 1100px;
+    margin: 0 auto 24px;
+    padding: 20px 24px;
+    background: linear-gradient(135deg, #25D366 0%, #1ba551 100%);
+    border-radius: 14px;
+    color: #000;
+  }
+  .header h1 { margin: 0 0 6px; font-size: 24px; }
+  .header .sub { font-size: 14px; opacity: 0.85; }
+  .stats {
+    display: flex;
+    gap: 16px;
+    max-width: 1100px;
+    margin: 0 auto 20px;
+  }
+  .stat {
+    flex: 1;
+    background: #1a1a1a;
+    padding: 16px 20px;
+    border-radius: 10px;
+    border-left: 4px solid #25D366;
+  }
+  .stat .num { font-size: 26px; font-weight: 700; color: #25D366; }
+  .stat .label { font-size: 13px; color: #aaa; margin-top: 4px; }
+  .section {
+    max-width: 1100px;
+    margin: 0 auto 32px;
+  }
+  .section-title {
+    font-size: 18px;
+    font-weight: 700;
+    margin-bottom: 16px;
+    padding: 10px 16px;
+    border-radius: 8px;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+  }
+  .section-title.ok { background: #0d3320; color: #25D366; border-left: 4px solid #25D366; }
+  .section-title.warn { background: #332a0d; color: #ffaa00; border-left: 4px solid #ffaa00; }
+  .section-title.danger { background: #331414; color: #ff4444; border-left: 4px solid #ff4444; }
+  .card {
+    background: #1a1a1a;
+    border-radius: 12px;
+    margin-bottom: 12px;
+    overflow: hidden;
+    border-left: 4px solid #25D366;
+  }
+  .card.warn { border-left-color: #ffaa00; }
+  .card.danger { border-left-color: #ff4444; }
+  .card.ok { border-left-color: #25D366; opacity: 0.85; }
+  .card-header {
+    padding: 14px 20px;
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    gap: 16px;
+  }
+  .card-info h3 {
+    margin: 0 0 4px;
+    font-size: 15px;
+    color: #fff;
+  }
+  .card-info .meta {
+    font-size: 12px;
+    color: #aaa;
+    line-height: 1.5;
+  }
+  .card-info .meta b { color: #ddd; }
+  .tag {
+    display: inline-block;
+    padding: 2px 8px;
+    border-radius: 10px;
+    font-size: 10px;
+    font-weight: 600;
+    margin-left: 4px;
+  }
+  .tag-green { background: #25D366; color: #000; }
+  .tag-yellow { background: #ffaa00; color: #000; }
+  .tag-red { background: #ff4444; color: #fff; }
+  .tag-gray { background: #444; color: #ccc; }
+  .card-value {
+    text-align: right;
+    flex-shrink: 0;
+  }
+  .card-value .valor {
+    font-size: 18px;
+    font-weight: 700;
+    color: #25D366;
+  }
+  .card-value .valor-warn { color: #ffaa00; }
+  .card-value .valor-danger { color: #ff4444; }
+  .card-value .atraso {
+    font-size: 11px;
+    color: #888;
+    margin-top: 2px;
+  }
+  .message {
+    padding: 0 20px;
+    margin-bottom: 10px;
+  }
+  .message-preview {
+    background: #0a0a0a;
+    padding: 12px 14px;
+    border-radius: 8px;
+    font-size: 12px;
+    line-height: 1.5;
+    white-space: pre-wrap;
+    color: #bbb;
+    border: 1px solid #2a2a2a;
+  }
+  .actions {
+    padding: 10px 20px 14px;
+    display: flex;
+    gap: 8px;
+    flex-wrap: wrap;
+    border-top: 1px solid #2a2a2a;
+  }
+  .btn {
+    padding: 7px 14px;
+    border-radius: 6px;
+    border: none;
+    font-size: 12px;
+    font-weight: 600;
+    cursor: pointer;
+  }
+  .btn-approve { background: #25D366; color: #000; }
+  .btn-approve:hover { background: #1ba551; }
+  .btn-edit { background: #333; color: #fff; }
+  .btn-skip { background: transparent; color: #888; border: 1px solid #333; }
+  .status-badge {
+    display: inline-block;
+    padding: 3px 8px;
+    border-radius: 10px;
+    font-size: 10px;
+    font-weight: 600;
+  }
+  .approved { background: #25D366; color: #000; }
+  .skipped { background: #555; color: #fff; }
+  .empty-state {
+    text-align: center;
+    padding: 30px;
+    color: #666;
+    font-size: 14px;
+  }
+  .footer-actions {
+    max-width: 1100px;
+    margin: 24px auto;
+    padding: 20px;
+    background: #1a1a1a;
+    border-radius: 12px;
+    display: flex;
+    gap: 12px;
+    justify-content: center;
+  }
+  .btn-big {
+    padding: 12px 28px;
+    font-size: 14px;
+    font-weight: 700;
+    border-radius: 8px;
+    border: none;
+    cursor: pointer;
+  }
+  .btn-big.approve-all { background: #25D366; color: #000; }
+  .btn-big.cancel-all { background: #ff4444; color: #fff; }
+  #toast {
+    position: fixed;
+    bottom: 20px;
+    right: 20px;
+    background: #25D366;
+    color: #000;
+    padding: 12px 18px;
+    border-radius: 10px;
+    font-weight: 600;
+    display: none;
+    z-index: 100;
+  }
+  .toggle-btn {
+    background: #222;
+    color: #888;
+    border: 1px solid #333;
+    padding: 6px 14px;
+    border-radius: 6px;
+    cursor: pointer;
+    font-size: 12px;
+  }
+  .toggle-btn:hover { color: #fff; }
+  .collapsed .card-body { display: none; }
+</style>
+</head>
+<body>
+
+<div class="header">
+  <h1>🏢 Pratika Cobrança — Painel Renaissance</h1>
+  <div class="sub">Condomínio Moacyr Maia · 18/05/2026 · 88 unidades</div>
+</div>
+
+<div class="stats">
+  <div class="stat">
+    <div class="num" id="stat-total">9</div>
+    <div class="label">Inadimplentes</div>
+  </div>
+  <div class="stat">
+    <div class="num">R$ 6.660,00</div>
+    <div class="label">Valor total a cobrar</div>
+  </div>
+  <div class="stat">
+    <div class="num" id="stat-approved">0</div>
+    <div class="label">Aprovadas hoje</div>
+  </div>
+  <div class="stat">
+    <div class="num" id="stat-skipped">0</div>
+    <div class="label">Puladas hoje</div>
+  </div>
+</div>
+
+<!-- ═══════════════════════════════════════════════════════ -->
+<!-- SEÇÃO 1: INADIMPLENTES (requer ação) -->
+<!-- ═══════════════════════════════════════════════════════ -->
+<div class="section">
+  <div class="section-title warn">
+    ⚠️ Inadimplentes — 9 unidades · R$ 6.660,00
+    <button class="toggle-btn" onclick="toggleSection('sec-inadimplentes')">Recolher</button>
+  </div>
+  <div id="sec-inadimplentes">
+
+    <!-- Card 1 -->
+    <div class="card warn" data-id="1">
+      <div class="card-header">
+        <div class="card-info">
+          <h3>PATRICIA CHRISTIANNE PEREIRA DE SOUZA <span class="tag tag-yellow">13 dias atraso</span></h3>
+          <div class="meta">
+            <b>Apto 0304 A</b> · Boleto 159214 · Venc: 05/05/2026<br>
+            WhatsApp: <b>+55 84 99129-8734</b>
+          </div>
+        </div>
+        <div class="card-value">
+          <div class="valor valor-warn">R$ 740,00</div>
+          <div class="atraso">juros aplicados</div>
+        </div>
+      </div>
+      <div class="message">
+        <div class="message-preview">Oi Patricia, tudo bem?
+
+O boleto do condomínio Renaissance (0304 A) está com 13 dias de atraso. Valor atualizado: R$ 740,00.
+
+Se precisar da 2ª via ou quiser negociar, me chama por aqui.
+
+Pratika Administradora</div>
+      </div>
+      <div class="actions">
+        <button class="btn btn-approve" onclick="aprovar(1)">✅ Aprovar e enviar</button>
+        <button class="btn btn-edit" onclick="editar(1)">✏️ Editar</button>
+        <button class="btn btn-skip" onclick="pular(1)">❌ Pular hoje</button>
+      </div>
+    </div>
+
+    <!-- Card 2 -->
+    <div class="card warn" data-id="2">
+      <div class="card-header">
+        <div class="card-info">
+          <h3>FRANCISCO SOARES DE O. FILHO <span class="tag tag-yellow">13 dias atraso</span></h3>
+          <div class="meta">
+            <b>Apto 0603 A</b> · Boleto 159225 · Venc: 05/05/2026<br>
+            WhatsApp: <b>+55 84 99982-3413</b>
+          </div>
+        </div>
+        <div class="card-value">
+          <div class="valor valor-warn">R$ 740,00</div>
+          <div class="atraso">juros aplicados</div>
+        </div>
+      </div>
+      <div class="message">
+        <div class="message-preview">Oi Francisco, tudo bem?
+
+O boleto do condomínio Renaissance (0603 A) está com 13 dias de atraso. Valor atualizado: R$ 740,00.
+
+Se precisar da 2ª via ou quiser negociar, me chama por aqui.
+
+Pratika Administradora</div>
+      </div>
+      <div class="actions">
+        <button class="btn btn-approve" onclick="aprovar(2)">✅ Aprovar e enviar</button>
+        <button class="btn btn-edit" onclick="editar(2)">✏️ Editar</button>
+        <button class="btn btn-skip" onclick="pular(2)">❌ Pular hoje</button>
+      </div>
+    </div>
+
+    <!-- Card 3 -->
+    <div class="card danger" data-id="3">
+      <div class="card-header">
+        <div class="card-info">
+          <h3>ALICE MARIA LINS MONTEIRO <span class="tag tag-red">SEM TELEFONE</span></h3>
+          <div class="meta">
+            <b>Apto 0704 A</b> · Boleto 159230 · Venc: 05/05/2026<br>
+            <span style="color:#ff6464">⚠️ Sem WhatsApp cadastrado — não é possível enviar automático</span>
+          </div>
+        </div>
+        <div class="card-value">
+          <div class="valor valor-danger">R$ 740,00</div>
+          <div class="atraso">13 dias atraso</div>
+        </div>
+      </div>
+      <div class="message">
+        <div class="message-preview" style="color:#ff6464">❌ Não é possível enviar mensagem automática — sem telefone cadastrado no Superlógica.
+
+Ação necessária: coletar telefone na portaria ou com o síndico.</div>
+      </div>
+      <div class="actions">
+        <button class="btn btn-skip" onclick="pular(3)">❌ Pular (sem telefone)</button>
+      </div>
+    </div>
+
+    <!-- Card 4 -->
+    <div class="card warn" data-id="4">
+      <div class="card-header">
+        <div class="card-info">
+          <h3>ANDRE CAVALCANTI DE OLIVEIRA <span class="tag tag-yellow">13 dias atraso</span></h3>
+          <div class="meta">
+            <b>Apto 0802 A</b> · Boleto 159232 · Venc: 05/05/2026<br>
+            WhatsApp: <b>+55 84 99984-8957</b>
+          </div>
+        </div>
+        <div class="card-value">
+          <div class="valor valor-warn">R$ 740,00</div>
+          <div class="atraso">juros aplicados</div>
+        </div>
+      </div>
+      <div class="message">
+        <div class="message-preview">Oi Andre, tudo bem?
+
+O boleto do condomínio Renaissance (0802 A) está com 13 dias de atraso. Valor atualizado: R$ 740,00.
+
+Se precisar da 2ª via ou quiser negociar, me chama por aqui.
+
+Pratika Administradora</div>
+      </div>
+      <div class="actions">
+        <button class="btn btn-approve" onclick="aprovar(4)">✅ Aprovar e enviar</button>
+        <button class="btn btn-edit" onclick="editar(4)">✏️ Editar</button>
+        <button class="btn btn-skip" onclick="pular(4)">❌ Pular hoje</button>
+      </div>
+    </div>
+
+    <!-- Card 5 -->
+    <div class="card warn" data-id="5">
+      <div class="card-header">
+        <div class="card-info">
+          <h3>TEREZINHA NOVAES GRANJA SILVA <span class="tag tag-yellow">13 dias atraso</span></h3>
+          <div class="meta">
+            <b>Apto 0803 A</b> · Boleto 159233 · Venc: 05/05/2026<br>
+            WhatsApp: <b>+55 83 99681-5960</b> <span style="color:#ffaa00">⚠️ DDD 83 (PB)</span>
+          </div>
+        </div>
+        <div class="card-value">
+          <div class="valor valor-warn">R$ 740,00</div>
+          <div class="atraso">juros aplicados</div>
+        </div>
+      </div>
+      <div class="message">
+        <div class="message-preview">Oi Terezinha, tudo bem?
+
+O boleto do condomínio Renaissance (0803 A) está com 13 dias de atraso. Valor atualizado: R$ 740,00.
+
+Se precisar da 2ª via ou quiser negociar, me chama por aqui.
+
+Pratika Administradora</div>
+      </div>
+      <div class="actions">
+        <button class="btn btn-approve" onclick="aprovar(5)">✅ Aprovar e enviar</button>
+        <button class="btn btn-edit" onclick="editar(5)">✏️ Editar</button>
+        <button class="btn btn-skip" onclick="pular(5)">❌ Pular hoje</button>
+      </div>
+    </div>
+
+    <!-- Card 6 -->
+    <div class="card warn" data-id="6">
+      <div class="card-header">
+        <div class="card-info">
+          <h3>GILVANETE SILVA <span class="tag tag-yellow">13 dias atraso</span></h3>
+          <div class="meta">
+            <b>Apto 1104 A</b> · Boleto 159248 · Venc: 05/05/2026<br>
+            WhatsApp: <b>+55 84 99692-0820</b>
+          </div>
+        </div>
+        <div class="card-value">
+          <div class="valor valor-warn">R$ 740,00</div>
+          <div class="atraso">juros aplicados</div>
+        </div>
+      </div>
+      <div class="message">
+        <div class="message-preview">Oi Gilvanete, tudo bem?
+
+O boleto do condomínio Renaissance (1104 A) está com 13 dias de atraso. Valor atualizado: R$ 740,00.
+
+Se precisar da 2ª via ou quiser negociar, me chama por aqui.
+
+Pratika Administradora</div>
+      </div>
+      <div class="actions">
+        <button class="btn btn-approve" onclick="aprovar(6)">✅ Aprovar e enviar</button>
+        <button class="btn btn-edit" onclick="editar(6)">✏️ Editar</button>
+        <button class="btn btn-skip" onclick="pular(6)">❌ Pular hoje</button>
+      </div>
+    </div>
+
+    <!-- Card 7 -->
+    <div class="card warn" data-id="7">
+      <div class="card-header">
+        <div class="card-info">
+          <h3>EMANUEL GUTTEMBERG DE MEDEIROS <span class="tag tag-yellow">13 dias atraso</span></h3>
+          <div class="meta">
+            <b>Apto 0302 B</b> · Boleto 159242 · Venc: 05/05/2026<br>
+            WhatsApp: <b>+55 84 99529-3395</b>
+          </div>
+        </div>
+        <div class="card-value">
+          <div class="valor valor-warn">R$ 740,00</div>
+          <div class="atraso">juros aplicados</div>
+        </div>
+      </div>
+      <div class="message">
+        <div class="message-preview">Oi Emanuel, tudo bem?
+
+O boleto do condomínio Renaissance (0302 B) está com 13 dias de atraso. Valor atualizado: R$ 740,00.
+
+Se precisar da 2ª via ou quiser negociar, me chama por aqui.
+
+Pratika Administradora</div>
+      </div>
+      <div class="actions">
+        <button class="btn btn-approve" onclick="aprovar(7)">✅ Aprovar e enviar</button>
+        <button class="btn btn-edit" onclick="editar(7)">✏️ Editar</button>
+        <button class="btn btn-skip" onclick="pular(7)">❌ Pular hoje</button>
+      </div>
+    </div>
+
+    <!-- Card 8 -->
+    <div class="card warn" data-id="8">
+      <div class="card-header">
+        <div class="card-info">
+          <h3>GERALDO SABINO DE ARAUJO <span class="tag tag-yellow">13 dias atraso</span></h3>
+          <div class="meta">
+            <b>Apto 1003 B</b> · Boleto 159264 · Venc: 05/05/2026<br>
+            WhatsApp: <b>+55 84 99991-6688</b>
+          </div>
+        </div>
+        <div class="card-value">
+          <div class="valor valor-warn">R$ 740,00</div>
+          <div class="atraso">juros aplicados</div>
+        </div>
+      </div>
+      <div class="message">
+        <div class="message-preview">Oi Geraldo, tudo bem?
+
+O boleto do condomínio Renaissance (1003 B) está com 13 dias de atraso. Valor atualizado: R$ 740,00.
+
+Se precisar da 2ª via ou quiser negociar, me chama por aqui.
+
+Pratika Administradora</div>
+      </div>
+      <div class="actions">
+        <button class="btn btn-approve" onclick="aprovar(8)">✅ Aprovar e enviar</button>
+        <button class="btn btn-edit" onclick="editar(8)">✏️ Editar</button>
+        <button class="btn btn-skip" onclick="pular(8)">❌ Pular hoje</button>
+      </div>
+    </div>
+
+    <!-- Card 9 -->
+    <div class="card warn" data-id="9">
+      <div class="card-header">
+        <div class="card-info">
+          <h3>LUZIA VALENTIM BORGES MARQUES <span class="tag tag-yellow">13 dias atraso</span></h3>
+          <div class="meta">
+            <b>Apto 1104 B</b> · Boleto 159274 · Venc: 05/05/2026<br>
+            WhatsApp: <b>+55 84 98848-5153</b>
+          </div>
+        </div>
+        <div class="card-value">
+          <div class="valor valor-warn">R$ 740,00</div>
+          <div class="atraso">juros aplicados</div>
+        </div>
+      </div>
+      <div class="message">
+        <div class="message-preview">Oi Luzia, tudo bem?
+
+O boleto do condomínio Renaissance (1104 B) está com 13 dias de atraso. Valor atualizado: R$ 740,00.
+
+Se precisar da 2ª via ou quiser negociar, me chama por aqui.
+
+Pratika Administradora</div>
+      </div>
+      <div class="actions">
+        <button class="btn btn-approve" onclick="aprovar(9)">✅ Aprovar e enviar</button>
+        <button class="btn btn-edit" onclick="editar(9)">✏️ Editar</button>
+        <button class="btn btn-skip" onclick="pular(9)">❌ Pular hoje</button>
+      </div>
+    </div>
+
+  </div>
+</div>
+
+<!-- ═══════════════════════════════════════════════════════ -->
+<!-- SEÇÃO 2: ACORDO OU JURÍDICO -->
+<!-- ═══════════════════════════════════════════════════════ -->
+<div class="section">
+  <div class="section-title danger">
+    🏛️ Acordo ou Jurídico — 0 unidades
+    <button class="toggle-btn" onclick="toggleSection('sec-acordo')">Recolher</button>
+  </div>
+  <div id="sec-acordo">
+    <div class="empty-state">
+      📋 Nenhuma unidade em acordo ou processo jurídico no momento.<br>
+      <span style="font-size:12px; color:#555;">Casos anteriores (base antiga): Brunaldo Bigi (2602), Raimundo Nonato (2702), Luciana Guerra (0802)</span>
+    </div>
+  </div>
+</div>
+
+<!-- ═══════════════════════════════════════════════════════ -->
+<!-- SEÇÃO 3: AINDA ESTÁ NO PRAZO -->
+<!-- ═══════════════════════════════════════════════════════ -->
+<div class="section">
+  <div class="section-title ok">
+    ✅ Ainda está no prazo — 79 unidades · R$ 54.510,00 pagos
+    <button class="toggle-btn" onclick="toggleSection('sec-prazo')">Recolher</button>
+  </div>
+  <div id="sec-prazo">
+    <div style="max-height: 400px; overflow-y: auto;">
+      <!-- Lista compacta dos 79 pagos -->
+      <div class="card ok" style="padding: 10px 16px; margin-bottom: 6px;">
+        <div style="display:flex; justify-content:space-between; align-items:center;">
+          <span><b>0101 A</b> · CÉLIO EDUARDO DE LIRA · <span style="color:#25D366">✓ Recebido</span></span>
+          <span style="color:#888; font-size:12px;">R$ 690,00 · Antecipou 5d</span>
+        </div>
+      </div>
+      <div class="card ok" style="padding: 10px 16px; margin-bottom: 6px;">
+        <div style="display:flex; justify-content:space-between; align-items:center;">
+          <span><b>0102 A</b> · ANA BEATRIZ SOARES FERNANDES · <span style="color:#25D366">✓ Recebido</span></span>
+          <span style="color:#888; font-size:12px;">R$ 690,00 · Antecipou 1d</span>
+        </div>
+      </div>
+      <div class="card ok" style="padding: 10px 16px; margin-bottom: 6px;">
+        <div style="display:flex; justify-content:space-between; align-items:center;">
+          <span><b>0103 A</b> · ROBERTA DE CARVALHO OLIVEIRA · <span style="color:#25D366">✓ Recebido</span></span>
+          <span style="color:#888; font-size:12px;">R$ 690,00 · Antecipou 5d</span>
+        </div>
+      </div>
+      <div class="card ok" style="padding: 10px 16px; margin-bottom: 6px;">
+        <div style="display:flex; justify-content:space-between; align-items:center;">
+          <span><b>0104 A</b> · MARIA DE FATIMA SOUTO · <span style="color:#25D366">✓ Recebido</span></span>
+          <span style="color:#888; font-size:12px;">R$ 690,00 · Antecipou 1d</span>
+        </div>
+      </div>
+      <div class="card ok" style="padding: 10px 16px; margin-bottom: 6px;">
+        <div style="display:flex; justify-content:space-between; align-items:center;">
+          <span><b>0201 A</b> · TALITA CAMARA MEDEIROS · <span style="color:#25D366">✓ Recebido</span></span>
+          <span style="color:#888; font-size:12px;">R$ 690,00 · Pagou no dia</span>
+        </div>
+      </div>
+      <div class="card ok" style="padding: 10px 16px; margin-bottom: 6px;">
+        <div style="display:flex; justify-content:space-between; align-items:center;">
+          <span><b>0202 A</b> · JOSE AFRANIO GOMES · <span style="color:#25D366">✓ Recebido</span></span>
+          <span style="color:#888; font-size:12px;">R$ 690,00 · Pagou no dia</span>
+        </div>
+      </div>
+      <div class="card ok" style="padding: 10px 16px; margin-bottom: 6px;">
+        <div style="display:flex; justify-content:space-between; align-items:center;">
+          <span><b>0203 A</b> · JEIMES MARQUES TEODORO · <span style="color:#25D366">✓ Recebido</span></span>
+          <span style="color:#888; font-size:12px;">R$ 690,00 · Antecipou 5d</span>
+        </div>
+      </div>
+      <div class="card ok" style="padding: 10px 16px; margin-bottom: 6px;">
+        <div style="display:flex; justify-content:space-between; align-items:center;">
+          <span><b>0204 A</b> · DEYSE BEZERRA DE CARVALHO · <span style="color:#25D366">✓ Recebido</span></span>
+          <span style="color:#888; font-size:12px;">R$ 690,00 · Antecipou 1d</span>
+        </div>
+      </div>
+      <div class="card ok" style="padding: 10px 16px; margin-bottom: 6px;">
+        <div style="display:flex; justify-content:space-between; align-items:center;">
+          <span><b>0301 A</b> · MAXWELL ARRUDA DE MEDEIROS · <span style="color:#25D366">✓ Recebido</span></span>
+          <span style="color:#888; font-size:12px;">R$ 690,00 · Pagou no dia</span>
+        </div>
+      </div>
+      <div class="card ok" style="padding: 10px 16px; margin-bottom: 6px;">
+        <div style="display:flex; justify-content:space-between; align-items:center;">
+          <span><b>0302 A</b> · VAGNER SOUZA DE MEDEIROS · <span style="color:#25D366">✓ Recebido</span></span>
+          <span style="color:#888; font-size:12px;">R$ 690,00 · Pagou no dia</span>
+        </div>
+      </div>
+      <div class="card ok" style="padding: 10px 16px; margin-bottom: 6px;">
+        <div style="display:flex; justify-content:space-between; align-items:center;">
+          <span><b>0303 A</b> · ERTON LUIZ DE LIMA · <span style="color:#25D366">✓ Recebido</span></span>
+          <span style="color:#888; font-size:12px;">R$ 690,00 · Pagou no dia</span>
+        </div>
+      </div>
+      <div class="card ok" style="padding: 10px 16px; margin-bottom: 6px;">
+        <div style="display:flex; justify-content:space-between; align-items:center;">
+          <span><b>0401 A</b> · TILON GURGEL FILHO · <span style="color:#25D366">✓ Recebido</span></span>
+          <span style="color:#888; font-size:12px;">R$ 690,00 · Pagou no dia</span>
+        </div>
+      </div>
+      <div class="card ok" style="padding: 10px 16px; margin-bottom: 6px;">
+        <div style="display:flex; justify-content:space-between; align-items:center;">
+          <span><b>0402 A</b> · ABRAÃO LINCOLN FERREIRA · <span style="color:#25D366">✓ Recebido</span></span>
+          <span style="color:#888; font-size:12px;">R$ 690,00 · Antecipou 1d</span>
+        </div>
+      </div>
+      <div class="card ok" style="padding: 10px 16px; margin-bottom: 6px;">
+        <div style="display:flex; justify-content:space-between; align-items:center;">
+          <span><b>0403 A</b> · MOEMA LARISSA PEREIRA · <span style="color:#25D366">✓ Recebido</span></span>
+          <span style="color:#888; font-size:12px;">R$ 690,00 · Antecipou 1d</span>
+        </div>
+      </div>
+      <div class="card ok" style="padding: 10px 16px; margin-bottom: 6px;">
+        <div style="display:flex; justify-content:space-between; align-items:center;">
+          <span><b>0404 A</b> · MARIA CANDIDA COSTA · <span style="color:#25D366">✓ Recebido</span></span>
+          <span style="color:#888; font-size:12px;">R$ 755,04 · Atrasou 1d</span>
+        </div>
+      </div>
+      <div class="card ok" style="padding: 10px 16px; margin-bottom: 6px;">
+        <div style="display:flex; justify-content:space-between; align-items:center;">
+          <span><b>0501 A</b> · IVANALDO SOARES · <span style="color:#25D366">✓ Recebido</span></span>
+          <span style="color:#888; font-size:12px;">R$ 740,00 · Antecipou 1d</span>
+        </div>
+      </div>
+      <div class="card ok" style="padding: 10px 16px; margin-bottom: 6px;">
+        <div style="display:flex; justify-content:space-between; align-items:center;">
+          <span><b>0502 A</b> · HEBERT RANIERY SILVA · <span style="color:#25D366">✓ Recebido</span></span>
+          <span style="color:#888; font-size:12px;">R$ 690,00 · Pagou no dia</span>
+        </div>
+      </div>
+      <div class="card ok" style="padding: 10px 16px; margin-bottom: 6px;">
+        <div style="display:flex; justify-content:space-between; align-items:center;">
+          <span><b>0504 A</b> · LENIGIA MARIA DE ALENCAR · <span style="color:#25D366">✓ Recebido</span></span>
+          <span style="color:#888; font-size:12px;">R$ 690,00 · Pagou no dia</span>
+        </div>
+      </div>
+      <div class="card ok" style="padding: 10px 16px; margin-bottom: 6px;">
+        <div style="display:flex; justify-content:space-between; align-items:center;">
+          <span><b>0601 A</b> · FRANCISCO HENRIQUE MAIA · <span style="color:#25D366">✓ Recebido</span></span>
+          <span style="color:#888; font-size:12px;">R$ 690,00 · Pagou no dia</span>
+        </div>
+      </div>
+      <div class="card ok" style="padding: 10px 16px; margin-bottom: 6px;">
+        <div style="display:flex; justify-content:space-between; align-items:center;">
+          <span><b>0602 A</b> · IVANISE RAMOS FREIRE · <span style="color:#25D366">✓ Recebido</span></span>
+          <span style="color:#888; font-size:12px;">R$ 690,00 · Antecipou 11d</span>
+        </div>
+      </div>
+      <div class="card ok" style="padding: 10px 16px; margin-bottom: 6px;">
+        <div style="display:flex; justify-content:space-between; align-items:center;">
+          <span><b>0604 A</b> · LUIS GEVANIR DE FREITAS · <span style="color:#25D366">✓ Recebido</span></span>
+          <span style="color:#888; font-size:12px;">R$ 690,00 · Pagou no dia</span>
+        </div>
+      </div>
+      <div class="card ok" style="padding: 10px 16px; margin-bottom: 6px;">
+        <div style="display:flex; justify-content:space-between; align-items:center;">
+          <span><b>0701 A</b> · MARCOS VASCONCELOS · <span style="color:#25D366">✓ Recebido</span></span>
+          <span style="color:#888; font-size:12px;">R$ 690,00 · Pagou no dia</span>
+        </div>
+      </div>
+      <div class="card ok" style="padding: 10px 16px; margin-bottom: 6px;">
+        <div style="display:flex; justify-content:space-between; align-items:center;">
+          <span><b>0702 A</b> · ALEXANDRE LUIS HONORIO · <span style="color:#25D366">✓ Recebido</span></span>
+          <span style="color:#888; font-size:12px;">R$ 690,00 · Antecipou 11d</span>
+        </div>
+      </div>
+      <div class="card ok" style="padding: 10px 16px; margin-bottom: 6px;">
+        <div style="display:flex; justify-content:space-between; align-items:center;">
+          <span><b>0703 A</b> · MARIA NIVETE LINHARES · <span style="color:#25D366">✓ Recebido</span></span>
+          <span style="color:#888; font-size:12px;">R$ 690,00 · Antecipou 1d</span>
+        </div>
+      </div>
+      <div class="card ok" style="padding: 10px 16px; margin-bottom: 6px;">
+        <div style="display:flex; justify-content:space-between; align-items:center;">
+          <span><b>0801 A</b> · MARCELO MOURA REBOUCAS · <span style="color:#25D366">✓ Recebido</span></span>
+          <span style="color:#888; font-size:12px;">R$ 690,00 · Pagou no dia</span>
+        </div>
+      </div>
+      <div class="card ok" style="padding: 10px 16px; margin-bottom: 6px;">
+        <div style="display:flex; justify-content:space-between; align-items:center;">
+          <span><b>0901 A</b> · JOSE RIBAMAR LOPES · <span style="color:#25D366">✓ Recebido</span></span>
+          <span style="color:#888; font-size:12px;">R$ 690,00 · Pagou no dia</span>
+        </div>
+      </div>
+      <div class="card ok" style="padding: 10px 16px; margin-bottom: 6px;">
+        <div style="display:flex; justify-content:space-between; align-items:center;">
+          <span><b>0902 A</b> · JOSE AILTON BEZERRA · <span style="color:#25D366">✓ Recebido</span></span>
+          <span style="color:#888; font-size:12px;">R$ 690,00 · Pagou no dia</span>
+        </div>
+      </div>
+      <div class="card ok" style="padding: 10px 16px; margin-bottom: 6px;">
+        <div style="display:flex; justify-content:space-between; align-items:center;">
+          <span><b>0903 A</b> · JOSE RIBAMAR LOPES · <span style="color:#25D366">✓ Recebido</span></span>
+          <span style="color:#888; font-size:12px;">R$ 690,00 · Pagou no dia</span>
+        </div>
+      </div>
+      <div class="card ok" style="padding: 10px 16px; margin-bottom: 6px;">
+        <div style="display:flex; justify-content:space-between; align-items:center;">
+          <span><b>0904 A</b> · JOSE RIBAMAR LOPES · <span style="color:#25D366">✓ Recebido</span></span>
+          <span style="color:#888; font-size:12px;">R$ 690,00 · Pagou no dia</span>
+        </div>
+      </div>
+      <div class="card ok" style="padding: 10px 16px; margin-bottom: 6px;">
+        <div style="display:flex; justify-content:space-between; align-items:center;">
+          <span><b>1001 A</b> · JOSE RIBAMAR LOPES · <span style="color:#25D366">✓ Recebido</span></span>
+          <span style="color:#888; font-size:12px;">R$ 690,00 · Pagou no dia</span>
+        </div>
+      </div>
+      <div class="card ok" style="padding: 10px 16px; margin-bottom: 6px;">
+        <div style="display:flex; justify-content:space-between; align-items:center;">
+          <span><b>1002 A</b> · JOSE RIBAMAR LOPES · <span style="color:#25D366">✓ Recebido</span></span>
+          <span style="color:#888; font-size:12px;">R$ 690,00 · Pagou no dia</span>
+        </div>
+      </div>
+      <div class="card ok" style="padding: 10px 16px; margin-bottom: 6px;">
+        <div style="display:flex; justify-content:space-between; align-items:center;">
+          <span><b>1004 A</b> · JOSE RIBAMAR LOPES · <span style="color:#25D366">✓ Recebido</span></span>
+          <span style="color:#888; font-size:12px;">R$ 690,00 · Pagou no dia</span>
+        </div>
+      </div>
+      <div class="card ok" style="padding: 10px 16px; margin-bottom: 6px;">
+        <div style="display:flex; justify-content:space-between; align-items:center;">
+          <span><b>1101 A</b> · JOSE RIBAMAR LOPES · <span style="color:#25D366">✓ Recebido</span></span>
+          <span style="color:#888; font-size:12px;">R$ 690,00 · Pagou no dia</span>
+        </div>
+      </div>
+      <div class="card ok" style="padding: 10px 16px; margin-bottom: 6px;">
+        <div style="display:flex; justify-content:space-between; align-items:center;">
+          <span><b>1102 A</b> · JOSE RIBAMAR LOPES · <span style="color:#25D366">✓ Recebido</span></span>
+          <span style="color:#888; font-size:12px;">R$ 690,00 · Pagou no dia</span>
+        </div>
+      </div>
+      <div class="card ok" style="padding: 10px 16px; margin-bottom: 6px;">
+        <div style="display:flex; justify-content:space-between; align-items:center;">
+          <span><b>1103 A</b> · JOSE RIBAMAR LOPES · <span style="color:#25D366">✓ Recebido</span></span>
+          <span style="color:#888; font-size:12px;">R$ 690,00 · Pagou no dia</span>
+        </div>
+      </div>
+      <div class="card ok" style="padding: 10px 16px; margin-bottom: 6px;">
+        <div style="display:flex; justify-content:space-between; align-items:center;">
+          <span><b>1201 A</b> · JOSE RIBAMAR LOPES · <span style="color:#25D366">✓ Recebido</span></span>
+          <span style="color:#888; font-size:12px;">R$ 690,00 · Pagou no dia</span>
+        </div>
+      </div>
+      <div class="card ok" style="padding: 10px 16px; margin-bottom: 6px;">
+        <div style="display:flex; justify-content:space-between; align-items:center;">
+          <span><b>1202 A</b> · JOSE RIBAMAR LOPES · <span style="color:#25D366">✓ Recebido</span></span>
+          <span style="color:#888; font-size:12px;">R$ 690,00 · Pagou no dia</span>
+        </div>
+      </div>
+      <div class="card ok" style="padding: 10px 16px; margin-bottom: 6px;">
+        <div style="display:flex; justify-content:space-between; align-items:center;">
+          <span><b>1203 A</b> · JOSE RIBAMAR LOPES · <span style="color:#25D366">✓ Recebido</span></span>
+          <span style="color:#888; font-size:12px;">R$ 690,00 · Pagou no dia</span>
+        </div>
+      </div>
+      <div class="card ok" style="padding: 10px 16px; margin-bottom: 6px;">
+        <div style="display:flex; justify-content:space-between; align-items:center;">
+          <span><b>1204 A</b> · JOSE RIBAMAR LOPES · <span style="color:#25D366">✓ Recebido</span></span>
+          <span style="color:#888; font-size:12px;">R$ 690,00 · Pagou no dia</span>
+        </div>
+      </div>
+      <div class="card ok" style="padding: 10px 16px; margin-bottom: 6px;">
+        <div style="display:flex; justify-content:space-between; align-items:center;">
+          <span><b>1301 A</b> · JOSE RIBAMAR LOPES · <span style="color:#25D366">✓ Recebido</span></span>
+          <span style="color:#888; font-size:12px;">R$ 690,00 · Pagou no dia</span>
+        </div>
+      </div>
+      <div class="card ok" style="padding: 10px 16px; margin-bottom: 6px;">
+        <div style="display:flex; justify-content:space-between; align-items:center;">
+          <span><b>1302 A</b> · JOSE RIBAMAR LOPES · <span style="color:#25D366">✓ Recebido</span></span>
+          <span style="color:#888; font-size:12px;">R$ 690,00 · Pagou no dia</span>
+        </div>
+      </div>
+      <div class="card ok" style="padding: 10px 16px; margin-bottom: 6px;">
+        <div style="display:flex; justify-content:space-between; align-items:center;">
+          <span><b>1303 A</b> · JOSE RIBAMAR LOPES · <span style="color:#25D366">✓ Recebido</span></span>
+          <span style="color:#888; font-size:12px;">R$ 690,00 · Pagou no dia</span>
+        </div>
+      </div>
+      <div class="card ok" style="padding: 10px 16px; margin-bottom: 6px;">
+        <div style="display:flex; justify-content:space-between; align-items:center;">
+          <span><b>1304 A</b> · JOSE RIBAMAR LOPES · <span style="color:#25D366">✓ Recebido</span></span>
+          <span style="color:#888; font-size:12px;">R$ 690,00 · Pagou no dia</span>
+        </div>
+      </div>
+      <div class="card ok" style="padding: 10px 16px; margin-bottom: 6px;">
+        <div style="display:flex; justify-content:space-between; align-items:center;">
+          <span><b>1401 A</b> · JOSE RIBAMAR LOPES · <span style="color:#25D366">✓ Recebido</span></span>
+          <span style="color:#888; font-size:12px;">R$ 690,00 · Pagou no dia</span>
+        </div>
+      </div>
+      <div class="card ok" style="padding: 10px 16px; margin-bottom: 6px;">
+        <div style="display:flex; justify-content:space-between; align-items:center;">
+          <span><b>1402 A</b> · JOSE RIBAMAR LOPES · <span style="color:#25D366">✓ Recebido</span></span>
+          <span style="color:#888; font-size:12px;">R$ 690,00 · Pagou no dia</span>
+        </div>
+      </div>
+      <div class="card ok" style="padding: 10px 16px; margin-bottom: 6px;">
+        <div style="display:flex; justify-content:space-between; align-items:center;">
+          <span><b>1403 A</b> · JOSE RIBAMAR LOPES · <span style="color:#25D366">✓ Recebido</span></span>
+          <span style="color:#888; font-size:12px;">R$ 690,00 · Pagou no dia</span>
+        </div>
+      </div>
+      <div class="card ok" style="padding: 10px 16px; margin-bottom: 6px;">
+        <div style="display:flex; justify-content:space-between; align-items:center;">
+          <span><b>1404 A</b> · JOSE RIBAMAR LOPES · <span style="color:#25D366">✓ Recebido</span></span>
+          <span style="color:#888; font-size:12px;">R$ 690,00 · Pagou no dia</span>
+        </div>
+      </div>
+      <div class="card ok" style="padding: 10px 16px; margin-bottom: 6px;">
+        <div style="display:flex; justify-content:space-between; align-items:center;">
+          <span><b>1501 A</b> · JOSE RIBAMAR LOPES · <span style="color:#25D366">✓ Recebido</span></span>
+          <span style="color:#888; font-size:12px;">R$ 690,00 · Pagou no dia</span>
+        </div>
+      </div>
+      <div class="card ok" style="padding: 10px 16px; margin-bottom: 6px;">
+        <div style="display:flex; justify-content:space-between; align-items:center;">
+          <span><b>1502 A</b> · JOSE RIBAMAR LOPES · <span style="color:#25D366">✓ Recebido</span></span>
+          <span style="color:#888; font-size:12px;">R$ 690,00 · Pagou no dia</span>
+        </div>
+      </div>
+      <div class="card ok" style="padding: 10px 16px; margin-bottom: 6px;">
+        <div style="display:flex; justify-content:space-between; align-items:center;">
+          <span><b>1503 A</b> · JOSE RIBAMAR LOPES · <span style="color:#25D366">✓ Recebido</span></span>
+          <span style="color:#888; font-size:12px;">R$ 690,00 · Pagou no dia</span>
+        </div>
+      </div>
+      <div class="card ok" style="padding: 10px 16px; margin-bottom: 6px;">
+        <div style="display:flex; justify-content:space-between; align-items:center;">
+          <span><b>1504 A</b> · JOSE RIBAMAR LOPES · <span style="color:#25D366">✓ Recebido</span></span>
+          <span style="color:#888; font-size:12px;">R$ 690,00 · Pagou no dia</span>
+        </div>
+      </div>
+      <div class="card ok" style="padding: 10px 16px; margin-bottom: 6px;">
+        <div style="display:flex; justify-content:space-between; align-items:center;">
+          <span><b>1601 A</b> · JOSE RIBAMAR LOPES · <span style="color:#25D366">✓ Recebido</span></span>
+          <span style="color:#888; font-size:12px;">R$ 690,00 · Pagou no dia</span>
+        </div>
+      </div>
+      <div class="card ok" style="padding: 10px 16px; margin-bottom: 6px;">
+        <div style="display:flex; justify-content:space-between; align-items:center;">
+          <span><b>1602 A</b> · JOSE RIBAMAR LOPES · <span style="color:#25D366">✓ Recebido</span></span>
+          <span style="color:#888; font-size:12px;">R$ 690,00 · Pagou no dia</span>
+        </div>
+      </div>
+      <div class="card ok" style="padding: 10px 16px; margin-bottom: 6px;">
+        <div style="display:flex; justify-content:space-between; align-items:center;">
+          <span><b>1603 A</b> · JOSE RIBAMAR LOPES · <span style="color:#25D366">✓ Recebido</span></span>
+          <span style="color:#888; font-size:12px;">R$ 690,00 · Pagou no dia</span>
+        </div>
+      </div>
+      <div class="card ok" style="padding: 10px 16px; margin-bottom: 6px;">
+        <div style="display:flex; justify-content:space-between; align-items:center;">
+          <span><b>1604 A</b> · JOSE RIBAMAR LOPES · <span style="color:#25D366">✓ Recebido</span></span>
+          <span style="color:#888; font-size:12px;">R$ 690,00 · Pagou no dia</span>
+        </div>
+      </div>
+      <div class="card ok" style="padding: 10px 16px; margin-bottom: 6px;">
+        <div style="display:flex; justify-content:space-between; align-items:center;">
+          <span><b>1701 A</b> · JOSE RIBAMAR LOPES · <span style="color:#25D366">✓ Recebido</span></span>
+          <span style="color:#888; font-size:12px;">R$ 690,00 · Pagou no dia</span>
+        </div>
+      </div>
+      <div class="card ok" style="padding: 10px 16px; margin-bottom: 6px;">
+        <div style="display:flex; justify-content:space-between; align-items:center;">
+          <span><b>1702 A</b> · JOSE RIBAMAR LOPES · <span style="color:#25D366">✓ Recebido</span></span>
+          <span style="color:#888; font-size:12px;">R$ 690,00 · Pagou no dia</span>
+        </div>
+      </div>
+      <div class="card ok" style="padding: 10px 16px; margin-bottom: 6px;">
+        <div style="display:flex; justify-content:space-between; align-items:center;">
+          <span><b>1703 A</b> · JOSE RIBAMAR LOPES · <span style="color:#25D366">✓ Recebido</span></span>
+          <span style="color:#888; font-size:12px;">R$ 690,00 · Pagou no dia</span>
+        </div>
+      </div>
+      <div class="card ok" style="padding: 10px 16px; margin-bottom: 6px;">
+        <div style="display:flex; justify-content:space-between; align-items:center;">
+          <span><b>1704 A</b> · JOSE RIBAMAR LOPES · <span style="color:#25D366">✓ Recebido</span></span>
+          <span style="color:#888; font-size:12px;">R$ 690,00 · Pagou no dia</span>
+        </div>
+      </div>
+      <div class="card ok" style="padding: 10px 16px; margin-bottom: 6px;">
+        <div style="display:flex; justify-content:space-between; align-items:center;">
+          <span><b>1801 A</b> · JOSE RIBAMAR LOPES · <span style="color:#25D366">✓ Recebido</span></span>
+          <span style="color:#888; font-size:12px;">R$ 690,00 · Pagou no dia</span>
+        </div>
+      </div>
+      <div class="card ok" style="padding: 10px 16px; margin-bottom: 6px;">
+        <div style="display:flex; justify-content:space-between; align-items:center;">
+          <span><b>1802 A</b> · JOSE RIBAMAR LOPES · <span style="color:#25D366">✓ Recebido</span></span>
+          <span style="color:#888; font-size:12px;">R$ 690,00 · Pagou no dia</span>
+        </div>
+      </div>
+      <div class="card ok" style="padding: 10px 16px; margin-bottom: 6px;">
+        <div style="display:flex; justify-content:space-between; align-items:center;">
+          <span><b>1803 A</b> · JOSE RIBAMAR LOPES · <span style="color:#25D366">✓ Recebido</span></span>
+          <span style="color:#888; font-size:12px;">R$ 690,00 · Pagou no dia</span>
+        </div>
+      </div>
+      <div class="card ok" style="padding: 10px 16px; margin-bottom: 6px;">
+        <div style="display:flex; justify-content:space-between; align-items:center;">
+          <span><b>1804 A</b> · JOSE RIBAMAR LOPES · <span style="color:#25D366">✓ Recebido</span></span>
+          <span style="color:#888; font-size:12px;">R$ 690,00 · Pagou no dia</span>
+        </div>
+      </div>
+      <div class="card ok" style="padding: 10px 16px; margin-bottom: 6px;">
+        <div style="display:flex; justify-content:space-between; align-items:center;">
+          <span><b>1901 A</b> · JOSE RIBAMAR LOPES · <span style="color:#25D366">✓ Recebido</span></span>
+          <span style="color:#888; font-size:12px;">R$ 690,00 · Pagou no dia</span>
+        </div>
+      </div>
+      <div class="card ok" style="padding: 10px 16px; margin-bottom: 6px;">
+        <div style="display:flex; justify-content:space-between; align-items:center;">
+          <span><b>1902 A</b> · JOSE RIBAMAR LOPES · <span style="color:#25D366">✓ Recebido</span></span>
+          <span style="color:#888; font-size:12px;">R$ 690,00 · Pagou no dia</span>
+        </div>
+      </div>
+      <div class="card ok" style="padding: 10px 16px; margin-bottom: 6px;">
+        <div style="display:flex; justify-content:space-between; align-items:center;">
+          <span><b>1903 A</b> · JOSE RIBAMAR LOPES · <span style="color:#25D366">✓ Recebido</span></span>
+          <span style="color:#888; font-size:12px;">R$ 690,00 · Pagou no dia</span>
+        </div>
+      </div>
+      <div class="card ok" style="padding: 10px 16px; margin-bottom: 6px;">
+        <div style="display:flex; justify-content:space-between; align-items:center;">
+          <span><b>1904 A</b> · JOSE RIBAMAR LOPES · <span style="color:#25D366">✓ Recebido</span></span>
+          <span style="color:#888; font-size:12px;">R$ 690,00 · Pagou no dia</span>
+        </div>
+      </div>
+      <div class="card ok" style="padding: 10px 16px; margin-bottom: 6px;">
+        <div style="display:flex; justify-content:space-between; align-items:center;">
+          <span><b>2001 A</b> · JOSE RIBAMAR LOPES · <span style="color:#25D366">✓ Recebido</span></span>
+          <span style="color:#888; font-size:12px;">R$ 690,00 · Pagou no dia</span>
+        </div>
+      </div>
+      <div class="card ok" style="padding: 10px 16px; margin-bottom: 6px;">
+        <div style="display:flex; justify-content:space-between; align-items:center;">
+          <span><b>2002 A</b> · JOSE RIBAMAR LOPES · <span style="color:#25D366">✓ Recebido</span></span>
+          <span style="color:#888; font-size:12px;">R$ 690,00 · Pagou no dia</span>
+        </div>
+      </div>
+      <div class="card ok" style="padding: 10px 16px; margin-bottom: 6px;">
+        <div style="display:flex; justify-content:space-between; align-items:center;">
+          <span><b>2003 A</b> · JOSE RIBAMAR LOPES · <span style="color:#25D366">✓ Recebido</span></span>
+          <span style="color:#888; font-size:12px;">R$ 690,00 · Pagou no dia</span>
+        </div>
+      </div>
+      <div class="card ok" style="padding: 10px 16px; margin-bottom: 6px;">
+        <div style="display:flex; justify-content:space-between; align-items:center;">
+          <span><b>2004 A</b> · JOSE RIBAMAR LOPES · <span style="color:#25D366">✓ Recebido</span></span>
+          <span style="color:#888; font-size:12px;">R$ 690,00 · Pagou no dia</span>
+        </div>
+      </div>
+      <div class="card ok" style="padding: 10px 16px; margin-bottom: 6px;">
+        <div style="display:flex; justify-content:space-between; align-items:center;">
+          <span><b>2101 A</b> · JOSE RIBAMAR LOPES · <span style="color:#25D366">✓ Recebido</span></span>
+          <span style="color:#888; font-size:12px;">R$ 690,00 · Pagou no dia</span>
+        </div>
+      </div>
+      <div class="card ok" style="padding: 10px 16px; margin-bottom: 6px;">
+        <div style="display:flex; justify-content:space-between; align-items:center;">
+          <span><b>2102 A</b> · JOSE RIBAMAR LOPES · <span style="color:#25D366">✓ Recebido</span></span>
+          <span style="color:#888; font-size:12px;">R$ 690,00 · Pagou no dia</span>
+        </div>
+      </div>
+      <div class="card ok" style="padding: 10px 16px; margin-bottom: 6px;">
+        <div style="display:flex; justify-content:space-between; align-items:center;">
+          <span><b>2103 A</b> · JOSE RIBAMAR LOPES · <span style="color:#25D366">✓ Recebido</span></span>
+          <span style="color:#888; font-size:12px;">R$ 690,00 · Pagou no dia</span>
+        </div>
+      </div>
+      <div class="card ok" style="padding: 10px 16px; margin-bottom: 6px;">
+        <div style="display:flex; justify-content:space-between; align-items:center;">
+          <span><b>2104 A</b> · JOSE RIBAMAR LOPES · <span style="color:#25D366">✓ Recebido</span></span>
+          <span style="color:#888; font-size:12px;">R$ 690,00 · Pagou no dia</span>
+        </div>
+      </div>
+      <div class="card ok" style="padding: 10px 16px; margin-bottom: 6px;">
+        <div style="display:flex; justify-content:space-between; align-items:center;">
+          <span><b>2201 A</b> · JOSE RIBAMAR LOPES · <span style="color:#25D366">✓ Recebido</span></span>
+          <span style="color:#888; font-size:12px;">R$ 690,00 · Pagou no dia</span>
+        </div>
+      </div>
+      <div class="card ok" style="padding: 10px 16px; margin-bottom: 6px;">
+        <div style="display:flex; justify-content:space-between; align-items:center;">
+          <span><b>2202 A</b> · JOSE RIBAMAR LOPES · <span style="color:#25D366">✓ Recebido</span></span>
+          <span style="color:#888; font-size:12px;">R$ 690,00 · Pagou no dia</span>
+        </div>
+      </div>
+      <div class="card ok" style="padding: 10px 16px; margin-bottom: 6px;">
+        <div style="display:flex; justify-content:space-between; align-items:center;">
+          <span><b>2203 A</b> · JOSE RIBAMAR LOPES · <span style="color:#25D366">✓ Recebido</span></span>
+          <span style="color:#888; font-size:12px;">R$ 690,00 · Pagou no dia</span>
+        </div>
+      </div>
+      <div class="card ok" style="padding: 10px 16px; margin-bottom: 6px;">
+        <div style="display:flex; justify-content:space-between; align-items:center;">
+          <span><b>2204 A</b> · JOSE RIBAMAR LOPES · <span style="color:#25D366">✓ Recebido</span></span>
+          <span style="color:#888; font-size:12px;">R$ 690,00 · Pagou no dia</span>
+        </div>
+      </div>
+      <div class="card ok" style="padding: 10px 16px; margin-bottom: 6px;">
+        <div style="display:flex; justify-content:space-between; align-items:center;">
+          <span><b>2301 A</b> · JOSE RIBAMAR LOPES · <span style="color:#25D366">✓ Recebido</span></span>
+          <span style="color:#888; font-size:12px;">R$ 690,00 · Pagou no dia</span>
+        </div>
+      </div>
+      <div class="card ok" style="padding: 10px 16px; margin-bottom: 6px;">
+        <div style="display:flex; justify-content:space-between; align-items:center;">
+          <span><b>2302 A</b> · JOSE RIBAMAR LOPES · <span style="color:#25D366">✓ Recebido</span></span>
+          <span style="color:#888; font-size:12px;">R$ 690,00 · Pagou no dia</span>
+        </div>
+      </div>
+      <div class="card ok" style="padding: 10px 16px; margin-bottom: 6px;">
+        <div style="display:flex; justify-content:space-between; align-items:center;">
+          <span><b>2303 A</b> · JOSE RIBAMAR LOPES · <span style="color:#25D366">✓ Recebido</span></span>
+          <span style="color:#888; font-size:12px;">R$ 690,00 · Pagou no dia</span>
+        </div>
+      </div>
+      <div class="card ok" style="padding: 10px 16px; margin-bottom: 6px;">
+        <div style="display:flex; justify-content:space-between; align-items:center;">
+          <span><b>2304 A</b> · JOSE RIBAMAR LOPES · <span style="color:#25D366">✓ Recebido</span></span>
+          <span style="color:#888; font-size:12px;">R$ 690,00 · Pagou no dia</span>
+        </div>
+      </div>
+      <div class="card ok" style="padding: 10px 16px; margin-bottom: 6px;">
+        <div style="display:flex; justify-content:space-between; align-items:center;">
+          <span><b>2401 A</b> · JOSE RIBAMAR LOPES · <span style="color:#25D366">✓ Recebido</span></span>
+          <span style="color:#888; font-size:12px;">R$ 690,00 · Pagou no dia</span>
+        </div>
+      </div>
+      <div class="card ok" style="padding: 10px 16px; margin-bottom: 6px;">
+        <div style="display:flex; justify-content:space-between; align-items:center;">
+          <span><b>2402 A</b> · JOSE RIBAMAR LOPES · <span style="color:#25D366">✓ Recebido</span></span>
+          <span style="color:#888; font-size:12px;">R$ 690,00 · Pagou no dia</span>
+        </div>
+      </div>
+      <div class="card ok" style="padding: 10px 16px; margin-bottom: 6px;">
+        <div style="display:flex; justify-content:space-between; align-items:center;">
+          <span><b>2403 A</b> · JOSE RIBAMAR LOPES · <span style="color:#25D366">✓ Recebido</span></span>
+          <span style="color:#888; font-size:12px;">R$ 690,00 · Pagou no dia</span>
+        </div>
+      </div>
+      <div class="card ok" style="padding: 10px 16px; margin-bottom: 6px;">
+        <div style="display:flex; justify-content:space-between; align-items:center;">
+          <span><b>2404 A</b> · JOSE RIBAMAR LOPES · <span style="color:#25D366">✓ Recebido</span></span>
+          <span style="color:#888; font-size:12px;">R$ 690,00 · Pagou no dia</span>
+        </div>
+      </div>
+      <div class="card ok" style="padding: 10px 16px; margin-bottom: 6px;">
+        <div style="display:flex; justify-content:space-between; align-items:center;">
+          <span><b>2501 A</b> · JOSE RIBAMAR LOPES · <span style="color:#25D366">✓ Recebido</span></span>
+          <span style="color:#888; font-size:12px;">R$ 690,00 · Pagou no dia</span>
+        </div>
+      </div>
+      <div class="card ok" style="padding: 10px 16px; margin-bottom: 6px;">
+        <div style="display:flex; justify-content:space-between; align-items:center;">
+          <span><b>2502 A</b> · JOSE RIBAMAR LOPES · <span style="color:#25D366">✓ Recebido</span></span>
+          <span style="color:#888; font-size:12px;">R$ 690,00 · Pagou no dia</span>
+        </div>
+      </div>
+      <div class="card ok" style="padding: 10px 16px; margin-bottom: 6px;">
+        <div style="display:flex; justify-content:space-between; align-items:center;">
+          <span><b>2503 A</b> · JOSE RIBAMAR LOPES · <span style="color:#25D366">✓ Recebido</span></span>
+          <span style="color:#888; font-size:12px;">R$ 690,00 · Pagou no dia</span>
+        </div>
+      </div>
+      <div class="card ok" style="padding: 10px 16px; margin-bottom: 6px;">
+        <div style="display:flex; justify-content:space-between; align-items:center;">
+          <span><b>2504 A</b> · JOSE RIBAMAR LOPES · <span style="color:#25D366">✓ Recebido</span></span>
+          <span style="color:#888; font-size:12px;">R$ 690,00 · Pagou no dia</span>
+        </div>
+      </div>
+      <div class="card ok" style="padding: 10px 16px; margin-bottom: 6px;">
+        <div style="display:flex; justify-content:space-between; align-items:center;">
+          <span><b>2601 A</b> · JOSE RIBAMAR LOPES · <span style="color:#25D366">✓ Recebido</span></span>
+          <span style="color:#888; font-size:12px;">R$ 690,00 · Pagou no dia</span>
+        </div>
+      </div>
+      <div class="card ok" style="padding: 10px 16px; margin-bottom: 6px;">
+        <div style="display:flex; justify-content:space-between; align-items:center;">
+          <span><b>2602 A</b> · JOSE RIBAMAR LOPES · <span style="color:#25D366">✓ Recebido</span></span>
+          <span style="color:#888; font-size:12px;">R$ 690,00 · Pagou no dia</span>
+        </div>
+      </div>
+      <div class="card ok" style="padding: 10px 16px; margin-bottom: 6px;">
+        <div style="display:flex; justify-content:space-between; align-items:center;">
+          <span><b>2603 A</b> · JOSE RIBAMAR LOPES · <span style="color:#25D366">✓ Recebido</span></span>
+          <span style="color:#888; font-size:12px;">R$ 690,00 · Pagou no dia</span>
+        </div>
+      </div>
+      <div class="card ok" style="padding: 10px 16px; margin-bottom: 6px;">
+        <div style="display:flex; justify-content:space-between; align-items:center;">
+          <span><b>2604 A</b> · JOSE RIBAMAR LOPES · <span style="color:#25D366">✓ Recebido</span></span>
+          <span style="color:#888; font-size:12px;">R$ 690,00 · Pagou no dia</span>
+        </div>
+      </div>
+      <div class="card ok" style="padding: 10px 16px; margin-bottom: 6px;">
+        <div style="display:flex; justify-content:space-between; align-items:center;">
+          <span><b>2701 A</b> · JOSE RIBAMAR LOPES · <span style="color:#25D366">✓ Recebido</span></span>
+          <span style="color:#888; font-size:12px;">R$ 690,00 · Pagou no dia</span>
+        </div>
+      </div>
+      <div class="card ok" style="padding: 10px 16px; margin-bottom: 6px;">
+        <div style="display:flex; justify-content:space-between; align-items:center;">
+          <span><b>2702 A</b> · JOSE RIBAMAR LOPES · <span style="color:#25D366">✓ Recebido</span></span>
+          <span style="color:#888; font-size:12px;">R$ 690,00 · Pagou no dia</span>
+        </div>
+      </div>
+      <div class="card ok" style="padding: 10px 16px; margin-bottom: 6px;">
+        <div style="display:flex; justify-content:space-between; align-items:center;">
+          <span><b>2703 A</b> · JOSE RIBAMAR LOPES · <span style="color:#25D366">✓ Recebido</span></span>
+          <span style="color:#888; font-size:12px;">R$ 690,00 · Pagou no dia</span>
+        </div>
+      </div>
+      <div class="card ok" style="padding: 10px 16px; margin-bottom: 6px;">
+        <div style="display:flex; justify-content:space-between; align-items:center;">
+          <span><b>2704 A</b> · JOSE RIBAMAR LOPES · <span style="color:#25D366">✓ Recebido</span></span>
+          <span style="color:#888; font-size:12px;">R$ 690,00 · Pagou no dia</span>
+        </div>
+      </div>
+      <div class="card ok" style="padding: 10px 16px; margin-bottom: 6px;">
+        <div style="display:flex; justify-content:space-between; align-items:center;">
+          <span><b>2801 A</b> · JOSE RIBAMAR LOPES · <span style="color:#25D366">✓ Recebido</span></span>
+          <span style="color:#888; font-size:12px;">R$ 690,00 · Pagou no dia</span>
+        </div>
+      </div>
+      <div class="card ok" style="padding: 10px 16px; margin-bottom: 6px;">
+        <div style="display:flex; justify-content:space-between; align-items:center;">
+          <span><b>2802 A</b> · JOSE RIBAMAR LOPES · <span style="color:#25D366">✓ Recebido</span></span>
+          <span style="color:#888; font-size:12px;">R$ 690,00 · Pagou no dia</span>
+        </div>
+      </div>
+      <div class="card ok" style="padding: 10px 16px; margin-bottom: 6px;">
+        <div style="display:flex; justify-content:space-between; align-items:center;">
+          <span><b>2803 A</b> · JOSE RIBAMAR LOPES · <span style="color:#25D366">✓ Recebido</span></span>
+          <span style="color:#888; font-size:12px;">R$ 690,00 · Pagou no dia</span>
+        </div>
+      </div>
+      <div class="card ok" style="padding: 10px 16px; margin-bottom: 6px;">
+        <div style="display:flex; justify-content:space-between; align-items:center;">
+          <span><b>2804 A</b> · JOSE RIBAMAR LOPES · <span style="color:#25D366">✓ Recebido</span></span>
+          <span style="color:#888; font-size:12px;">R$ 690,00 · Pagou no dia</span>
+        </div>
+      </div>
+      <div class="card ok" style="padding: 10px 16px; margin-bottom: 6px;">
+        <div style="display:flex; justify-content:space-between; align-items:center;">
+          <span><b>2901 A</b> · JOSE RIBAMAR LOPES · <span style="color:#25D366">✓ Recebido</span></span>
+          <span style="color:#888; font-size:12px;">R$ 690,00 · Pagou no dia</span>
+        </div>
+      </div>
+      <div class="card ok" style="padding: 10px 16px; margin-bottom: 6px;">
+        <div style="display:flex; justify-content:space-between; align-items:center;">
+          <span><b>2902 A</b> · JOSE RIBAMAR LOPES · <span style="color:#25D366">✓ Recebido</span></span>
+          <span style="color:#888; font-size:12px;">R$ 690,00 · Pagou no dia</span>
+        </div>
+      </div>
+      <div class="card ok" style="padding: 10px 16px; margin-bottom: 6px;">
+        <div style="display:flex; justify-content:space-between; align-items:center;">
+          <span><b>2903 A</b> · JOSE RIBAMAR LOPES · <span style="color:#25D366">✓ Recebido</span></span>
+          <span style="color:#888; font-size:12px;">R$ 690,00 · Pagou no dia</span>
+        </div>
+      </div>
+      <div class="card ok" style="padding: 10px 16px; margin-bottom: 6px;">
+        <div style="display:flex; justify-content:space-between; align-items:center;">
+          <span><b>2904 A</b> · JOSE RIBAMAR LOPES · <span style="color:#25D366">✓ Recebido</span></span>
+          <span style="color:#888; font-size:12px;">R$ 690,00 · Pagou no dia</span>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ═══════════════════════════════════════════════════════ -->
+<!-- AÇÕES FINAIS -->
+<!-- ═══════════════════════════════════════════════════════ -->
+<div class="footer-actions">
+  <button class="btn btn-big approve-all" onclick="aprovarTodas()">✅ Aprovar TODAS (8 com WhatsApp)</button>
+  <button class="btn btn-big cancel-all" onclick="cancelarTodas()">❌ Pular TODAS</button>
+</div>
+
+<div id="toast"></div>
+
+<script>
+function toast(msg) {
+  const t = document.getElementById('toast');
+  t.textContent = msg;
+  t.style.display = 'block';
+  setTimeout(() => { t.style.display = 'none'; }, 3000);
+}
+
+function aprovar(id) {
+  const card = document.querySelector('.card[data-id="' + id + '"]');
+  if (!card) return;
+  const actions = card.querySelector('.actions');
+  actions.innerHTML = '<span class="status-badge approved">✅ Aprovada — enviando via Z-API...</span>';
+  card.style.opacity = '0.6';
+  toast('Mensagem aprovada e enviada');
+  atualizarStats();
+}
+
+function pular(id) {
+  const card = document.querySelector('.card[data-id="' + id + '"]');
+  if (!card) return;
+  const actions = card.querySelector('.actions');
+  actions.innerHTML = '<span class="status-badge skipped">❌ Pulada hoje</span>';
+  card.style.opacity = '0.4';
+  toast('Mensagem pulada');
+  atualizarStats();
+}
+
+function editar(id) {
+  const card = document.querySelector('.card[data-id="' + id + '"]');
+  const preview = card.querySelector('.message-preview');
+  const atual = preview.textContent;
+  const novo = prompt('Editar mensagem:', atual);
+  if (novo && novo !== atual) {
+    preview.textContent = novo;
+    toast('Mensagem editada — clique Aprovar para enviar');
+  }
+}
+
+function aprovarTodas() {
+  const comWpp = document.querySelectorAll('.card.warn[data-id]');
+  if (!confirm('Aprovar e enviar ' + comWpp.length + ' mensagens?')) return;
+  comWpp.forEach(c => {
+    const id = c.getAttribute('data-id');
+    if (id) aprovar(id);
+  });
+}
+
+function cancelarTodas() {
+  if (!confirm('Pular TODAS as mensagens? Nada será enviado hoje.')) return;
+  document.querySelectorAll('.card.warn[data-id]').forEach(c => {
+    const id = c.getAttribute('data-id');
+    if (id) pular(id);
+  });
+}
+
+function atualizarStats() {
+  const approved = document.querySelectorAll('.status-badge.approved').length;
+  const skipped = document.querySelectorAll('.status-badge.skipped').length;
+  document.getElementById('stat-approved').textContent = approved;
+  document.getElementById('stat-skipped').textContent = skipped;
+}
+
+function toggleSection(id) {
+  const sec = document.getElementById(id);
+  if (sec.style.display === 'none') {
+    sec.style.display = 'block';
+  } else {
+    sec.style.display = 'none';
+  }
+}
+</script>
+
+</body>
+</html>

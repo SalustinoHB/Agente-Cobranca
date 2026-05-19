@@ -1,0 +1,293 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Painel de Condomínios - Pratika</title>
+<style>
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body {
+    font-family: -apple-system, system-ui, 'Segoe UI', Roboto, sans-serif;
+    background: #0a0a0a;
+    color: #fff;
+    padding: 20px;
+  }
+  .header {
+    max-width: 1000px; margin: 0 auto 20px; padding: 24px 28px;
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    border-radius: 14px; color: #fff;
+  }
+  .header h1 { margin: 0 0 6px; font-size: 26px; }
+  .header .sub { font-size: 14px; opacity: 0.85; }
+  .header .data-ref { font-size: 12px; opacity: 0.6; margin-top: 8px; }
+  .stats-row { display: flex; gap: 12px; max-width: 1000px; margin: 0 auto 20px; flex-wrap: wrap; }
+  .stat-card {
+    flex: 1; min-width: 130px; background: #1a1a1a; padding: 16px 20px;
+    border-radius: 10px; border-left: 4px solid #667eea;
+  }
+  .stat-card .num { font-size: 28px; font-weight: 700; color: #667eea; }
+  .stat-card .label { font-size: 12px; color: #aaa; margin-top: 4px; }
+  .stat-card.red { border-left-color: #ff4444; }
+  .stat-card.red .num { color: #ff4444; }
+  .stat-card.green { border-left-color: #00d4aa; }
+  .stat-card.green .num { color: #00d4aa; }
+  .stat-card.yellow { border-left-color: #ffaa00; }
+  .stat-card.yellow .num { color: #ffaa00; }
+  .search-box { max-width: 1000px; margin: 0 auto 16px; }
+  .search-box input {
+    width: 100%; padding: 10px 14px; border-radius: 8px; border: 1px solid #333;
+    background: #1a1a1a; color: #fff; font-size: 14px;
+  }
+  .search-box input:focus { outline: none; border-color: #667eea; }
+  .container { max-width: 1000px; margin: 0 auto; }
+  
+  /* Abas de Condomínios */
+  .cond-tabs {
+    display: flex; gap: 8px; max-width: 1000px; margin: 0 auto 16px;
+    flex-wrap: wrap;
+  }
+  .cond-tab {
+    padding: 12px 20px; border-radius: 8px; border: 1px solid #333;
+    background: transparent; color: #aaa; cursor: pointer;
+    font-size: 14px; font-weight: 600; transition: all 0.2s;
+  }
+  .cond-tab:hover { border-color: #667eea; color: #667eea; }
+  .cond-tab.active { background: #667eea; color: #fff; border-color: #667eea; }
+  .cond-tab .count {
+    display: inline-block; background: rgba(255,255,255,0.15);
+    padding: 1px 8px; border-radius: 10px; font-size: 11px; margin-left: 6px;
+  }
+  .cond-tab.active .count { background: rgba(0,0,0,0.2); }
+  
+  /* Cards de Condômino */
+  .residente-card {
+    background: #1a1a1a; border-radius: 10px;
+    margin-bottom: 10px; overflow: hidden;
+    border: 1px solid #2a2a2a;
+    display: flex; align-items: center; padding: 14px 18px;
+    gap: 14px; transition: all 0.2s;
+  }
+  .residente-card:hover { border-color: #444; }
+  .residente-card .avatar {
+    width: 44px; height: 44px; border-radius: 50%;
+    background: linear-gradient(135deg, #667eea, #764ba2);
+    display: flex; align-items: center; justify-content: center;
+    font-weight: 700; font-size: 18px; flex-shrink: 0;
+  }
+  .residente-card .info { flex: 1; }
+  .residente-card .info h4 { font-size: 15px; color: #fff; margin-bottom: 4px; }
+  .residente-card .info .meta { font-size: 12px; color: #888; }
+  .residente-card .info .meta b { color: #ccc; }
+  .residente-card .badges { display: flex; gap: 6px; flex-shrink: 0; }
+  .badge {
+    display: inline-block; padding: 3px 10px; border-radius: 10px;
+    font-size: 11px; font-weight: 600;
+  }
+  .badge-wpp { background: #1a4d2e; color: #00d4aa; }
+  .badge-nowpp { background: #4d1a1a; color: #ff4444; }
+  .badge-pendente { background: #4d3d1a; color: #ffaa00; }
+  .badge-pago { background: #1a4d2e; color: #00d4aa; }
+  .badge-info { background: #333; color: #aaa; }
+  .badge-atraso { background: #4d1a1a; color: #ff4444; }
+  .badge-pendente { background: #4d3d1a; color: #ffaa00; }
+  .footer-actions { max-width: 1000px; margin: 24px auto; text-align: center; color: #555; font-size: 12px; }
+  #toast { position: fixed; bottom: 24px; right: 24px; background: #667eea; color: #fff; padding: 12px 18px; border-radius: 8px; font-weight: 600; box-shadow: 0 6px 24px rgba(0,0,0,0.4); display: none; z-index: 100; }
+</style>
+</head>
+<body>
+
+<div class="header">
+  <h1>🏢 Painel de Condomínios - Pratika</h1>
+  <div class="sub">Visão geral de todos os condomínios e seus condôminos</div>
+  <div class="data-ref" id="dataRef">Carregando...</div>
+</div>
+
+<div class="stats-row" id="statsRow"></div>
+<div class="search-box"><input type="text" id="searchInput" placeholder="🔍 Buscar por nome do condômino, unidade ou telefone..." oninput="filtrar()"></div>
+<div class="cond-tabs" id="condTabs"></div>
+<div class="container" id="container"></div>
+<div class="footer-actions">Pratika Administradora &bull; Sistema de Gestão de Cobrança</div>
+<div id="toast"></div>
+
+<script>
+// ═══════════════════════════════════════════════════════════
+// DADOS - Múltiplos Condomínios
+// ═══════════════════════════════════════════════════════════
+
+const COND_DATA = {
+  "Renaissance": [
+    {nome:"CELIO EDUARDO DE LIRA", unidade:"0101 A", wpp:"5584987189866", status:"pago", valor:690, dias:13},
+    {nome:"ANA BEATRIZ SOARES FERNANDES DA COSTA", unidade:"0102 A", wpp:"5584996576218", status:"pago", valor:690, dias:13},
+    {nome:"ROBERTA DE CARVALHO OLIVEIRA", unidade:"0103 A", wpp:"5584981900059", status:"pago", valor:690, dias:13},
+    {nome:"MARIA DE FATIMA SOUTO", unidade:"0104 A", wpp:"", status:"pago", valor:690, dias:13},
+    {nome:"TALITA CAMARA MEDEIROS", unidade:"0201 A", wpp:"", status:"pago", valor:690, dias:13},
+    {nome:"JOSE AFRANIO GOMES", unidade:"0202 A", wpp:"5584988777276", status:"pago", valor:690, dias:13},
+    {nome:"JEIMES MARQUES TEODORO", unidade:"0203 A", wpp:"", status:"pago", valor:690, dias:13},
+    {nome:"DEYSE BEZERRA DE CARVALHO", unidade:"0204 A", wpp:"5584996593081", status:"pago", valor:690, dias:13},
+    {nome:"MAXWELL ARRUDA DE MEDEIROS", unidade:"0301 A", wpp:"5584999599988", status:"pago", valor:690, dias:13},
+    {nome:"VAGNER SOUZA DE MEDEIROS", unidade:"0302 A", wpp:"5584996666402", status:"pago", valor:690, dias:13},
+    {nome:"ERTON LUIZ DE LIMA", unidade:"0303 A", wpp:"", status:"pago", valor:690, dias:13},
+    {nome:"MARCOS VENICIUS PEREIRA", unidade:"0304 A", wpp:"", status:"pago", valor:690, dias:13},
+    {nome:"PAULO SERGIO PEREIRA", unidade:"0401 A", wpp:"", status:"pago", valor:690, dias:13},
+    {nome:"MARIA DA CONCEICAO ALVES", unidade:"0402 A", wpp:"", status:"pago", valor:690, dias:13},
+    {nome:"JOAO BATISTA DE OLIVEIRA", unidade:"0403 A", wpp:"", status:"pago", valor:690, dias:13},
+    {nome:"FRANCISCO DAS CHAGAS", unidade:"0404 A", wpp:"", status:"pago", valor:690, dias:13},
+    {nome:"LUCIANA MARIA DE OLIVEIRA", unidade:"0501 A", wpp:"", status:"pago", valor:690, dias:13},
+    {nome:"PEDRO HENRIQUE SOUZA", unidade:"0502 A", wpp:"", status:"pago", valor:690, dias:13},
+    {nome:"CLARA MARIA DE JESUS", unidade:"0503 A", wpp:"", status:"pago", valor:690, dias:13},
+    {nome:"RAFAEL ALMEIDA SANTOS", unidade:"0504 A", wpp:"", status:"pago", valor:690, dias:13},
+    {nome:"SILVIA HELENA COSTA", unidade:"0601 A", wpp:"", status:"pago", valor:690, dias:13},
+    {nome:"LUCAS GABRIEL MARTINS", unidade:"0602 A", wpp:"", status:"pago", valor:690, dias:13},
+    {nome:"FERNANDA LIMA SILVA", unidade:"0603 A", wpp:"", status:"pago", valor:690, dias:13},
+    {nome:"ANTONIO CARLOS FERREIRA", unidade:"0604 A", wpp:"", status:"pago", valor:690, dias:13},
+    {nome:"JULIANA ALVES MOREIRA", unidade:"0701 A", wpp:"", status:"pago", valor:690, dias:13},
+    {nome:"CARLOS EDUARDO ROCHA", unidade:"0702 A", wpp:"", status:"pago", valor:690, dias:13},
+    {nome:"PATRICIA GOMES LIMA", unidade:"0703 A", wpp:"5584992647892", status:"pendente", valor:740, dias:13},
+    {nome:"ALICE CRISTINA SANTOS", unidade:"0704 A", wpp:"", status:"pago", valor:690, dias:13},
+    {nome:"RODRIGO OLIVEIRA SOUZA", unidade:"0801 A", wpp:"", status:"pago", valor:690, dias:13},
+    {nome:"LUCIANA SOUZA SANTOS", unidade:"0802 A", wpp:"", status:"pago", valor:690, dias:13},
+    {nome:"THIAGO HENRIQUE MENDES", unidade:"0803 A", wpp:"", status:"pago", valor:690, dias:13},
+    {nome:"GABRIELA NASCIMENTO", unidade:"0804 A", wpp:"", status:"pago", valor:690, dias:13},
+    {nome:"FRANCISCO SOARES DE O. FILHO", unidade:"0603 A", wpp:"5584991234567", status:"pendente", valor:740, dias:13},
+    {nome:"ANDRE LUIZ SILVEIRA", unidade:"0901 A", wpp:"", status:"pago", valor:690, dias:13},
+    {nome:"VANESSA CRISTINA ROCHA", unidade:"0902 A", wpp:"", status:"pago", valor:690, dias:13},
+    {nome:"BRUNO CESAR ARAUJO", unidade:"0903 A", wpp:"", status:"pago", valor:690, dias:13},
+    {nome:"AMANDA CAROLINE RIBEIRO", unidade:"0904 A", wpp:"", status:"pago", valor:690, dias:13},
+  ],
+  
+  "Residencial Solar": [
+    {nome:"MARIA JOSE DOS SANTOS", unidade:"Apto 12", wpp:"5584987654321", status:"pendente", valor:520, dias:5},
+    {nome:"JOAO CARLOS MENDES", unidade:"Apto 15", wpp:"5584998765432", status:"pago", valor:520, dias:0},
+    {nome:"ANA PAULA ROCHA", unidade:"Apto 18", wpp:"", status:"pendente", valor:520, dias:10},
+    {nome:"PEDRO AUGUSTO LIMA", unidade:"Apto 22", wpp:"5584912345678", status:"pago", valor:520, dias:0},
+    {nome:"LUCIANA MARIA SOUZA", unidade:"Apto 25", wpp:"5584956789012", status:"pendente", valor:520, dias:3},
+    {nome:"CARLOS ALBERTO SILVA", unidade:"Apto 31", wpp:"", status:"pago", valor:520, dias:0},
+  ],
+  
+  "Edificio Park Avenue": [
+    {nome:"ROBERTO CARLOS OLIVEIRA", unidade:"Sala 101", wpp:"5584912345098", status:"pendente", valor:890, dias:20},
+    {nome:"FERNANDA MONTENEGRO", unidade:"Sala 203", wpp:"5584976543210", status:"pago", valor:890, dias:0},
+    {nome:"RICARDO JOSE PEREIRA", unidade:"Sala 305", wpp:"5584934567890", status:"pendente", valor:980, dias:15},
+    {nome:"MARCOS VINICIUS ROCHA", unidade:"Sala 402", wpp:"5584965432109", status:"pago", valor:890, dias:0},
+  ],
+  
+  "Condominio Ville de Montagne": [
+    {nome:"THIAGO RODRIGUES SANTOS", unidade:"Casa 8", wpp:"5584976543987", status:"pendente", valor:1200, dias:25},
+    {nome:"CAMILA FERNANDA LOPES", unidade:"Casa 12", wpp:"5584932109876", status:"pago", valor:1100, dias:0},
+    {nome:"LEONARDO CESAR MOTA", unidade:"Casa 15", wpp:"", status:"pendente", valor:1200, dias:8},
+    {nome:"JULIANA CRISTINA ROCHA", unidade:"Casa 22", wpp:"5584967890123", status:"pago", valor:1100, dias:0},
+    {nome:"FELIPE ANDRADE GOMES", unidade:"Casa 25", wpp:"5584945678901", status:"pendente", valor:1200, dias:2},
+  ],
+};
+
+// ═══════════════════════════════════════════════════════════
+// RENDER
+// ═══════════════════════════════════════════════════════════
+
+let condAtivo = Object.keys(COND_DATA)[0];
+
+function render() {
+  const todos = Object.values(COND_DATA).flat();
+  const total = todos.length;
+  const comWpp = todos.filter(r => r.wpp).length;
+  const pendentes = todos.filter(r => r.status !== 'pago').length;
+  const totalValor = todos.reduce((s,r) => s + (r.valor||0), 0);
+
+  document.getElementById('statsRow').innerHTML = `
+    <div class="stat-card"><div class="num">${total}</div><div class="label">Total Condôminos</div></div>
+    <div class="stat-card red"><div class="num">${pendentes}</div><div class="label">Inadimplentes</div></div>
+    <div class="stat-card green"><div class="num">${comWpp}</div><div class="label">Com WhatsApp</div></div>
+    <div class="stat-card"><div class="num">${total - comWpp}</div><div class="label">Sem WhatsApp</div></div>
+    <div class="stat-card yellow"><div class="num">R$ ${totalValor.toLocaleString('pt-BR',{minFractionDigits:2})}</div><div class="label">Valor Total</div></div>
+    <div class="stat-card"><div class="num">${Object.keys(COND_DATA).length}</div><div class="label">Condomínios</div></div>
+  `;
+  document.getElementById('dataRef').textContent = 'Atualizado: ' + new Date().toLocaleString('pt-BR');
+  renderCondTabs();
+  renderContainer();
+}
+
+function renderCondTabs() {
+  document.getElementById('condTabs').innerHTML = Object.keys(COND_DATA).map(c => {
+    const pends = COND_DATA[c].filter(r => r.status !== 'pago').length;
+    const total = COND_DATA[c].length;
+    return `<button class="cond-tab${c === condAtivo ? ' active' : ''}" onclick="switchCond('${c}')">
+      🏢 ${c} <span class="count">${total}</span>
+      ${pends > 0 ? ` <span class="count" style="background:#4d1a1a;color:#ff4444;">${pends}</span>` : ''}
+    </button>`;
+  }).join('');
+}
+
+function switchCond(cond) {
+  condAtivo = cond;
+  document.querySelectorAll('.cond-tab').forEach(t => t.classList.remove('active'));
+  event.target.classList.add('active');
+  renderContainer();
+}
+
+function filtrar() {
+  renderContainer();
+}
+
+function renderContainer() {
+  const busca = (document.getElementById('searchInput').value || '').toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g, '');
+  
+  let html = '';
+  const conds = condAtivo ? [condAtivo] : Object.keys(COND_DATA);
+  
+  for (const cond of conds) {
+    let residentes = COND_DATA[cond];
+    
+    if (busca) {
+      residentes = residentes.filter(r =>
+        r.nome.toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g, '').includes(busca) ||
+        r.unidade.toLowerCase().includes(busca) ||
+        (r.wpp||'').includes(busca)
+      );
+    }
+    
+    if (residentes.length === 0) continue;
+    
+    html += `<h3 style="color:#667eea;margin:0 0 12px;font-size:16px;">🏢 ${cond} — ${residentes.length} condômino${residentes.length > 1 ? 's' : ''}</h3>`;
+    
+    residentes.sort((a,b) => a.nome.localeCompare(b.nome)).forEach(r => {
+      const inicial = r.nome.charAt(0);
+      const temWpp = !!r.wpp;
+      const pendente = r.status !== 'pago';
+      const dias = r.dias || 0;
+      const valor = r.valor || 0;
+      
+      let badge = '';
+      if (!temWpp) badge = '<span class="badge badge-nowpp">📵 Sem WhatsApp</span>';
+      else badge = '<span class="badge badge-wpp">📱 WhatsApp</span>';
+      
+      if (pendente && dias >= 15) badge += ' <span class="badge badge-atraso">⚠️ ' + dias + 'd atraso</span>';
+      else if (pendente) badge += ' <span class="badge badge-pendente">⏳ ' + dias + 'd atraso</span>';
+      else badge += ' <span class="badge badge-pago">✅ Em dia</span>';
+      
+      html += `
+        <div class="residente-card">
+          <div class="avatar">${inicial}</div>
+          <div class="info">
+            <h4>${r.nome}</h4>
+            <div class="meta">
+              <b>Unidade:</b> ${r.unidade}
+              ${temWpp ? ' &nbsp;|&nbsp; <b>WhatsApp:</b> ' + r.wpp : ' &nbsp;|&nbsp; ⚠️ Telefone não cadastrado'}
+              &nbsp;|&nbsp; <b>Valor:</b> R$ ${valor.toFixed(2).replace('.',',')}
+              ${pendente ? ' &nbsp;|&nbsp; <b style="color:'+(dias>=15?'#ff4444':'#ffaa00')+'">' + dias + ' dias em atraso</b>' : ''}
+            </div>
+          </div>
+          <div class="badges">${badge}</div>
+        </div>
+      `;
+    });
+    
+    html += '<div style="margin-bottom:24px;"></div>';
+  }
+  
+  document.getElementById('container').innerHTML = html || '<div style="text-align:center;padding:40px;color:#555;">Nenhum resultado encontrado</div>';
+}
+
+render();
+</script>
+</body>
+</html>

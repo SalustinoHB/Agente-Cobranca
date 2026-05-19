@@ -1,0 +1,47 @@
+# =====================================================================
+# WPPConnect-Server — alternativa ao Evolution API
+# Usa Puppeteer com chromium headless; QR/Pairing funciona out-of-the-box
+# Mantido pela comunidade BR: github.com/wppconnect-team/wppconnect-server
+# =====================================================================
+
+services:
+  wppconnect:
+    image: wppconnect/wppconnect-server:latest
+    container_name: cobranca-wppconnect
+    restart: unless-stopped
+    ports:
+      - "21465:21465"   # API REST + Swagger
+      - "21466:21466"   # WebSocket (eventos em tempo real)
+    environment:
+      - PORT=21465
+      - SECRET_KEY=${WPPCONNECT_SECRET_KEY}
+      - SESSION_KEY=cobranca
+      - LOG_LEVEL=info
+      - DEVICE_NAME=Pratika Cobranca
+    volumes:
+      - ./data/wppconnect_tokens:/usr/src/wpp-server/tokens
+      - ./data/wppconnect_userdata:/usr/src/wpp-server/userDataDir
+    # Sem dependência de Postgres — usa storage local em arquivos
+    deploy:
+      resources:
+        limits:
+          memory: 1500M
+
+  # Postgres + Redis ficam removidos pra essa versão (WPPConnect não precisa)
+  # Se quiser reusar nossa API Python, ela funciona com qualquer um dos 2
+
+networks:
+  default:
+    name: cobranca
+
+# =====================================================================
+# DEPLOY:
+# 1) Mate Evolution antigo:
+#    cd /opt/cobranca-renaissance && sudo docker compose down
+# 2) Substitua docker-compose.yml por este arquivo
+# 3) Gere SECRET_KEY: openssl rand -hex 32 — adicione em .env
+# 4) Suba: sudo docker compose up -d
+# 5) Aguarde ~30s
+# 6) Crie sessão: curl -X POST http://localhost:21465/api/cobranca/THISISMYSECURETOKEN/start-session
+# 7) Pegue QR/Pairing: GET /api/cobranca/qrcode-session
+# =====================================================================

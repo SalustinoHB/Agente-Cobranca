@@ -1,0 +1,4726 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Painel de Condomínios - Pratika</title>
+<style>
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body { font-family: -apple-system, system-ui, 'Segoe UI', Roboto, sans-serif; background: #0a0a0a; color: #fff; padding: 20px; }
+  .header { max-width: 1200px; margin: 0 auto 20px; padding: 24px 28px; background: linear-gradient(135deg, #1e3a8a 0%, #4f46e5 100%); border-radius: 14px; color: #fff; }
+  .header h1 { margin: 0 0 6px; font-size: 26px; }
+  .header .sub { font-size: 14px; opacity: 0.85; }
+  .header .data-ref { font-size: 12px; opacity: 0.6; margin-top: 8px; }
+  .stats-row { display: flex; gap: 12px; max-width: 1200px; margin: 0 auto 20px; flex-wrap: wrap; }
+  .stat-card { flex: 1; min-width: 140px; background: #1a1a1a; padding: 14px 18px; border-radius: 10px; border-left: 4px solid #4f46e5; }
+  .stat-card .num { font-size: 24px; font-weight: 700; color: #4f46e5; }
+  .stat-card .label { font-size: 12px; color: #aaa; margin-top: 4px; }
+  .stat-card.green { border-left-color: #16a34a; }
+  .stat-card.green .num { color: #16a34a; }
+  .search-box { max-width: 1200px; margin: 0 auto 16px; }
+  .search-box input { width: 100%; padding: 10px 14px; border-radius: 8px; border: 1px solid #333; background: #1a1a1a; color: #fff; font-size: 14px; }
+  .search-box input:focus { outline: none; border-color: #4f46e5; }
+  .cond-tabs { display: flex; gap: 8px; max-width: 1200px; margin: 0 auto 16px; flex-wrap: wrap; }
+  .cond-tab { padding: 12px 20px; border-radius: 8px; border: 1px solid #333; background: transparent; color: #aaa; cursor: pointer; font-size: 14px; font-weight: 600; }
+  .cond-tab:hover { border-color: #4f46e5; color: #4f46e5; }
+  .cond-tab.active { background: #4f46e5; color: #fff; border-color: #4f46e5; }
+  .cond-tab .count { display: inline-block; background: rgba(255,255,255,0.15); padding: 1px 8px; border-radius: 10px; font-size: 11px; margin-left: 6px; }
+  .cond-tab.active .count { background: rgba(0,0,0,0.2); }
+  .container { max-width: 1200px; margin: 0 auto; }
+  .residente-card { background: #1a1a1a; border-radius: 8px; margin-bottom: 6px; border: 1px solid #2a2a2a; display: flex; align-items: center; padding: 10px 14px; gap: 10px; }
+  .residente-card:hover { border-color: #444; }
+  .residente-card .avatar { width: 36px; height: 36px; border-radius: 50%; background: linear-gradient(135deg, #1e3a8a, #4f46e5); display: flex; align-items: center; justify-content: center; font-weight: 700; font-size: 14px; flex-shrink: 0; }
+  .residente-card .info { flex: 1; min-width: 0; }
+  .residente-card .info h4 { font-size: 13px; color: #fff; margin-bottom: 2px; }
+  .residente-card .info .meta { font-size: 11px; color: #888; line-height: 1.4; }
+  .residente-card .info .meta b { color: #ccc; }
+  .badge { display: inline-block; padding: 2px 7px; border-radius: 6px; font-size: 10px; font-weight: 600; }
+  .badge-wpp { background: #14532d; color: #22c55e; }
+  .badge-nowpp { background: #450a0a; color: #ef4444; }
+  .badge-email { background: #1e1b4b; color: #818cf8; }
+  .footer { max-width: 1200px; margin: 24px auto; text-align: center; color: #555; font-size: 12px; }
+  .loading { text-align: center; padding: 40px; color: #555; }
+</style>
+</head>
+<body>
+<div class="header">
+  <h1>🏢 Painel de Condomínios - Pratika</h1>
+  <div class="sub">Relação completa extraída do Superlógica · 594 condôminos</div>
+  <div class="data-ref" id="dataRef">Atualizado: 19/05/2026</div>
+</div>
+<div class="stats-row" id="statsRow"></div>
+<div class="search-box"><input type="text" id="searchInput" placeholder="🔍 Buscar por nome, unidade ou telefone..." oninput="render()"></div>
+<div class="cond-tabs" id="condTabs"></div>
+<div class="container" id="container"></div>
+<div class="footer">Pratika Administradora · Dados do Relatório COND SP</div>
+<script>
+var CONDOMINIOS = [
+  {
+    "nome": "AUREA GUEDES",
+    "slug": "aurea-guedes",
+    "residentes": [
+      {
+        "apto": "0101",
+        "nome": "IVONETE GOMES BASTOS",
+        "fone": "+55 32022418",
+        "tipo": "Proprietário",
+        "cpf": "27706389472",
+        "email": "cavalcantidantas@bol.com.br"
+      },
+      {
+        "apto": "0102",
+        "nome": "ARILZA SOARES E SILVA PEREIRA",
+        "tipo": "Proprietário",
+        "fone": "",
+        "email": "myllinha.coutinho23@gmail.com"
+      },
+      {
+        "apto": "0201",
+        "nome": "MAURÍCIO B. DE NORONHA",
+        "tipo": "Proprietário",
+        "email": "mauriciobnoronha61@gmail.com",
+        "fone": ""
+      },
+      {
+        "apto": "0202",
+        "nome": "ARITA SALEM DUARTE MEDEIROS",
+        "tipo": "Proprietário",
+        "email": "infinitoeterno88@gmail.com",
+        "fone": ""
+      },
+      {
+        "apto": "0301",
+        "nome": "REGINA MARA DA SILVA",
+        "fone": "+55 55 84 998576",
+        "tipo": "Proprietário",
+        "cpf": "59469080734",
+        "email": "marafunch@hotmail.com"
+      },
+      {
+        "apto": "0302",
+        "nome": "LINDALVA ALVES DE MEDEIROS",
+        "fone": "+55 99668563",
+        "tipo": "Proprietário",
+        "cpf": "65470800482",
+        "email": "lindalva.medeiros@gmail.com"
+      },
+      {
+        "apto": "0401",
+        "nome": "MARIA DO S.C.N. DA SILVA",
+        "fone": "+55 32010387 (+55 84996447357)",
+        "tipo": "Proprietário",
+        "cpf": "44358997449",
+        "email": "administrativonatal@comshalom.org"
+      },
+      {
+        "apto": "0402",
+        "nome": "ANA TEREZA SALES SOUSA LIMA",
+        "fone": "+55 84999847472",
+        "tipo": "Proprietário",
+        "cpf": "14218798400",
+        "email": "atssl@hotmail.com"
+      },
+      {
+        "apto": "0501",
+        "nome": "SEVERINA DANTAS DE MEDEIROS",
+        "tipo": "Proprietário",
+        "fone": "",
+        "email": "denise2014lemos@gmail.com"
+      },
+      {
+        "apto": "0502",
+        "nome": "DIONE VIOLETA DE MEDEIROS",
+        "tipo": "Proprietário",
+        "email": "ricardo2206@supercabo.com.br",
+        "fone": ""
+      },
+      {
+        "apto": "0601",
+        "nome": "IVO TRINDADE",
+        "tipo": "Proprietário",
+        "fone": "",
+        "email": "lourdinhacirne@gmail.com"
+      },
+      {
+        "apto": "0602",
+        "nome": "MAINÁ MEDEIROS",
+        "fone": "+55 84 994178537",
+        "tipo": "Proprietário",
+        "cpf": "07639015472",
+        "email": "mainamedeiros@bol.com.br"
+      },
+      {
+        "apto": "0701",
+        "nome": "Adriana Tinoco de Andrade",
+        "fone": "+55 55 995219524",
+        "tipo": "Proprietário",
+        "cpf": "46633065434",
+        "email": "adriana.tinoco@hotmail.com"
+      },
+      {
+        "apto": "0702",
+        "nome": "MARIA LUCIA DE OLIVEIRA BASTOS",
+        "fone": "+55 981566324",
+        "tipo": "Proprietário",
+        "cpf": "35792540497",
+        "email": "luciabastos42@hotmail.com"
+      },
+      {
+        "apto": "0801",
+        "nome": "HILDA MEDEIROS",
+        "fone": "+55 84998008969",
+        "tipo": "Proprietário",
+        "cpf": "11383954801",
+        "email": "joseariston@hotmail.com"
+      },
+      {
+        "apto": "0802",
+        "nome": "TIBURCIO FRANCISCO FONTENELE",
+        "fone": "+55 84988889060",
+        "tipo": "Proprietário",
+        "cpf": "31663710449",
+        "email": "tbfonte12@gmail.com"
+      },
+      {
+        "apto": "0901",
+        "nome": "JORGE LUIZ TRAVASSOS CAMPOS",
+        "fone": "+55 84 996231004 (+55 11 999664043)",
+        "tipo": "Proprietário",
+        "cpf": "21383164835",
+        "email": "jorgeltcampos@gmail.com"
+      },
+      {
+        "apto": "0902",
+        "nome": "EULÁLIA MARIA CHAVES MAIA",
+        "tipo": "Proprietário",
+        "fone": "",
+        "email": "vicentepdg@yahoo.com.br"
+      },
+      {
+        "apto": "1001",
+        "nome": "JOSE GALENO DIOGENES",
+        "fone": "55 84999046462",
+        "tipo": "Proprietário",
+        "cpf": "51334739404",
+        "email": "lorena_holanda@yahoo.com.br"
+      },
+      {
+        "apto": "1002",
+        "nome": "RAQUEL MACHADO DE MEDEIROS",
+        "fone": "+55 84988035738",
+        "tipo": "Proprietário",
+        "cpf": "32504747896",
+        "email": "raquelmmed@yahoo.com.br"
+      },
+      {
+        "apto": "1101",
+        "nome": "FRANCISCO DE ASSIS RAIMUNDO",
+        "fone": "+55 55 999130654",
+        "tipo": "Proprietário",
+        "cpf": "40546160468",
+        "email": "assisalrn@gmail.com"
+      },
+      {
+        "apto": "1102",
+        "nome": "MARIA NÓBREGA FERNANDES",
+        "fone": "+55 55 84 99742001",
+        "tipo": "Proprietário",
+        "email": "Yoannaguerra@yahoo.com.br"
+      },
+      {
+        "apto": "1201",
+        "nome": "LÚCIA MARIA SALUSTINO DUTRA",
+        "fone": "+55 32012436 (+55 84999246085)",
+        "tipo": "Proprietário",
+        "cpf": "13055933400",
+        "email": "luciadutra2011@uol.com.br"
+      },
+      {
+        "apto": "1202",
+        "nome": "GREICE ACHAN DE SIQUEIRA",
+        "fone": "+55 84981142141",
+        "tipo": "Proprietário",
+        "cpf": "01055847464",
+        "email": "greiceachan@hotmail.com"
+      },
+      {
+        "apto": "1301",
+        "nome": "JAIME RODRIGUES DE AGUIAR",
+        "fone": "+55 996317966",
+        "tipo": "Proprietário",
+        "cpf": "33635641472",
+        "email": "jaimeraguiar@gmail.com"
+      },
+      {
+        "apto": "1302",
+        "nome": "MARCOS LAEL DE OLIVEIRA",
+        "fone": "+55 84 988550223",
+        "tipo": "Proprietário",
+        "cpf": "13134086468",
+        "email": "marcoslael@gmail.com"
+      },
+      {
+        "apto": "1401",
+        "nome": "MARIA DE LOURDES DIÓGENES",
+        "tipo": "Proprietário",
+        "fone": "",
+        "email": "emporiorgescritorio@gmail.com"
+      },
+      {
+        "apto": "1402",
+        "nome": "JURANDIR M.DE C. JÚNIOR",
+        "tipo": "Proprietário",
+        "email": "pedrosalesmed@gmail.com",
+        "fone": ""
+      },
+      {
+        "apto": "1501",
+        "nome": "JOSÉ ANANIAS MATOS",
+        "tipo": "Proprietário",
+        "fone": ""
+      },
+      {
+        "apto": "1502",
+        "nome": "CRISTIAN CYRO BEZERRA",
+        "tipo": "Proprietário",
+        "fone": "",
+        "email": "nildoanalista38@gmail.com"
+      },
+      {
+        "apto": "0101",
+        "nome": "MANUELLE SILVA DE ANDRADE",
+        "fone": "+55 11 998433353",
+        "tipo": "Proprietário",
+        "cpf": "06329308454",
+        "email": "manuelle@gmail.com;raisabento@uol."
+      },
+      {
+        "apto": "0103",
+        "nome": "DANIELA GARCIA LEADEBAL",
+        "fone": "+55 84 999321436",
+        "tipo": "Proprietário",
+        "cpf": "20233299491",
+        "email": "cabral@alvesdacunha.com.br"
+      },
+      {
+        "apto": "0201",
+        "nome": "KATIUSCIA ALCANTRA ARIANSEN",
+        "tipo": "Proprietário",
+        "fone": "",
+        "cpf": "77849167449",
+        "email": "davilla.joyce97@gmail.com"
+      },
+      {
+        "apto": "0202",
+        "nome": "SEBASTIÃO INACIO DA SILVA",
+        "fone": "+55 55 69 84114589",
+        "tipo": "Proprietário",
+        "cpf": "16297601291",
+        "email": "supermercadobelavista1@gmail.com"
+      },
+      {
+        "apto": "0203",
+        "nome": "MIRNA NADJA  DE OLIVEIRA",
+        "fone": "+55 92 91323900",
+        "tipo": "Proprietário",
+        "cpf": "17569966449",
+        "email": "marcosfsmcb@gmail.com"
+      },
+      {
+        "apto": "0301",
+        "nome": "JOÃO DOURADO",
+        "fone": "+55 81 992324411",
+        "tipo": "Proprietário",
+        "cpf": "66647169415",
+        "email": "lpms@gmail.com"
+      },
+      {
+        "apto": "0302",
+        "nome": "TATIANA AKEMI WAKE",
+        "fone": "+55 84988987671",
+        "tipo": "Proprietário",
+        "cpf": "08695729460",
+        "email": "tatianawake30@gmail.com"
+      },
+      {
+        "apto": "0303",
+        "nome": "RAMISLAS D. BARROSO DE PAULA",
+        "tipo": "Proprietário",
+        "fone": "",
+        "cpf": "04574932406",
+        "email": "rayelleramoni5@gmail.com"
+      },
+      {
+        "apto": "0401",
+        "nome": "ROBERT SCHNABL",
+        "fone": "+55 84 94319327",
+        "tipo": "Proprietário",
+        "cpf": "01273704479",
+        "email": "edson@nordestefomento.com.br"
+      },
+      {
+        "apto": "0402",
+        "nome": "CARMEM ADILE PEREZ-SOTO",
+        "tipo": "Proprietário",
+        "fone": "",
+        "email": "cperezsoto8@gmail.com"
+      },
+      {
+        "apto": "0403",
+        "nome": "VALÉRIA VILETE PIRES",
+        "tipo": "Proprietário",
+        "fone": "",
+        "cpf": "09725772709",
+        "email": "medeiross17@gmail.com"
+      },
+      {
+        "apto": "0501",
+        "nome": "SILVIO LUIZ DA SILVEIRA",
+        "tipo": "Proprietário",
+        "fone": "",
+        "cpf": "08248401863",
+        "email": "silveira@gabriel.bontempo.com.br"
+      },
+      {
+        "apto": "0502",
+        "nome": "NILBERT ROBERTO MACIEL DA",
+        "fone": "+55 84 988270007",
+        "tipo": "Proprietário",
+        "cpf": "72101016400",
+        "email": "financeirodigisound@gmail.com"
+      },
+      {
+        "apto": "0503",
+        "nome": "OCEANOS EMPREENDIMENTOS",
+        "tipo": "Proprietário",
+        "fone": "",
+        "cpf": "06321571000104",
+        "email": "mzpecas@yahoo.com.br"
+      },
+      {
+        "apto": "0601",
+        "nome": "PETER HARLEY HUNT",
+        "fone": "+55 8433656470 (+55 84981262047)",
+        "tipo": "Proprietário",
+        "cpf": "05514666778",
+        "email": "fabiano@moveplusinternational.com"
+      },
+      {
+        "apto": "0602",
+        "nome": "RENATA DE FREITAS MODESTO",
+        "tipo": "Proprietário",
+        "fone": "",
+        "cpf": "18856631881",
+        "email": "refreitas5@hotmail.com"
+      },
+      {
+        "apto": "0603",
+        "nome": "ALFREDO COPELLI",
+        "fone": "+55 999162429",
+        "tipo": "Proprietário",
+        "cpf": "05985217710",
+        "email": "joaosergiopimentalemos@gmail.com"
+      },
+      {
+        "apto": "0701",
+        "nome": "TATIANA SUDAS",
+        "tipo": "Proprietário",
+        "fone": "",
+        "cpf": "70809685426",
+        "email": "rosalemosfono@gmail.com"
+      },
+      {
+        "apto": "0702",
+        "nome": "LUCELIA SOARES STEVENIN",
+        "fone": "+55 998215091",
+        "tipo": "Proprietário",
+        "cpf": "06863486482",
+        "email": "luceliastevenin@gmail.com"
+      },
+      {
+        "apto": "0703",
+        "nome": "SCOTT THOMAS SHANKS",
+        "fone": "+55 77999954449",
+        "tipo": "Proprietário",
+        "cpf": "72777982104",
+        "email": "sshanks@gmail.com"
+      },
+      {
+        "apto": "0801",
+        "nome": "CICERO SULIANO DE LIMA",
+        "fone": "+55 62 81451365",
+        "tipo": "Proprietário",
+        "cpf": "16136241153",
+        "email": "anaflaviaalencar97@gmail.com"
+      },
+      {
+        "apto": "0802",
+        "nome": "ROBERTO  FOSCHI",
+        "fone": "+55 988049353",
+        "tipo": "Proprietário",
+        "cpf": "01503689417",
+        "email": "jurido@hotmail.it"
+      },
+      {
+        "apto": "0803",
+        "nome": "ANA DULCE DE SOUSA PEIXOTO",
+        "tipo": "Proprietário",
+        "fone": "",
+        "cpf": "10806415487",
+        "email": "anitita40@hotmail.com"
+      },
+      {
+        "apto": "0901",
+        "nome": "JOSE GENIBERTO FERREIRA",
+        "fone": "+55 8436227851",
+        "tipo": "Proprietário",
+        "cpf": "18823840406",
+        "email": "geniberto@gmail.com"
+      },
+      {
+        "apto": "0902",
+        "nome": "KIVIA CUNHA PEREIRA PINTO",
+        "fone": "+55 994510662",
+        "tipo": "Proprietário",
+        "cpf": "42913772404",
+        "email": "lucianasantiago79@icloud.com"
+      },
+      {
+        "apto": "0903",
+        "nome": "RENZO SAVASTA",
+        "fone": "+55 84981179464",
+        "tipo": "Proprietário",
+        "cpf": "70074705482",
+        "email": "administracao@savimbrasil.com"
+      },
+      {
+        "apto": "1001",
+        "nome": "ARTHUR FERREIRA NETO",
+        "fone": "+55 84 88809878 (51 83191010 51",
+        "tipo": "Proprietário",
+        "cpf": "90070240000",
+        "email": "santos@sistemaprismatec.com.br"
+      },
+      {
+        "apto": "1002",
+        "nome": "SERGIO MURILO VIANA SILVA",
+        "fone": "+55 32133478 (+55 999740590;+55",
+        "tipo": "Proprietário",
+        "cpf": "29273315372",
+        "email": "brasilmotos_kriss@hotmail.com"
+      },
+      {
+        "apto": "1003",
+        "nome": "SAMYR DE CASTRO NERI",
+        "fone": "+55 84999033335 (+55 84994555353)",
+        "tipo": "Proprietário",
+        "cpf": "06933878821",
+        "email": "comercial@paradisehoteis.com.br"
+      },
+      {
+        "apto": "1101",
+        "nome": "ROBERTO CATRICALA",
+        "fone": "+55 39330290103",
+        "tipo": "Proprietário",
+        "cpf": "01584157445",
+        "email": "catrica@libero.it"
+      },
+      {
+        "apto": "1102",
+        "nome": "ROBERTO CATRICALA",
+        "tipo": "Proprietário",
+        "fone": "",
+        "email": "Tel.: (84)3234-0110/(84)99189-9192 / E-mail: atendimento.pratika.natal@gmail.com"
+      },
+      {
+        "apto": "1103",
+        "nome": "EMANUELE COELHO MELO LEITE",
+        "fone": "+55 84996760000 (+55 84999259009)",
+        "tipo": "Proprietário",
+        "cpf": "88044254315",
+        "email": "emanuelecoelho@hotmail.com"
+      },
+      {
+        "apto": "1201",
+        "nome": "ANTONIO CARLOS DE MEDEIROS",
+        "fone": "+55 84997024264",
+        "tipo": "Proprietário",
+        "cpf": "48152951404",
+        "email": "antonio_araujo@hotmail.com"
+      },
+      {
+        "apto": "1202",
+        "nome": "ROBERTO FOSCHI",
+        "tipo": "Proprietário",
+        "fone": "",
+        "cpf": "01123209456",
+        "email": "jurido@hotmail.it"
+      },
+      {
+        "apto": "1203",
+        "nome": "LUIZ EDUARDO DE MACEDO",
+        "fone": "+55 21986243846;+55 21993408054",
+        "tipo": "Proprietário"
+      },
+      {
+        "apto": "1301",
+        "nome": "VERONICA CARLOS CABRAL RAMOS",
+        "fone": "+55 84986020222",
+        "tipo": "Proprietário",
+        "cpf": "37870122068",
+        "email": "senhoradotempo@hotmail.com"
+      },
+      {
+        "apto": "1302",
+        "nome": "ANIELLO CERBONE",
+        "tipo": "Proprietário",
+        "fone": "",
+        "cpf": "01599464411",
+        "email": "papinmed@gmail.com"
+      },
+      {
+        "apto": "1303",
+        "nome": "TOMASO PADOVANI",
+        "fone": "+55 84987256487;+55 84999349868",
+        "tipo": "Proprietário",
+        "cpf": "01562507486",
+        "email": "danielapereira24d@gmail.com"
+      },
+      {
+        "apto": "1401",
+        "nome": "PAULO ROBERTO COSTA",
+        "fone": "+55 991941928 (+55 999271624)",
+        "tipo": "Proprietário",
+        "cpf": "40638847400",
+        "email": "prcnat@yahoo.com.br"
+      },
+      {
+        "apto": "1402",
+        "nome": "MAURO MAIA DRUMOND",
+        "fone": "+55 84 99260318",
+        "tipo": "Proprietário",
+        "cpf": "19910495600",
+        "email": "villareservahotel@gmail.com"
+      },
+      {
+        "apto": "1403",
+        "nome": "MAURO MAIA DRUMOND",
+        "fone": "+55 84 99260318",
+        "tipo": "Proprietário",
+        "cpf": "19910495600",
+        "email": "villareservahotel@gmail.com"
+      },
+      {
+        "apto": "1501",
+        "nome": "CARLOS HIRAM BENTES DAVID",
+        "fone": "+55 61 996415656",
+        "tipo": "Proprietário",
+        "cpf": "29126606100",
+        "email": "eloimoveis.hiram@gmail.com"
+      },
+      {
+        "apto": "1502",
+        "nome": "ANA AMÉLIA MACHADO",
+        "tipo": "Proprietário",
+        "fone": "",
+        "email": "Tel.: (84)3234-0110/(84)99189-9192 / E-mail: atendimento.pratika.natal@gmail.com"
+      },
+      {
+        "apto": "1503",
+        "nome": "LINDENBERG CIRNE DE LIMA",
+        "fone": "+55 71987991183",
+        "tipo": "Proprietário",
+        "cpf": "06981054434",
+        "email": "lcirne2@hotmail.com"
+      },
+      {
+        "apto": "1601",
+        "nome": "DONALD ERNEST KALLUSKY",
+        "tipo": "Proprietário",
+        "fone": "",
+        "email": "estevamcg@hotmail.com"
+      },
+      {
+        "apto": "1502",
+        "nome": "NOVA PARNAMIRIM - PARNAMIRIM - RN -",
+        "fone": "",
+        "cpf": "87563088415",
+        "email": "junior_brito1979@hotmail.com"
+      },
+      {
+        "apto": "0100",
+        "nome": "HERBERT PEREIRA BEZERRA",
+        "fone": "+55 55 8432015900",
+        "tipo": "Proprietário",
+        "cpf": "32276109491",
+        "email": "hbezerra63@gmail.com"
+      },
+      {
+        "apto": "0200",
+        "nome": "CARLOS ALBERTO SOBRAL PESSOA",
+        "fone": "55 84994262728",
+        "tipo": "Proprietário",
+        "cpf": "38875837449",
+        "email": "carlosaspessoa@gmail.com"
+      },
+      {
+        "apto": "0300",
+        "nome": "ANTONIO JOSE FERREIRA DE S.",
+        "fone": "55 84999823216",
+        "tipo": "Proprietário",
+        "cpf": "29893968453",
+        "email": "patmourabezerra70@gmail.com"
+      },
+      {
+        "apto": "0400",
+        "nome": "PAULO ROBERTO DE",
+        "fone": "55 84999820185 (55 84999822853)",
+        "tipo": "Proprietário",
+        "cpf": "17563194487",
+        "email": "paulo213@uol.com.br"
+      },
+      {
+        "apto": "0500",
+        "nome": "ANA LUCIA DOS SANTOS SCALA",
+        "fone": "+55 55 8421333176 (55 84999087181)",
+        "tipo": "Proprietário",
+        "cpf": "26616092100",
+        "email": "com.br;italoscala@hotmail.com"
+      },
+      {
+        "apto": "0600",
+        "nome": "ANA ELISABETE DE LARA MENEZES",
+        "fone": "+55 55 8432018076 (55 84994812932)",
+        "tipo": "Proprietário",
+        "cpf": "13685287400",
+        "email": "analaraspin@gmail.com"
+      },
+      {
+        "apto": "0700",
+        "nome": "MARCO ANTONIO VEPPO DOS",
+        "fone": "55 84999273609",
+        "tipo": "Proprietário",
+        "cpf": "73046981791",
+        "email": "veppao@yahoo.com.br"
+      },
+      {
+        "apto": "0800",
+        "nome": "JASON GONCALVES DE LIMA",
+        "fone": "+55 55 8432014532 (55 84988900108)",
+        "tipo": "Proprietário",
+        "cpf": "00503967572",
+        "email": "jasonglima@uol.com.br"
+      },
+      {
+        "apto": "0900",
+        "nome": "ANTONIO LEITE",
+        "fone": "+55 55 8436113206 (55 84994065644)",
+        "tipo": "Proprietário",
+        "cpf": "02226855734",
+        "email": "aleite1943@gmail.com"
+      },
+      {
+        "apto": "1000",
+        "nome": "ERIVALDO MATIAS FERREIRA",
+        "fone": "55 84991247978",
+        "tipo": "Proprietário",
+        "cpf": "83696318434",
+        "email": "erivaldo.matias@bol.com.br"
+      },
+      {
+        "apto": "1100",
+        "nome": "CESIMAR SEVERIANO DO",
+        "fone": "55 84996222222",
+        "tipo": "Proprietário",
+        "cpf": "29505720491",
+        "email": "cesimar.nascimento@gmail.com"
+      },
+      {
+        "apto": "1200",
+        "nome": "GUSTAVO FELIPE PASQUAL",
+        "tipo": "Proprietário",
+        "fone": "",
+        "email": "pasqual.gu@yahoo.com.br"
+      },
+      {
+        "apto": "1300",
+        "nome": "ALDAIR DE SOUZA PAIVA",
+        "fone": "55 84996280202 (55 84988962192)",
+        "tipo": "Proprietário",
+        "cpf": "31528910400",
+        "email": "hemocardiologia@yahoo.com.br"
+      },
+      {
+        "apto": "1400",
+        "nome": "JOSE ROBERTO BEZERRA DE",
+        "fone": "+55 55 8432019888 (55 84999832578)",
+        "tipo": "Proprietário",
+        "cpf": "20045395420",
+        "email": "jrbdemedeiros@gmail.com"
+      },
+      {
+        "apto": "1500",
+        "nome": "EUGENIO LIMA DE SOUZA",
+        "fone": "55 84996492666 (55 84996492662)",
+        "tipo": "Proprietário",
+        "cpf": "31637108400",
+        "email": "genioviolao@gmail.com"
+      },
+      {
+        "apto": "1600",
+        "nome": "JOAO ALVES DA SILVA",
+        "fone": "55 84991235015",
+        "tipo": "Proprietário",
+        "cpf": "01190121468",
+        "email": "yanaclara@hotmail.com"
+      },
+      {
+        "apto": "0101",
+        "nome": "João Paulo F. L. de Holanda",
+        "tipo": "Proprietário",
+        "fone": "",
+        "email": "joaopauloholanda@yahoo.com.br"
+      },
+      {
+        "apto": "0102",
+        "nome": "Regina Gonçalves de Melo",
+        "fone": "+55 999875715",
+        "tipo": "Proprietário",
+        "cpf": "52379400482",
+        "email": "melogregina@gmail.com"
+      },
+      {
+        "apto": "0103",
+        "nome": "Kleber de Medeiros Teixeira",
+        "fone": "+55 994319775",
+        "tipo": "Proprietário",
+        "cpf": "05295571424",
+        "email": "peres@yahoo.com.br;sol_trt@hotmail."
+      },
+      {
+        "apto": "0104",
+        "nome": "Rodrigo José Fernandes Cabral",
+        "fone": "+55 55 996075056",
+        "tipo": "Proprietário",
+        "cpf": "04453232489",
+        "email": "marifcabral5@gmail.com"
+      },
+      {
+        "apto": "0201",
+        "nome": "Naianne Kelly Clebis",
+        "fone": "+55 991269459",
+        "tipo": "Proprietário",
+        "cpf": "02441924990",
+        "email": "nkclebis@hotmail.com"
+      },
+      {
+        "apto": "0202",
+        "nome": "MARIA DA CONCEIÇÃO NERI",
+        "fone": "+55 84987181068;+55 84996940813;",
+        "tipo": "Proprietário"
+      },
+      {
+        "apto": "0203",
+        "nome": "Francisco Fernandes de Oliveira",
+        "fone": "+55 996226293",
+        "tipo": "Proprietário",
+        "cpf": "02006502468",
+        "email": "marcius_adv@hotmail.com"
+      },
+      {
+        "apto": "0204",
+        "nome": "Rodrigo José Fernandes Cabral",
+        "fone": "+55 55 996075056",
+        "tipo": "Proprietário",
+        "cpf": "04453232489",
+        "email": "marifcabral5@gmail.com"
+      },
+      {
+        "apto": "0301",
+        "nome": "Blademir Pereira dos Santos",
+        "fone": "+55 999844060",
+        "tipo": "Proprietário",
+        "cpf": "31238017487",
+        "email": "blademirsantos@gmail.com"
+      },
+      {
+        "apto": "0302",
+        "nome": "IRACEMA CLEBIS",
+        "fone": "+55 84 991295129",
+        "tipo": "Proprietário",
+        "cpf": "00390124923",
+        "email": "iclebis@hotmail.com"
+      },
+      {
+        "apto": "0303",
+        "nome": "Bruno Marques Ferreira da Silva",
+        "fone": "+55 999550779",
+        "tipo": "Proprietário",
+        "cpf": "06438119407",
+        "email": "brunomfs@gmail.com"
+      },
+      {
+        "apto": "0304",
+        "nome": "Marcus Antonio Queiroz Chaves Filho",
+        "fone": "+55 996888636",
+        "tipo": "Proprietário",
+        "cpf": "05635596401",
+        "email": "maqcfilho2009@hotmail.com"
+      },
+      {
+        "apto": "0401",
+        "nome": "Mauro Alves de Oliveira",
+        "fone": "+55 999920526",
+        "tipo": "Proprietário",
+        "cpf": "00367559404",
+        "email": "maoves@gmail.com"
+      },
+      {
+        "apto": "0402",
+        "nome": "Gilvan Mikelyson Delmiro de Gois",
+        "fone": "+55 55 999911568",
+        "tipo": "Proprietário",
+        "cpf": "91425530400",
+        "email": "administrativo@gusmaoimoveisrn.com."
+      },
+      {
+        "apto": "0403",
+        "nome": "Vania Aparecida Kruger",
+        "fone": "+55 991128443",
+        "tipo": "Proprietário",
+        "cpf": "09308382895",
+        "email": "marciacruz7676@gmail.com"
+      },
+      {
+        "apto": "0404",
+        "nome": "Maxdavid Campos",
+        "fone": "+55 84 91103046 (+55 991103046)",
+        "tipo": "Proprietário",
+        "cpf": "06832462409",
+        "email": "maxdavid_campos@outlook.com"
+      },
+      {
+        "apto": "0501",
+        "nome": "Erivaldo Leite Galindo Junior",
+        "tipo": "Proprietário",
+        "fone": "",
+        "email": "jrleite.g@gmail.com"
+      },
+      {
+        "apto": "0502",
+        "nome": "Alberto Signoretti",
+        "fone": "+55 999509407",
+        "tipo": "Proprietário",
+        "cpf": "22234071453",
+        "email": "michelegaldinocamara@gmail.com"
+      },
+      {
+        "apto": "0503",
+        "nome": "JAIR DIOGENES DE CARVALHO",
+        "fone": "+55 84 999129666",
+        "tipo": "Proprietário",
+        "cpf": "00292109415",
+        "email": "julia_diogeness@hotmail.com"
+      },
+      {
+        "apto": "0504",
+        "nome": "JAIR DIOGENES DE CARVALHO",
+        "fone": "+55 84 999129666",
+        "tipo": "Proprietário",
+        "cpf": "00292109415",
+        "email": "julia_diogeness@hotmail.com"
+      },
+      {
+        "apto": "0601",
+        "nome": "Sebastiao Marques Ferreira Filho",
+        "fone": "+55 999968771",
+        "tipo": "Proprietário",
+        "cpf": "31641466472",
+        "email": "sebastiaomff@yahoo.com.br"
+      },
+      {
+        "apto": "0602",
+        "nome": "Radir Azevedo Meira Filho",
+        "fone": "+55 999279035",
+        "tipo": "Proprietário",
+        "cpf": "01043884475",
+        "email": "radirfilhoadv@gmail.com"
+      },
+      {
+        "apto": "0603",
+        "nome": "JAIR DIOGENES DE CARVALHO",
+        "fone": "+55 84 999129666",
+        "tipo": "Proprietário",
+        "cpf": "00292109415",
+        "email": "julia_diogeness@hotmail.com"
+      },
+      {
+        "apto": "0604",
+        "nome": "JAIR DIOGENES DE CARVALHO",
+        "fone": "+55 84 999129666",
+        "tipo": "Proprietário",
+        "cpf": "00292109415",
+        "email": "julia_diogeness@hotmail.com"
+      },
+      {
+        "apto": "0701",
+        "nome": "ALBERTINO PIERRE DA COSTA",
+        "tipo": "Proprietário",
+        "fone": "",
+        "email": "danielllsampaio1000@gmail.com"
+      },
+      {
+        "apto": "0702",
+        "nome": "AUGUSTO CESAR AMMANUEL",
+        "fone": "+55 84 96697000",
+        "tipo": "Proprietário",
+        "cpf": "03420885482",
+        "email": "suerdapsiconeuro@gmail.com"
+      },
+      {
+        "apto": "0703",
+        "nome": "Marcus Vinicius Venancio da Penha",
+        "fone": "+55 21977305950",
+        "tipo": "Proprietário",
+        "cpf": "02305008465",
+        "email": "marcusmvvp@hotmail.com"
+      },
+      {
+        "apto": "0704",
+        "nome": "Gabriela Barbosa Bruno",
+        "fone": "+55 999801552",
+        "tipo": "Proprietário",
+        "cpf": "08107466462",
+        "email": "gabibbruno2@gmail.com"
+      },
+      {
+        "apto": "0801",
+        "nome": "Richard Medeiros de Araújo",
+        "fone": "+55 987024034",
+        "tipo": "Proprietário",
+        "cpf": "01046189492",
+        "email": "richardmaraujo@uol.com.br"
+      },
+      {
+        "apto": "0802",
+        "nome": "Flávio Eugênio da Rocha Calife",
+        "fone": "+55 988264604",
+        "tipo": "Proprietário",
+        "cpf": "42309034487",
+        "email": "flaviocalife@gmail.com"
+      },
+      {
+        "apto": "0803",
+        "nome": "Caroline Evelin Nascimento Kluczynik",
+        "fone": "+55 994769229",
+        "tipo": "Proprietário",
+        "cpf": "07654109407",
+        "email": "carolinekluczynik@gmail.com"
+      },
+      {
+        "apto": "0804",
+        "nome": "Lilian de Souza Costa",
+        "fone": "+55 991233773",
+        "tipo": "Proprietário",
+        "cpf": "00989791408",
+        "email": "liliscster@gmail.com"
+      },
+      {
+        "apto": "0901",
+        "nome": "MARCIO MACIEL",
+        "fone": "+55 84 987448171 (+55 84 988962873)",
+        "tipo": "Proprietário",
+        "cpf": "28247540444",
+        "email": "marciomaciel.maciel@gmail.com"
+      },
+      {
+        "apto": "0902",
+        "nome": "Daniel Dantas Viana Medeiros",
+        "fone": "+55 999247374",
+        "tipo": "Proprietário",
+        "cpf": "05184098488",
+        "email": "medeirosddv@googlemail.com"
+      },
+      {
+        "apto": "0903",
+        "nome": "Diogo Almeida Chaves",
+        "fone": "+55 61 996814155",
+        "tipo": "Proprietário",
+        "cpf": "27271140875",
+        "email": "dido10chaves@hotmail.com"
+      },
+      {
+        "apto": "0904",
+        "nome": "Francisco Igor de Melo Liberato",
+        "fone": "+55 996153198",
+        "tipo": "Proprietário",
+        "cpf": "01444130439",
+        "email": "liberatoigor@gmail.com"
+      },
+      {
+        "apto": "1001",
+        "nome": "Domingos Savio de Araujo Paulo",
+        "fone": "+55 996628811",
+        "tipo": "Proprietário",
+        "cpf": "18276245404",
+        "email": "domingos.sap@gmail.com"
+      },
+      {
+        "apto": "1002",
+        "nome": "LEAO ERNESTO SILVA POPOFF",
+        "fone": "+55 84999848410",
+        "tipo": "Proprietário",
+        "cpf": "00017922291",
+        "email": "leaopopoff@gmail.com"
+      },
+      {
+        "apto": "1003",
+        "nome": "EDEMILSON SIMÕES LEMOS",
+        "fone": "+55 84996496133",
+        "tipo": "Proprietário",
+        "cpf": "55622780063",
+        "email": "edemilsonslemos@gmail.com"
+      },
+      {
+        "apto": "1004",
+        "nome": "JAIR DIOGENES DE CARVALHO",
+        "fone": "+55 84 999129666",
+        "tipo": "Proprietário",
+        "cpf": "00292109415",
+        "email": "julia_diogeness@hotmail.com"
+      },
+      {
+        "apto": "1101",
+        "nome": "MARJORIE SAUNDERS BRIGIDO",
+        "fone": "+55 84 988468006 (+55 84999126889)",
+        "tipo": "Proprietário",
+        "cpf": "07794944406",
+        "email": "engmygor@gmail.com"
+      },
+      {
+        "apto": "1102",
+        "nome": "JULIANA ARAUJO CARTAXO",
+        "fone": "+55 84 996124662",
+        "tipo": "Proprietário",
+        "cpf": "85366650410",
+        "email": "julianagomesnat@icloud.com"
+      },
+      {
+        "apto": "1103",
+        "nome": "Zenaide Gomes De Oliveira",
+        "fone": "+55 998562226",
+        "tipo": "Proprietário",
+        "cpf": "17584876404",
+        "email": "zenadeoliveira@yahoo.com.br"
+      },
+      {
+        "apto": "1104",
+        "nome": "Bruno Emerson Gurgel Gomes",
+        "fone": "+55 988636304",
+        "tipo": "Proprietário",
+        "cpf": "01061676420",
+        "email": "crisbrunadantas@gmail.com"
+      },
+      {
+        "apto": "1201",
+        "nome": "FABIO MONTEIRO DA SILVA",
+        "fone": "+55 84998300532",
+        "tipo": "Proprietário",
+        "cpf": "03159627470",
+        "email": "fabioyeshua7@gmail.com"
+      },
+      {
+        "apto": "1202",
+        "nome": "Augusto Gomes Dourado Neto",
+        "fone": "+55 999829016",
+        "tipo": "Proprietário",
+        "cpf": "18288898491",
+        "email": "dourado.neto@hotmail.com"
+      },
+      {
+        "apto": "1203",
+        "nome": "WANESSA FARIAS DOS SANTOS",
+        "fone": "+55 8499201 0068",
+        "tipo": "Proprietário",
+        "cpf": "01171657439",
+        "email": "wanessa_farias@hotmail.com"
+      },
+      {
+        "apto": "1204",
+        "nome": "Maria de Fatima Fenandes Souza",
+        "fone": "+55 988443888",
+        "tipo": "Proprietário",
+        "cpf": "96661623420",
+        "email": "fatima.facex@yahoo.com.br"
+      },
+      {
+        "apto": "1301",
+        "nome": "ANALGASINA DA SILVA FIGUEIREDO",
+        "fone": "+55 84999007250",
+        "tipo": "Proprietário",
+        "cpf": "25729152434",
+        "email": "zinasfigueiredo@hotmail.com"
+      },
+      {
+        "apto": "1302",
+        "nome": "FERNANDO GUEDES DE CAMPOS /",
+        "fone": "+55 81 993245532;+55 81 985150513",
+        "tipo": "Proprietário"
+      },
+      {
+        "apto": "1304",
+        "nome": "Marcelo Ferreira Arruda Camara",
+        "fone": "+55 999264650",
+        "tipo": "Proprietário",
+        "cpf": "01058321463",
+        "email": "marceloarrudacamara@gmail.com"
+      },
+      {
+        "apto": "1401",
+        "nome": "Ariadne Cruz de Oliveira",
+        "fone": "+55 51 99318484",
+        "tipo": "Proprietário",
+        "cpf": "04494147443",
+        "email": "ariadne_cruz@hotmail.com"
+      },
+      {
+        "apto": "1402",
+        "nome": "Rodolfo Gonçalves Pinheiro Filho",
+        "fone": "+55 996025713",
+        "tipo": "Proprietário",
+        "cpf": "06683879478",
+        "email": "rodolfopinheirofilho@gmail.com"
+      },
+      {
+        "apto": "1403",
+        "nome": "Eduardo Vance Harrop",
+        "fone": "+55 999224694",
+        "tipo": "Proprietário",
+        "cpf": "02684726450",
+        "email": "eduharrop@hotmail.com"
+      },
+      {
+        "apto": "1404",
+        "nome": "CHRISTINA INÁCIO DOS SANTOS",
+        "fone": "+55 84 94108072",
+        "tipo": "Proprietário"
+      },
+      {
+        "apto": "1501",
+        "nome": "Anacleir Cruz de Oliveira",
+        "fone": "+55 84 998989907",
+        "tipo": "Proprietário",
+        "cpf": "05997965457",
+        "email": "Anaclerr@gmail.com"
+      },
+      {
+        "apto": "1502",
+        "nome": "ARTHUR FERNANDES DINIZ",
+        "fone": "+55 84 999164006",
+        "tipo": "Proprietário"
+      },
+      {
+        "apto": "1503",
+        "nome": "Wagner Aparecido Vicente",
+        "fone": "+55 81 9 81661575 (55 81 991156172)",
+        "tipo": "Proprietário",
+        "cpf": "07509346894",
+        "email": "locacao@imocapital.com.br"
+      },
+      {
+        "apto": "1504",
+        "nome": "Elder Andre de Siqueira",
+        "fone": "+55 84 987014327 (+55 999999695)",
+        "tipo": "Proprietário",
+        "cpf": "69472475434",
+        "email": "cavalca@gmail.com"
+      },
+      {
+        "apto": "1601",
+        "nome": "FELIPE DE SOUZA MAGALHÃES",
+        "fone": "+55 84 996175799",
+        "tipo": "Proprietário",
+        "cpf": "05380424430",
+        "email": "Felipemagalhaes06@hotmail.com"
+      },
+      {
+        "apto": "1602",
+        "nome": "HEVELINE GOMES DO NASCIMENTO",
+        "fone": "+55 84 981452795",
+        "tipo": "Proprietário"
+      },
+      {
+        "apto": "1603",
+        "nome": "Luiz Fagner de Paiva Silva",
+        "fone": "+55 999222657",
+        "tipo": "Proprietário",
+        "cpf": "06140184479",
+        "email": "luizfagnerps@gmail.com"
+      },
+      {
+        "apto": "1604",
+        "nome": "MARCIA REGINA MATIAS PEREIRA",
+        "fone": "+55 999830571",
+        "tipo": "Proprietário",
+        "cpf": "66475732400",
+        "email": "reginamrmp@gmail.com"
+      },
+      {
+        "apto": "1701",
+        "nome": "GIULIANO NUBILE RAMOS",
+        "fone": "+55 84991099559",
+        "tipo": "Proprietário"
+      },
+      {
+        "apto": "1702",
+        "nome": "JESSICA ADRIELLY DA COSTA",
+        "fone": "+55 84 996499161 (+55 84 999349175)",
+        "tipo": "Proprietário",
+        "cpf": "07579579430",
+        "email": "albertovale_geo@yahoo.com.br"
+      },
+      {
+        "apto": "1703",
+        "nome": "ANDREA FILGUEIRA DO AMARAL",
+        "fone": "+55 8499987 3857",
+        "tipo": "Proprietário",
+        "cpf": "02070678482",
+        "email": "andreafamaral@yahoo.com.br"
+      },
+      {
+        "apto": "1704",
+        "nome": "Kalina Albuquerque de Araujo",
+        "fone": "+55 84996398216",
+        "tipo": "Proprietário",
+        "cpf": "06920905418",
+        "email": "kalinaalbuquerque@hotmail.com"
+      },
+      {
+        "apto": "1802",
+        "nome": "ETENIGER MARCELA FERNANDES",
+        "fone": "+55 84 98401845;+55 84 999121999",
+        "tipo": "Proprietário",
+        "cpf": "00971734445",
+        "email": "eduardodieb@gmail.com"
+      },
+      {
+        "apto": "0101",
+        "nome": "BRUNO TORRES MIRANDA",
+        "fone": "+55 55 20300177 (+55 55 999810595)",
+        "tipo": "Proprietário",
+        "cpf": "79098444415",
+        "email": "brunotmiranda@hotmail.com"
+      },
+      {
+        "apto": "0102",
+        "nome": "JOÃO TOSCANO DELGADO",
+        "fone": "+55 999141530",
+        "tipo": "Proprietário",
+        "cpf": "15668681491",
+        "email": "joaoalbertodelgado@hotmail.com"
+      },
+      {
+        "apto": "0201",
+        "nome": "ROBERTO TEIXEIRA JUNIOR",
+        "fone": "+55 32354218 (+55 988781410)",
+        "tipo": "Proprietário",
+        "cpf": "06951264740",
+        "email": "rtjunior@petrobras.com.br"
+      },
+      {
+        "apto": "0202",
+        "nome": "FELIPE MACIEL PINHEIRO BARRO",
+        "fone": "+55 84 996505000",
+        "tipo": "Proprietário",
+        "cpf": "01264252480",
+        "email": "felipemaciel@hotmail.com"
+      },
+      {
+        "apto": "0301",
+        "nome": "ADAY REGINA DE SOUSA",
+        "fone": "+55 84 94119441",
+        "tipo": "Proprietário",
+        "cpf": "67304338415",
+        "email": "alderimartins@bol.com.br"
+      },
+      {
+        "apto": "0302",
+        "nome": "SIMONE SOUTO MAIA",
+        "fone": "+55 33012443 (+55 987350318)",
+        "tipo": "Proprietário",
+        "cpf": "34989420500",
+        "email": "simone_souto_mello@hotmail.com"
+      },
+      {
+        "apto": "0401",
+        "nome": "MARÍLIA SILVEIRA DE MEDEIROS",
+        "fone": "+55 999855595 (+55 999717996)",
+        "tipo": "Proprietário",
+        "cpf": "65530594468",
+        "email": "joaojuniorrn@yahoo.com.br"
+      },
+      {
+        "apto": "0402",
+        "nome": "ALEXANDRE MOTTA CÂMERA",
+        "fone": "+55 999811187",
+        "tipo": "Proprietário",
+        "cpf": "53859669400",
+        "email": "alexmottacamara@hotmail.com"
+      },
+      {
+        "apto": "0501",
+        "nome": "HELIO SANTA ROSA MAFRA",
+        "tipo": "Proprietário",
+        "fone": "",
+        "email": "hsrmafra@gmail.com"
+      },
+      {
+        "apto": "0502",
+        "nome": "FV INVESTIMENTOS IMOBILIÁRIOS",
+        "fone": "+55 991390699",
+        "tipo": "Proprietário",
+        "cpf": "35660072000140",
+        "email": "fred@imocapital.com.br"
+      },
+      {
+        "apto": "0601",
+        "nome": "JOSÉ LUIS ARGIZ JUSTO",
+        "fone": "+55 32317940 (+55 999520254)",
+        "tipo": "Proprietário",
+        "cpf": "02163274403",
+        "email": "jlargis@uol.com.br"
+      },
+      {
+        "apto": "0602",
+        "nome": "MARCO ANTONIO MARTINS RIBEIRO",
+        "tipo": "Proprietário",
+        "fone": "",
+        "email": "contato@clinicama.com.br"
+      },
+      {
+        "apto": "0701",
+        "nome": "JOÃO PAULO FERREIRA DE SOUZA",
+        "fone": "+55 32220907 (+55 999915600)",
+        "tipo": "Proprietário",
+        "cpf": "01860896430",
+        "email": "jp_viveiros@hotmail.com"
+      },
+      {
+        "apto": "0702",
+        "nome": "ANTONIO TITO DE MIRANDA",
+        "fone": "+55 13 32491419 (+55 13 991706565)",
+        "tipo": "Proprietário",
+        "cpf": "26323443104",
+        "email": "antitos1000@gmail.com"
+      },
+      {
+        "apto": "0801",
+        "nome": "PAULO EDUARDO DE MORAES",
+        "fone": "+55 999828117 (+55 999245385)",
+        "tipo": "Proprietário",
+        "cpf": "83895680478",
+        "email": "paulo@birocroqui.com.br"
+      },
+      {
+        "apto": "0802",
+        "nome": "LUCIANA GUERRA BRANDÃO",
+        "fone": "+55 84  981184849;+55 84 991314899",
+        "tipo": "Proprietário",
+        "cpf": "02653598485",
+        "email": "lucianalyra@unifacex.edu.br"
+      },
+      {
+        "apto": "0901",
+        "nome": "ANDRÉS DE MEDEIROS LEITE",
+        "fone": "+55 84999707282 (+55 61 981217966)",
+        "tipo": "Proprietário",
+        "cpf": "00353919799",
+        "email": "leite@gmail.com"
+      },
+      {
+        "apto": "0902",
+        "nome": "MARCELA SAMILLE ARAÚJO DE",
+        "fone": "+55 84999845920",
+        "tipo": "Proprietário",
+        "cpf": "06504232407",
+        "email": "mmsamille@gmail.com"
+      },
+      {
+        "apto": "1001",
+        "nome": "JOAO MARCELO TERTULIANO",
+        "fone": "+55 81996360696 (+55 84981830505)",
+        "tipo": "Proprietário",
+        "cpf": "03780665441",
+        "email": "renata_emerenciano@hotmail.com"
+      },
+      {
+        "apto": "1002",
+        "nome": "FRANCISCO SIDNEY LOPES",
+        "fone": "+55 994073036",
+        "tipo": "Proprietário",
+        "cpf": "78589070425",
+        "email": "sidneycorreia@hotmail.com"
+      },
+      {
+        "apto": "1101",
+        "nome": "JOSÉ PAULO ROCHA RASCH",
+        "fone": "55 55 51 33315001 (55 51 999823686)",
+        "tipo": "Proprietário",
+        "cpf": "19803478087",
+        "email": "arrudaclaudia@hotmail.com"
+      },
+      {
+        "apto": "1102",
+        "nome": "ERIKA VIDAL COSTA REGO",
+        "fone": "+55 32018149 (+55 994075115)",
+        "tipo": "Proprietário",
+        "cpf": "03422806431",
+        "email": "anacvidal1@hotmail.com"
+      },
+      {
+        "apto": "1201",
+        "nome": "TAIANNY TORRES",
+        "fone": "+55 81 981717416",
+        "tipo": "Proprietário",
+        "cpf": "05100295406",
+        "email": "taiannytorres@hotmail.com"
+      },
+      {
+        "apto": "1202",
+        "nome": "BRUNO BARROS GOMES DA",
+        "fone": "+55 999819725",
+        "tipo": "Proprietário",
+        "cpf": "01013542401",
+        "email": "bruno_bgc@hotmail.com"
+      },
+      {
+        "apto": "1301",
+        "nome": "DIRCEU FONSECA DE MIRANDA",
+        "tipo": "Proprietário",
+        "fone": "",
+        "email": "dirceu.fm@hotmail.com"
+      },
+      {
+        "apto": "1302",
+        "nome": "BRUNO HENRIQUE DE PAULA GOIS",
+        "fone": "+55 84 991243898",
+        "tipo": "Proprietário",
+        "cpf": "04601369410",
+        "email": "Brunohpgois@yahoo.com.br"
+      },
+      {
+        "apto": "1401",
+        "nome": "JOÃO MARIA CARNEIRO",
+        "fone": "+55 988127065 (+55 988991072)",
+        "tipo": "Proprietário",
+        "cpf": "20030037468",
+        "email": "primeiro1oficiofjm@gmail.com"
+      },
+      {
+        "apto": "1402",
+        "nome": "CARLOS AUGUSTO QUEIROZ DA",
+        "fone": "+55 11 20929311 (+55 11 999793054)",
+        "tipo": "Proprietário",
+        "cpf": "05642248472",
+        "email": "carloskeiroz@terra.com.br"
+      },
+      {
+        "apto": "1501",
+        "nome": "VINÍCIUS FERNANDO DA LUZ",
+        "fone": "+55 84 99213838",
+        "tipo": "Proprietário",
+        "cpf": "04794678460",
+        "email": "viniciusfernando@yahoo.com.br"
+      },
+      {
+        "apto": "1502",
+        "nome": "VERA KARINA PEREIRA DA ROCHA",
+        "fone": "+55 84 88882409",
+        "tipo": "Proprietário",
+        "cpf": "85282642468",
+        "email": "j.l_imoveis@hotmail.com"
+      },
+      {
+        "apto": "1601",
+        "nome": "CESAR LUIS SOARES",
+        "fone": "+55 32111205 (+55 999891232)",
+        "tipo": "Proprietário",
+        "cpf": "56969350797",
+        "email": "cesarluis@uol.com.br"
+      },
+      {
+        "apto": "1602",
+        "nome": "KARLA KARINE GURGEL CABRAL",
+        "fone": "+55 999928400",
+        "tipo": "Proprietário",
+        "cpf": "00072507462",
+        "email": "karlakarine@yahoo.com.br"
+      },
+      {
+        "apto": "1701",
+        "nome": "DEA DE MIRANDA MAC DOWELL",
+        "fone": "+55 988449998 (+55 988240589)",
+        "tipo": "Proprietário",
+        "cpf": "26303620191",
+        "email": "ac@macdowell.adm.br"
+      },
+      {
+        "apto": "1702",
+        "nome": "THIAGO GALVÃO SIMONETTI",
+        "tipo": "Proprietário",
+        "fone": "",
+        "email": "thiagosimonetti@yahoo.com.br"
+      },
+      {
+        "apto": "1801",
+        "nome": "VALENTINA DE ARAÚJO MONTE",
+        "fone": "+55 32118180 (+55 994312703)",
+        "tipo": "Proprietário",
+        "cpf": "91589711491",
+        "email": "valentina@monteneto.com.br"
+      },
+      {
+        "apto": "1802",
+        "nome": "GUSTAVO HENRIQUE VIDAL",
+        "fone": "+55 84994517783",
+        "tipo": "Proprietário",
+        "cpf": "06824258423",
+        "email": "elianevbarbosa@hotmail.com"
+      },
+      {
+        "apto": "1901",
+        "nome": "MELINA TERTULINO DE LIMA",
+        "tipo": "Proprietário",
+        "fone": "",
+        "email": "sqmedeiros@gmail.com"
+      },
+      {
+        "apto": "1902",
+        "nome": "PEDRO DE ALCANTARA  FARIAS",
+        "fone": "+55 84999887331",
+        "tipo": "Proprietário",
+        "cpf": "02724116470",
+        "email": "pedrosyoko@yahoo.com.br"
+      },
+      {
+        "apto": "2001",
+        "nome": "ELISTENIO RICHARDSON GUEDES",
+        "fone": "+55 84999798000",
+        "tipo": "Proprietário",
+        "cpf": "02440117455",
+        "email": "viladaliana@gmail.com"
+      },
+      {
+        "apto": "2002",
+        "nome": "MARIA RITA MANZARRA DE MOURA",
+        "fone": "+55 55 999349777",
+        "tipo": "Proprietário",
+        "cpf": "64858278387",
+        "email": "mariaritamanzarra@gmail.com"
+      },
+      {
+        "apto": "2101",
+        "nome": "TANIA MARIA DANTAS DE FARIA",
+        "fone": "+55 32018762",
+        "tipo": "Proprietário",
+        "cpf": "05618215420"
+      },
+      {
+        "apto": "2102",
+        "nome": "MAELBA RODRIGUES ALVES",
+        "fone": "+55 999846605 (+55 999021151)",
+        "tipo": "Proprietário",
+        "cpf": "47567155400",
+        "email": "br;fabianammcc@gmail.com"
+      },
+      {
+        "apto": "2201",
+        "nome": "ISAAC LIMA MEDEIROS",
+        "fone": "+55 84 996176666",
+        "tipo": "Proprietário",
+        "cpf": "01187320480",
+        "email": "divaneidelima@outlook.com"
+      },
+      {
+        "apto": "2202",
+        "nome": "RUBIA VALERIA XAVIER FONTES",
+        "fone": "+55 991419090 (+55 996513824)",
+        "tipo": "Proprietário",
+        "cpf": "50653636334",
+        "email": "rubiavaleria29@gmail.com"
+      },
+      {
+        "apto": "2301",
+        "nome": "CARMEM LUCIA PAULA DE",
+        "fone": "+55 84 999810138;+55 322222866;+55",
+        "tipo": "Proprietário",
+        "cpf": "52401456449",
+        "email": "sergiolverb@gmail.com"
+      },
+      {
+        "apto": "2302",
+        "nome": "ERIKA VIDAL COSTA RÊGO",
+        "fone": "+55 84 996244445;+55 84 999648644",
+        "tipo": "Proprietário",
+        "cpf": "03422806431",
+        "email": "erikavcrego@gmail.com"
+      },
+      {
+        "apto": "2401",
+        "nome": "CLAYTON BARRETO DE OLIVEIRA",
+        "fone": "+55 999356750 (+55 999137940)",
+        "tipo": "Proprietário",
+        "cpf": "97746860559",
+        "email": "c.barreto17@yahoo.com.br"
+      },
+      {
+        "apto": "2402",
+        "nome": "TANIA VALDELICE MACIEL DE",
+        "fone": "+55 988776552 (+55 999413920)",
+        "tipo": "Proprietário",
+        "cpf": "08406081449",
+        "email": "tanitzoliver@gmail.com"
+      },
+      {
+        "apto": "2501",
+        "nome": "HINDENBURG COSTA GOMES",
+        "fone": "+55 36130528 (+55 988533494)",
+        "tipo": "Proprietário",
+        "cpf": "36998320400",
+        "email": "hi-gomes@hotmail.com"
+      },
+      {
+        "apto": "2502",
+        "nome": "RODRIGO FERREIRA ABDALA",
+        "fone": "+55 981644433",
+        "tipo": "Proprietário",
+        "cpf": "25930942811",
+        "email": "rodrigoabdala@gmail.com"
+      },
+      {
+        "apto": "2601",
+        "nome": "FREDERICO CANTINHO SALSA",
+        "fone": "+55 991390699",
+        "tipo": "Proprietário",
+        "cpf": "02200932456",
+        "email": "fred@imocapital.com.br"
+      },
+      {
+        "apto": "2602",
+        "nome": "BRUNALDO BIGI",
+        "fone": "55 11 999512022",
+        "tipo": "Proprietário",
+        "cpf": "01506043437",
+        "email": "brunaldobigi@hotmail.com"
+      },
+      {
+        "apto": "2701",
+        "nome": "EMILIA MATILDE ARAUJO DE",
+        "fone": "+55 999499591",
+        "tipo": "Proprietário",
+        "cpf": "03630418422",
+        "email": "edson_zumba@hotmail.com"
+      },
+      {
+        "apto": "2702",
+        "nome": "RAIMUNDO NONATO DA FONSECA",
+        "fone": "+55 55 35252235 (+55 55 988122235)",
+        "tipo": "Proprietário",
+        "cpf": "13004980487",
+        "email": "Katiusciafonseca.adv@gmail.com"
+      },
+      {
+        "apto": "2801",
+        "nome": "EDIVALDO FERNANDES DE QUEIROZ",
+        "fone": "+55 32319227 (+55 999163667)",
+        "tipo": "Proprietário",
+        "cpf": "04748697415",
+        "email": "recepcao.hidro@hotmail.com"
+      },
+      {
+        "apto": "0101",
+        "nome": "PRISCILA EMMANUELLA OLIVEIRA",
+        "fone": "55 84991973107 (+55 55 84 98991670)",
+        "tipo": "Proprietário",
+        "cpf": "75199858491",
+        "email": "priscilaeomelo@hotmail.com"
+      },
+      {
+        "apto": "0102",
+        "nome": "WANDERSON EDUARDO SANTOS",
+        "tipo": "Proprietário",
+        "fone": ""
+      },
+      {
+        "apto": "0201",
+        "nome": "EMILLY AYUMI YANAGUIBASHI",
+        "fone": "+55 8499006967 (+55 84999006967)",
+        "tipo": "Proprietário",
+        "cpf": "71280909404",
+        "email": "emillyyanaguibashi@gmail.com"
+      },
+      {
+        "apto": "0202",
+        "nome": "VESCIA HOLANDA LEITE",
+        "fone": "+55 8432343671 (+55 84994116864)",
+        "tipo": "Proprietário",
+        "cpf": "22974652468",
+        "email": "vaniahleite@gmail.com"
+      },
+      {
+        "apto": "0301",
+        "nome": "CLEOMIR ALVES DA SILVA",
+        "fone": "+55 84994151218",
+        "tipo": "Proprietário",
+        "cpf": "09454152491",
+        "email": "tscriative@hotmail.com"
+      },
+      {
+        "apto": "0302",
+        "nome": "ANDRÉIA RAMOS DA SILVA",
+        "fone": "+55 994063338",
+        "tipo": "Proprietário",
+        "cpf": "87773791449",
+        "email": "andreia.ramoss@hotmail.com"
+      },
+      {
+        "apto": "0401",
+        "nome": "PAULO CESÁR PEREIRA",
+        "fone": "55 84999099343",
+        "tipo": "Proprietário",
+        "cpf": "55566413404",
+        "email": "paulojoaocesar@hotmail.com"
+      },
+      {
+        "apto": "0402",
+        "nome": "FRANCISCO EDSON DA COSTA E",
+        "tipo": "Proprietário",
+        "fone": "",
+        "email": "franscisco.emmanouil@caixa.gov.br"
+      },
+      {
+        "apto": "0501",
+        "nome": "LAMPADINHA MATERIAIS",
+        "fone": "+55 8430896992 (+55 84981780415)",
+        "tipo": "Proprietário",
+        "cpf": "09392341000124",
+        "email": "financeiro@lampadinha.com.br"
+      },
+      {
+        "apto": "0502",
+        "nome": "KLEBER CARLOS CARVALHO",
+        "fone": "+55 84994637498",
+        "tipo": "Proprietário",
+        "cpf": "04210038806",
+        "email": "kayo_carvalho@hotmail.com"
+      },
+      {
+        "apto": "0601",
+        "nome": "FRANCISCO DE ASSIS CARLOS",
+        "tipo": "Proprietário",
+        "fone": "",
+        "email": "fac@unp.br"
+      },
+      {
+        "apto": "0602",
+        "nome": "CECILIA MADRUGA",
+        "fone": "55 84994024601 (55 84 999229933)",
+        "tipo": "Proprietário",
+        "cpf": "49846280491",
+        "email": "financeiro@habitacionalonline.com.br"
+      },
+      {
+        "apto": "0701",
+        "nome": "ANA CRISTINA DE MELO COSTA",
+        "fone": "+55 8432060737 (+55 84988683032)",
+        "tipo": "Proprietário",
+        "cpf": "72297093420",
+        "email": "fantunesmelo@hotmail.com"
+      },
+      {
+        "apto": "0702",
+        "nome": "PAOLO RICCARDO MIRANDA DE",
+        "fone": "55 84996901911 (55 84996601911)",
+        "tipo": "Proprietário",
+        "cpf": "08097239485",
+        "email": "gabriiela@gmail.com"
+      },
+      {
+        "apto": "0801",
+        "nome": "ANA MARIA DA CÂMARA",
+        "fone": "+55 84 9 9611 3355 (+55 84996752664)",
+        "tipo": "Proprietário",
+        "cpf": "03794121449",
+        "email": "criscolombieri@gmail.com"
+      },
+      {
+        "apto": "0802",
+        "nome": "DANIEL DE OLIVEIRA RODRIGUES",
+        "fone": "+55 998448770",
+        "tipo": "Proprietário",
+        "cpf": "01115362437",
+        "email": "daniel.olivrod@gmail.com"
+      },
+      {
+        "apto": "0901",
+        "nome": "HUDSON RAFAEL BORJA BATISTA",
+        "fone": "+55 84 999083442 (+55 84 999083442)",
+        "tipo": "Proprietário",
+        "cpf": "08484982408",
+        "email": "hud-rafa@hotmail.com"
+      },
+      {
+        "apto": "0902",
+        "nome": "ROSÂNGELA SOARES DE",
+        "fone": "+55 84999618677",
+        "tipo": "Proprietário",
+        "cpf": "22147420425",
+        "email": "rosangela27@gmail.com"
+      },
+      {
+        "apto": "1001",
+        "nome": "RENAN FELIPE MONTEIRO NOE",
+        "fone": "+55 84 996666973",
+        "tipo": "Proprietário",
+        "cpf": "07098647446",
+        "email": "renannoe@outlook.com"
+      },
+      {
+        "apto": "1002",
+        "nome": "INAMAR DANTAS FILHO",
+        "fone": "+55 8432177081 (+55 84987212743)",
+        "tipo": "Proprietário",
+        "cpf": "07193076434",
+        "email": "inamarbabau@gmail.com"
+      }
+    ]
+  },
+  {
+    "nome": "ODONTO MEDICO",
+    "slug": "odonto-medico",
+    "residentes": [
+      {
+        "apto": "0101",
+        "nome": "NATHALY GREICY SILVA DA CRUZ",
+        "fone": "+55 997022770",
+        "tipo": "Proprietário",
+        "cpf": "05986723465",
+        "email": "nath_g87@hotmail.com"
+      },
+      {
+        "apto": "0102",
+        "nome": "MARIA CÉCILIA XAVIER",
+        "fone": "+55 988277698",
+        "tipo": "Proprietário",
+        "cpf": "13498870807",
+        "email": "celiaxavier.mcx@gmail.com"
+      },
+      {
+        "apto": "0103",
+        "nome": "ISMAEL JOSÉ DOS SANTOS",
+        "fone": "+55 988528699 (+55 996447341)",
+        "tipo": "Proprietário",
+        "cpf": "74022318872",
+        "email": "brasil@gmail.com"
+      },
+      {
+        "apto": "0104",
+        "nome": "ELANIA MARIA FERNANDES SILVA",
+        "fone": "+55 987127113",
+        "tipo": "Proprietário",
+        "cpf": "01359501479",
+        "email": "elania_fernandes@yahoo.com.br"
+      },
+      {
+        "apto": "0201",
+        "nome": "HOMERO FERNANDES",
+        "fone": "+55 997022770",
+        "tipo": "Proprietário",
+        "cpf": "00866947400",
+        "email": "andradebezerra@gmail.com"
+      },
+      {
+        "apto": "0202",
+        "nome": "FRANCISCO IRANYLSON",
+        "fone": "+55 999561005",
+        "tipo": "Proprietário",
+        "cpf": "06053043435",
+        "email": "iranylson.brito@ifrn.edu.br"
+      },
+      {
+        "apto": "0203",
+        "nome": "TELMA DE VASCONCELOS PIPOLO",
+        "fone": "+55 84 991673092 (+55 991256456)",
+        "tipo": "Proprietário",
+        "cpf": "18964486404",
+        "email": "milenappinto@hotmail.com"
+      },
+      {
+        "apto": "0204",
+        "nome": "RICARDO PINHEIRO DE SOUZA",
+        "fone": "+55 84 991201412 (+55 987127113)",
+        "tipo": "Proprietário",
+        "cpf": "83789545449",
+        "email": "rpsouzasilva@gmail.com"
+      },
+      {
+        "apto": "0301",
+        "nome": "NEUZA DE OLIVEIRA MEDEIROS",
+        "fone": "+55 999354559 (+55 987614900)",
+        "tipo": "Proprietário",
+        "cpf": "37925415487",
+        "email": "drika.poly@hotmail.com"
+      },
+      {
+        "apto": "0302",
+        "nome": "PATRICIA PAULA FERNANDES DA",
+        "fone": "+55 84 994007900",
+        "tipo": "Proprietário",
+        "cpf": "77864611400",
+        "email": "paty.natal@gmail.com"
+      },
+      {
+        "apto": "0101",
+        "nome": "HENRIQUE LEITE DANTAS",
+        "fone": "+55 981243225 (+55 84999871010)",
+        "tipo": "Proprietário",
+        "cpf": "03296853413",
+        "email": "antiogenes.natal@gmail.com"
+      },
+      {
+        "apto": "0102",
+        "nome": "WIVIANE GOMES DA SILVA",
+        "tipo": "Proprietário",
+        "fone": ""
+      },
+      {
+        "apto": "0201",
+        "nome": "ILLANA BESTRIZ RODRIGUES PAIVA",
+        "fone": "+55 84999020220 (+55 84988998051)",
+        "tipo": "Proprietário",
+        "cpf": "07982625401",
+        "email": "br;Illana.paiva@gmail.com"
+      },
+      {
+        "apto": "0202",
+        "nome": "ANTÔNIO CARLOS FONSECA DA",
+        "fone": "+55 8436055455 (+55 84999857676)",
+        "tipo": "Proprietário",
+        "cpf": "37938738468",
+        "email": "gameleira@uol.com.br"
+      },
+      {
+        "apto": "0301",
+        "nome": "S A SOBRINHO IND AGRO PECUARIA",
+        "fone": "+55 84 998227395",
+        "tipo": "Proprietário",
+        "cpf": "09088063000116",
+        "email": "Robsonherculesbraga@gmail.com"
+      },
+      {
+        "apto": "0302",
+        "nome": "SÉRGIO GONÇALVES DE MEDEIROS",
+        "fone": "+55 84994082889 (+55 84994082889)",
+        "tipo": "Proprietário",
+        "cpf": "58360360472",
+        "email": "sgmed@hotmail.com"
+      },
+      {
+        "apto": "0401",
+        "nome": "LÚSIO ARAÚJO LOPES",
+        "fone": "+55 8434172840 (+55 84999223636)",
+        "tipo": "Proprietário",
+        "cpf": "20013051415",
+        "email": "lusiojunior@gmail.com"
+      },
+      {
+        "apto": "0402",
+        "nome": "SERGIO LUIS PEGADO LEMOS",
+        "fone": "+55 8499848794",
+        "tipo": "Proprietário",
+        "cpf": "42360765434",
+        "email": "Splemos8@gmail.com"
+      },
+      {
+        "apto": "0501",
+        "nome": "DARIUS DOS SANTOS",
+        "fone": "+55 8436068080 (+55 84994614055)",
+        "tipo": "Proprietário",
+        "cpf": "41576993000",
+        "email": "ds@hotmail.com"
+      },
+      {
+        "apto": "0502",
+        "nome": "HELVIA MARIA DANTAS FERREIRA",
+        "tipo": "Proprietário",
+        "fone": "",
+        "email": "helvia0523dantas@gmail.com;"
+      },
+      {
+        "apto": "0601",
+        "nome": "MARGARETE QUERINO OLÍMPIO",
+        "fone": "+55 84 996861112",
+        "tipo": "Proprietário",
+        "cpf": "00759088403",
+        "email": "margarete_olimpio@hotmail.com"
+      },
+      {
+        "apto": "0602",
+        "nome": "MARIA SUELY NUNES DO",
+        "fone": "+55 8432068828 (+55 84991345149)",
+        "tipo": "Proprietário",
+        "cpf": "32855192749",
+        "email": "nnms25@yahoo.com.br"
+      },
+      {
+        "apto": "0701",
+        "nome": "RAISSA CRISTINA OZÓRIO TAVARES",
+        "fone": "+55 84 991044007",
+        "tipo": "Proprietário",
+        "cpf": "07443422440",
+        "email": "igorpeixoto84@gmail.com"
+      },
+      {
+        "apto": "0702",
+        "nome": "CARLOS HENRIQUE DE SOUZA",
+        "fone": "+55 84 996616390",
+        "tipo": "Proprietário",
+        "cpf": "91470420449",
+        "email": "carlosxavierbb1@gmail.com"
+      },
+      {
+        "apto": "0801",
+        "nome": "IRANILDE VICTOR DA S GUIMARÃES",
+        "fone": "+55 8432067822 (+55 84999116247)",
+        "tipo": "Proprietário",
+        "cpf": "20115822453",
+        "email": "iranildevictor@hotmail.com"
+      },
+      {
+        "apto": "0802",
+        "nome": "VALDEMIR GERMANO DA SILVA",
+        "fone": "+55 8432068470 (+55 84999820674)",
+        "tipo": "Proprietário",
+        "cpf": "13248430478",
+        "email": "germano3107@hotmail.com"
+      },
+      {
+        "apto": "0901",
+        "nome": "ANDRE LIRA DE LIMA BARROS",
+        "fone": "+55 84999219482 (+55 84999884449)",
+        "tipo": "Proprietário",
+        "cpf": "02002476462",
+        "email": "andrebarrosadv@icloud.com"
+      },
+      {
+        "apto": "0902",
+        "nome": "ORLANDO SILVA DE ARAUJO",
+        "fone": "+55 8432067025 (+55 84992185282)",
+        "tipo": "Proprietário",
+        "cpf": "10820604453",
+        "email": "monteiro@hotmail.com"
+      }
+    ]
+  },
+  {
+    "nome": "PRATIKA COBRANCA (60)",
+    "slug": "pratika-cobranca-60",
+    "residentes": [
+      {
+        "apto": "2702",
+        "nome": "MOACYR",
+        "tipo": "Proprietário",
+        "fone": ""
+      },
+      {
+        "apto": "0001",
+        "nome": "SANDRA MARIA LEÃO GARCIA",
+        "fone": "+55 84991346321 (+55 51992813241)",
+        "tipo": "Proprietário",
+        "cpf": "33532141000",
+        "email": "lucieneczgomes@gmail.com"
+      },
+      {
+        "apto": "0101",
+        "nome": "ANA ALVES DANTAS DA SILVA",
+        "fone": "55 84999256275 19564806161 (+55",
+        "tipo": "Proprietário",
+        "cpf": "53870743115",
+        "email": "dantasgoess@hotmail.com"
+      },
+      {
+        "apto": "0102",
+        "nome": "MARCONDES MENDES DE SOUZA",
+        "fone": "+55 84999534795",
+        "tipo": "Proprietário",
+        "cpf": "59460741487",
+        "email": "mmsouza2003@yahoo.com.br"
+      },
+      {
+        "apto": "0103",
+        "nome": "ANDERSON KLUSER SALES",
+        "fone": "+55 21997551087 (+55 21998148921)",
+        "tipo": "Proprietário",
+        "cpf": "05921348732",
+        "email": "klusera12@hotmail.com"
+      },
+      {
+        "apto": "0104",
+        "nome": "REINALDO ANTONIO LEITAO DE",
+        "fone": "+55 351964700006",
+        "tipo": "Proprietário",
+        "cpf": "70157378179",
+        "email": "reinaldo.muralha@gmail.com"
+      },
+      {
+        "apto": "0201",
+        "nome": "VERÔNICA AQUINO T. DOS SANTOS",
+        "fone": "+55 84998525681 (+55 84991622929)",
+        "tipo": "Proprietário"
+      },
+      {
+        "apto": "2255",
+        "nome": "CABANGA - RECIFE - PE - 50090-400",
+        "fone": "",
+        "email": "anjosveve@gmail.com"
+      },
+      {
+        "apto": "0202",
+        "nome": "RAFAEL GONÇALVES DO",
+        "fone": "55 21 968114466 (55 21 968114466)",
+        "tipo": "Proprietário",
+        "cpf": "05285633788",
+        "email": "carolsousa78@yahoo.com.br"
+      },
+      {
+        "apto": "0203",
+        "nome": "DAIANE PEREIRA CARVALHO",
+        "fone": "+55 62981612869",
+        "tipo": "Proprietário",
+        "cpf": "08945746633",
+        "email": "br;daycarvalhogt@gmail.com"
+      },
+      {
+        "apto": "0204",
+        "nome": "ADRIANA DOMINIQUE DA COSTA",
+        "fone": "+55 11977108077",
+        "tipo": "Proprietário",
+        "cpf": "08976319435",
+        "email": "manhattan204.natal@gmail.com"
+      },
+      {
+        "apto": "0301",
+        "nome": "ADRIANUS CORNELIS JOHANNES",
+        "fone": "+55 84999222706 (+55 84999222706)",
+        "tipo": "Proprietário",
+        "cpf": "70624948447",
+        "email": "biaplaneta2@hotmail.com"
+      },
+      {
+        "apto": "0302",
+        "nome": "MARIO AUGUSTO BEZERRA DE",
+        "fone": "+55 84991236006 (+55 84991236006)",
+        "tipo": "Proprietário",
+        "cpf": "71454888415",
+        "email": "br;natal@doutorresolve.com.br"
+      },
+      {
+        "apto": "0303",
+        "nome": "BERND ZEPTER",
+        "fone": "+55 41796843368 (+55 41796943268)",
+        "tipo": "Proprietário",
+        "cpf": "01231388684",
+        "email": "benibrasil@hotmail.com"
+      },
+      {
+        "apto": "0304",
+        "nome": "MAVY HENRIQUE LIMA DO",
+        "tipo": "Proprietário",
+        "fone": "",
+        "email": "com;manhattan.flat304@gmail.com;"
+      },
+      {
+        "apto": "0401",
+        "nome": "LUIS ALVES DIAS",
+        "fone": "+55 84999689672 (+55 84994495991)",
+        "tipo": "Proprietário",
+        "cpf": "15406229087",
+        "email": "lucieneczgomes@gmail.com"
+      },
+      {
+        "apto": "0402",
+        "nome": "ROSANGELA CONCEIÇÃO ROSA DE",
+        "fone": "+55 84 998115073",
+        "tipo": "Proprietário",
+        "cpf": "54897521149",
+        "email": "leizertilman@gmail.com"
+      },
+      {
+        "apto": "0403",
+        "nome": "JOÃO EREDICIO PINTO",
+        "fone": "+55 62 994834968 (+55 62996218687)",
+        "tipo": "Proprietário",
+        "cpf": "05583128453",
+        "email": "joaoerediciopinto@hotmail.com"
+      },
+      {
+        "apto": "0404",
+        "nome": "JUAN RAMON GONZALEZ ARANA",
+        "fone": "+55 34661922175 (+55 34661922175)",
+        "tipo": "Proprietário",
+        "cpf": "01683885457",
+        "email": "lucieneczgomes@gmail.com"
+      },
+      {
+        "apto": "0501",
+        "nome": "FÁBIO PETRY RAMOS",
+        "fone": "+55 84996953805 (+55 84996953805)",
+        "tipo": "Proprietário",
+        "cpf": "97484091049",
+        "email": "ariadne_cruz@hotmail.com"
+      },
+      {
+        "apto": "0502",
+        "nome": "SILVIA HELENA SILVA SANTIAGO",
+        "fone": "+55 84994945335",
+        "tipo": "Proprietário",
+        "cpf": "70235546100",
+        "email": "silviasantiagoimoveis@gmail.com"
+      },
+      {
+        "apto": "0503",
+        "nome": "ANTONIO DE PADUA G. SOUZA NEVE",
+        "fone": "+55 83991067572",
+        "tipo": "Proprietário",
+        "cpf": "20417136404",
+        "email": "drpadua@gmail.com"
+      },
+      {
+        "apto": "0504",
+        "nome": "KEZIA KARSINE ALVES DO N. E SI",
+        "fone": "+55 61985499173",
+        "tipo": "Proprietário",
+        "cpf": "90382498453",
+        "email": "alves199@hotmail.com"
+      },
+      {
+        "apto": "0601",
+        "nome": "ANA ALVES DANTAS DA SILVA",
+        "fone": "+55 84 81877777",
+        "tipo": "Proprietário",
+        "cpf": "53870743115",
+        "email": "dantasgoess@hotmail.com"
+      },
+      {
+        "apto": "0602",
+        "nome": "RUI WAETGE",
+        "fone": "+55 84999535947",
+        "tipo": "Proprietário",
+        "cpf": "59321180834",
+        "email": "wlacima@gmail.com"
+      },
+      {
+        "apto": "0603",
+        "nome": "JUAN JOSÉ PEREZ VILLALBA",
+        "fone": "+55 34600073019",
+        "tipo": "Proprietário",
+        "cpf": "01569035474",
+        "email": "pervilju2@hotmail.com"
+      },
+      {
+        "apto": "0604",
+        "nome": "THUANE CONDE DA MOTA KLUSER",
+        "fone": "+55 21997551087",
+        "tipo": "Proprietário",
+        "cpf": "11746445750",
+        "email": "thuane.conde@hotmail.com"
+      },
+      {
+        "apto": "0701",
+        "nome": "PAULO HENRIQUE DE MENEZES",
+        "fone": "55 84 996652333 (55 84 996652333)",
+        "tipo": "Proprietário",
+        "cpf": "03507825473",
+        "email": "contabilidade.assec@gmail.com"
+      },
+      {
+        "apto": "0702",
+        "nome": "JOSÉ DE ALMEIDA TAVARES",
+        "fone": "+55 55 84 81829556 (+55",
+        "tipo": "Proprietário",
+        "cpf": "41295072491",
+        "email": "jatlawyer@gmail.com"
+      },
+      {
+        "apto": "0703",
+        "nome": "BERND ZEPTER",
+        "fone": "+55 41796843368 (+55 41796943268)",
+        "tipo": "Proprietário",
+        "cpf": "01231388684",
+        "email": "benibrasil@hotmail.com"
+      },
+      {
+        "apto": "0101",
+        "nome": "NOÉ CARVALHO DA SILVEIRA",
+        "fone": "+55 84999079067",
+        "tipo": "Proprietário",
+        "cpf": "22232630463",
+        "email": "noesilveira1@hotmail.com"
+      },
+      {
+        "apto": "0102",
+        "nome": "LUCAS BASTOS MAURÍCIO CRUZ",
+        "fone": "+55 84988272261",
+        "tipo": "Proprietário",
+        "cpf": "01706745419",
+        "email": "lucasbastos199@gmail.com"
+      },
+      {
+        "apto": "0103",
+        "nome": "ORIVALDO BAGNI",
+        "tipo": "Proprietário",
+        "fone": "",
+        "email": "andrebagni@hotmail.com"
+      },
+      {
+        "apto": "0104",
+        "nome": "POLIANA ANTONIO ALVES SOARES",
+        "fone": "+55 62981520113",
+        "tipo": "Proprietário",
+        "cpf": "89632605187",
+        "email": "polianasoaresgyn@icloud.com"
+      },
+      {
+        "apto": "0201",
+        "nome": "BLC EMPREENDIMENTOS",
+        "fone": "+55 84998482525",
+        "tipo": "Proprietário",
+        "cpf": "15867438000149",
+        "email": "velasecretaria@gmail.com"
+      },
+      {
+        "apto": "0202",
+        "nome": "EVERARDO MACIEL MUNIZ",
+        "tipo": "Proprietário",
+        "fone": "",
+        "email": "everardomuniz@gmail.com"
+      },
+      {
+        "apto": "0203",
+        "nome": "VELA CONSULTORIA EM",
+        "fone": "+55 998482525",
+        "tipo": "Proprietário",
+        "cpf": "09441186000199",
+        "email": "velasecretaria@gmail.com"
+      },
+      {
+        "apto": "0204",
+        "nome": "EDVALDO RODRIGUES BETIM",
+        "tipo": "Proprietário",
+        "fone": "",
+        "email": "edybetim@gmail.com"
+      },
+      {
+        "apto": "0301",
+        "nome": "JOHN KENNEDY BARBOSA GOMES",
+        "tipo": "Proprietário",
+        "fone": "",
+        "email": "flaviagutman@yahoo.com.br"
+      },
+      {
+        "apto": "0302",
+        "nome": "JOSÉ EWERTON FLORENTINO",
+        "fone": "+55 84981630681 (+55 84981630681)",
+        "tipo": "Proprietário",
+        "cpf": "70046655425",
+        "email": "rafael05031990@icloud.com"
+      },
+      {
+        "apto": "0303",
+        "nome": "CHRISTINA MARIA DE ARAÚJO",
+        "tipo": "Proprietário",
+        "fone": "",
+        "email": "diogo_liberato@yahoo.com.br"
+      },
+      {
+        "apto": "0304",
+        "nome": "MARIA DE LOURDES LEMOS",
+        "fone": "+55 84999825056",
+        "tipo": "Proprietário",
+        "cpf": "30811767434",
+        "email": "lourdinhalemosferreira@gmail.com"
+      },
+      {
+        "apto": "0401",
+        "nome": "FRANCISCA FRANCILEIDE XIMENES",
+        "tipo": "Proprietário",
+        "fone": "",
+        "email": "flaniaaviadora@gmail.com"
+      },
+      {
+        "apto": "0402",
+        "nome": "FRANCISCO BRUNO FERREIRA",
+        "fone": "+55 84999029523",
+        "tipo": "Proprietário",
+        "cpf": "07760565496",
+        "email": "nessafernandes2010@hotmail.com"
+      },
+      {
+        "apto": "0403",
+        "nome": "JOSÉ FRANCISCO DO NASCIMENTO",
+        "fone": "+55 12996217605",
+        "tipo": "Proprietário",
+        "cpf": "28453719691",
+        "email": "financeiro@estateinvest.com.br"
+      },
+      {
+        "apto": "0404",
+        "nome": "FRANCISCA FRANCILEIDE XIMENES",
+        "tipo": "Proprietário",
+        "fone": "",
+        "email": "flaniaaviadora@gmail.com"
+      },
+      {
+        "apto": "0501",
+        "nome": "ELIANE SILVA DO NASCIMENTO",
+        "fone": "+55 41 33472775 (+55 4198885472)",
+        "tipo": "Proprietário",
+        "cpf": "49638149434",
+        "email": "elimoveiscwb@gmail.com"
+      },
+      {
+        "apto": "0502",
+        "nome": "EDNA CLEIDE DA SILVA",
+        "tipo": "Proprietário",
+        "fone": "",
+        "email": "edna.agostinho@hotmail.com"
+      },
+      {
+        "apto": "0503",
+        "nome": "OLIVIER ADELIN ALBERT",
+        "fone": "+55 32362716 (+55 99462946;+55",
+        "tipo": "Proprietário",
+        "cpf": "01631746448",
+        "email": "contato@flaviabezerrilimoveis.com.br"
+      },
+      {
+        "apto": "0504",
+        "nome": "RAFAEL SANTOS DOS REIS",
+        "tipo": "Proprietário",
+        "fone": "",
+        "email": "rafael05031990@icloud.com"
+      },
+      {
+        "apto": "0601",
+        "nome": "OSCAR DANIEL KIMELMAN",
+        "tipo": "Proprietário",
+        "fone": "",
+        "email": "mateusppalhano@gmail.com"
+      },
+      {
+        "apto": "0602",
+        "nome": "OSCAR DANIEL KIMELMAN",
+        "tipo": "Proprietário",
+        "fone": "",
+        "email": "mateusppalhano@gmail.com"
+      },
+      {
+        "apto": "0603",
+        "nome": "MARIA INES OYHARZABAL MACRI",
+        "tipo": "Proprietário",
+        "fone": "",
+        "email": "Oyharzabalmaria@gmail.com"
+      },
+      {
+        "apto": "0604",
+        "nome": "MARIA INES OYHARZABAL MACRI",
+        "tipo": "Proprietário",
+        "fone": "",
+        "email": "Oyharzabalmaria@gmail.com"
+      },
+      {
+        "apto": "0701",
+        "nome": "DIEGO GABRIEL PARENTE",
+        "fone": "+55 84 96006600 (+55 84 96006600)",
+        "tipo": "Proprietário",
+        "cpf": "70786911484",
+        "email": "Gabrielchango2@live.com"
+      },
+      {
+        "apto": "0702",
+        "nome": "ANA MARIA MATOS PEDROSA",
+        "fone": "+55 21997647751",
+        "tipo": "Proprietário",
+        "cpf": "37231057772",
+        "email": "anamatospedrosa@hotmail.com"
+      },
+      {
+        "apto": "0703",
+        "nome": "SONIA RITA BAENA",
+        "tipo": "Proprietário",
+        "fone": "",
+        "email": "adorei.natal@gmail.com"
+      },
+      {
+        "apto": "0704",
+        "nome": "GERALDO CRUZ FILHO",
+        "fone": "+55 27999661392 (+55 27998600560)",
+        "tipo": "Proprietário",
+        "cpf": "71906690782",
+        "email": "g.cruz@hotmail.com"
+      },
+      {
+        "apto": "0802",
+        "nome": "FRANCISCO BRUNO FERREIRA",
+        "fone": "+55 84999029523",
+        "tipo": "Proprietário",
+        "cpf": "07760565496",
+        "email": "nessafernandes2010@hotmail.com"
+      },
+      {
+        "apto": "0803",
+        "nome": "SILVIA FERNANDES CAVALCANTI",
+        "fone": "+55 84 991836161",
+        "tipo": "Proprietário",
+        "cpf": "03561176429",
+        "email": "lucarmaquinas@hotmail.com"
+      },
+      {
+        "apto": "0804",
+        "nome": "ANTONIO VALBERTO MIRANDA",
+        "fone": "+55 92 981139269",
+        "tipo": "Proprietário",
+        "cpf": "41287975291",
+        "email": "antonio-freitas@live.com"
+      },
+      {
+        "apto": "0901",
+        "nome": "WENDELL BACON DO AMARAL",
+        "fone": "+55 84994179526",
+        "tipo": "Proprietário",
+        "cpf": "00428324975",
+        "email": "wendellbacon@outlook.com"
+      },
+      {
+        "apto": "0902",
+        "nome": "POLIANA ANTONIO ALVES SOARES",
+        "fone": "+55 62981520113",
+        "tipo": "Proprietário",
+        "cpf": "89632605187",
+        "email": "polianasoaresgyn@icloud.com"
+      },
+      {
+        "apto": "0903",
+        "nome": "ANTONIO VALBERTO MIRANDA",
+        "fone": "+55 92 981139269",
+        "tipo": "Proprietário",
+        "cpf": "41287975291",
+        "email": "antonio-freitas@live.com"
+      },
+      {
+        "apto": "0904",
+        "nome": "JULIO AURELIO TORRES HERRERAS",
+        "fone": "+55 84988746716;+55 34 649864261",
+        "tipo": "Proprietário",
+        "cpf": "72080599429",
+        "email": "marcufe@hotmail.com"
+      },
+      {
+        "apto": "1001",
+        "nome": "MARCOS CESAR PERES",
+        "fone": "+55 36634040",
+        "tipo": "Proprietário",
+        "cpf": "72561866904",
+        "email": "dahor@gmail.com"
+      },
+      {
+        "apto": "1002",
+        "nome": "ALESSANDRA ARCHILLETTI",
+        "tipo": "Proprietário",
+        "fone": "",
+        "email": "financeiro@estateinvest.com.br"
+      },
+      {
+        "apto": "1003",
+        "nome": "ALESSANDRA ARCHILLETTI",
+        "tipo": "Proprietário",
+        "fone": "",
+        "email": "financeiro@estateinvest.com.br"
+      },
+      {
+        "apto": "1004",
+        "nome": "ELIASAR BORGES GUIMARÃES",
+        "tipo": "Proprietário",
+        "fone": "",
+        "email": "nhicolyborges94@gmail.com"
+      },
+      {
+        "apto": "1101",
+        "nome": "ESTEVÃO ZALAZAR FILHO",
+        "tipo": "Proprietário",
+        "fone": "",
+        "email": "estevaozalazar@hotmail.com"
+      },
+      {
+        "apto": "1102",
+        "nome": "ESTEVÃO ZALAZAR FILHO",
+        "tipo": "Proprietário",
+        "fone": "",
+        "email": "estevaozalazar@hotmail.com"
+      }
+    ]
+  },
+  {
+    "nome": "RENAISSANCE PREMIERE",
+    "slug": "renaissance-premiere",
+    "residentes": [
+      {
+        "apto": "3103",
+        "nome": "Ponta Negra - Natal - RN - 59092-440",
+        "fone": "+55 55 61 81545221 (+55 84 88621330)",
+        "tipo": "Proprietário",
+        "cpf": "03338670176",
+        "email": "adrianodsa@gmail.com"
+      },
+      {
+        "apto": "0101",
+        "nome": "LINDALVA SANTOS M. NEÓ",
+        "tipo": "Proprietário",
+        "fone": "",
+        "email": "lissamaia@hotmail.com"
+      },
+      {
+        "apto": "0102",
+        "nome": "MARIA GOMES DA SILVA",
+        "tipo": "Proprietário",
+        "fone": "",
+        "email": "Tel.: (84)3234-0110/(84)99189-9192 / E-mail: atendimento.pratika.natal@gmail.com"
+      },
+      {
+        "apto": "0201",
+        "nome": "AMANDA DANTAS CYSNEIROS",
+        "fone": "55 84 981014730;55 84 987265623",
+        "tipo": "Proprietário",
+        "cpf": "07372423457",
+        "email": "marcusemerenciano@gmail.com"
+      },
+      {
+        "apto": "0202",
+        "nome": "GILSON LINDBERGH DANTAS DE",
+        "fone": "+55 8433224494 (84998851966",
+        "tipo": "Proprietário",
+        "cpf": "50073176400",
+        "email": "gilson@tinol.com.br;adrica333@yahoo."
+      },
+      {
+        "apto": "0301",
+        "nome": "ALDECI DA COSTA DANTAS",
+        "fone": "+55 999514508",
+        "tipo": "Proprietário",
+        "cpf": "15072690482",
+        "email": "aldecidantas@gmail.com"
+      },
+      {
+        "apto": "0302",
+        "nome": "VENERANDO EUSTÁQUIO AMARO",
+        "fone": "+55 84 99857255",
+        "tipo": "Proprietário",
+        "cpf": "35385839191",
+        "email": "venerando.amaro@gmail.com"
+      },
+      {
+        "apto": "0401",
+        "nome": "FERNANDO CLAUDIO DOS SANTOS",
+        "fone": "+55 84992099920",
+        "tipo": "Proprietário",
+        "cpf": "03220823408",
+        "email": "fernanfilho@yahoo.com.br"
+      },
+      {
+        "apto": "0402",
+        "nome": "JORGE LUIZ DAVIM",
+        "fone": "+55 84 99827323",
+        "tipo": "Proprietário",
+        "cpf": "41393015468",
+        "email": "hcdavim@gmail.com.br"
+      },
+      {
+        "apto": "0501",
+        "nome": "ISNA JORGE DE CASTRO",
+        "tipo": "Proprietário",
+        "fone": "",
+        "email": "michelinefalcao@gmail.com"
+      },
+      {
+        "apto": "0502",
+        "nome": "RÔMULO CHAVES WANDERLEY",
+        "fone": "+55 32121282",
+        "tipo": "Proprietário",
+        "cpf": "56734565491",
+        "email": "romulo@rwca.com.br"
+      },
+      {
+        "apto": "0601",
+        "nome": "MÁRIO MARQUES DE LIMA",
+        "tipo": "Proprietário",
+        "fone": "",
+        "email": "carmem_rita@hotmail.com"
+      },
+      {
+        "apto": "0602",
+        "nome": "WILLIAN MARIBONDO VINAGRE",
+        "fone": "+55 988071207",
+        "tipo": "Proprietário",
+        "cpf": "20007779453",
+        "email": "maribondovinagre@uol.com.br"
+      },
+      {
+        "apto": "0701",
+        "nome": "CARLOS THEODORICO DE",
+        "tipo": "Proprietário",
+        "fone": ""
+      },
+      {
+        "apto": "0702",
+        "nome": "ARTHUR PATRIOTA MEDEIROS",
+        "fone": "+55 999295585",
+        "tipo": "Proprietário",
+        "cpf": "04849277446",
+        "email": "escritorio_sfmad@outlook.com"
+      },
+      {
+        "apto": "0801",
+        "nome": "PEDRO HENRIQUE MARINHO",
+        "tipo": "Proprietário",
+        "fone": "",
+        "email": "pedro@franciscofausto.adv.br"
+      },
+      {
+        "apto": "0802",
+        "nome": "NELSON DE OLIVEIRA",
+        "tipo": "Proprietário",
+        "fone": "",
+        "email": "bernadeteoliveira@hotmail.com"
+      },
+      {
+        "apto": "0901",
+        "nome": "MAURÍCIO NUNES DE MIRANDA",
+        "tipo": "Proprietário",
+        "fone": "",
+        "email": "labdentalnunes@yahoo.com.br"
+      },
+      {
+        "apto": "0902",
+        "nome": "KIVIA PESSOA DE ARAUJO",
+        "fone": "+55 997051212 (+55 84999861212)",
+        "tipo": "Proprietário",
+        "cpf": "59622970400",
+        "email": "Tel.: (84)3234-0110/(84)99189-9192 / E-mail: atendimento.pratika.natal@gmail.com"
+      },
+      {
+        "apto": "1001",
+        "nome": "ANDRÉ LUIZ PINHEIRO SARAIVA",
+        "tipo": "Proprietário",
+        "fone": "",
+        "email": "andrepsaraiva@hotmail.com"
+      },
+      {
+        "apto": "1002",
+        "nome": "ANDRE LUIZ MARTINS SEREJO",
+        "fone": "+55 996907700",
+        "tipo": "Proprietário",
+        "cpf": "13872370472",
+        "email": "mefmartins53@gmail.com"
+      },
+      {
+        "apto": "1101",
+        "nome": "MARIA APARECIDA CARDOSO DE",
+        "tipo": "Proprietário",
+        "fone": "",
+        "email": "cidathayna@yahoo.com.br"
+      },
+      {
+        "apto": "1102",
+        "nome": "JAQUELINE COSTA DE CARVALHO",
+        "fone": "+55 84994444536 (+55 84988023595)",
+        "tipo": "Proprietário",
+        "cpf": "35926686415",
+        "email": "financeiro@pontadomadeiro.com.br"
+      },
+      {
+        "apto": "1201",
+        "nome": "MARCOS DE MACEDO TINOCO",
+        "tipo": "Proprietário",
+        "fone": "",
+        "email": "marcosmtinoco@yahoo.com.br"
+      },
+      {
+        "apto": "1202",
+        "nome": "LUIZ ALCIDES MARINHO / LUIZA",
+        "fone": "+55 84999845999 (+55 84999746999)",
+        "tipo": "Proprietário",
+        "cpf": "37895559400",
+        "email": "luicarol73@gmail.com"
+      },
+      {
+        "apto": "1301",
+        "nome": "DALVA DUARTE SILVA",
+        "fone": "8432011543   84 987351543 (+55 84",
+        "tipo": "Proprietário",
+        "cpf": "13878760400"
+      },
+      {
+        "apto": "1302",
+        "nome": "HENRIQUE EUFRÁSIO DE S. JÚNIOR",
+        "fone": "+55 84994410525;+55 11 963138800",
+        "tipo": "Proprietário",
+        "cpf": "33599394415",
+        "email": "com;sorayacafesantana@gmail.com"
+      },
+      {
+        "apto": "1401",
+        "nome": "MICHELLE ARANHA JAPYASSU",
+        "fone": "+55 55 84 99948098",
+        "tipo": "Proprietário",
+        "cpf": "91041805420",
+        "email": "michelle_aranha@live.com"
+      },
+      {
+        "apto": "1402",
+        "nome": "PEDRO SANCHO DE MEDEIROS",
+        "tipo": "Proprietário",
+        "fone": "",
+        "email": "psancho@hotmail.com.br"
+      },
+      {
+        "apto": "1501",
+        "nome": "SAYONARA CAFÉ MELO",
+        "fone": "+55 55 9 99350065",
+        "tipo": "Proprietário",
+        "cpf": "36686603449",
+        "email": "sayonara_cafe@hormail.com"
+      },
+      {
+        "apto": "1502",
+        "nome": "FRANCISCO FÁBIO DE ARAÚJO",
+        "fone": "+55 84 981897794",
+        "tipo": "Proprietário",
+        "cpf": "16007506487",
+        "email": "ilkabatistamed@hotmail.com"
+      },
+      {
+        "apto": "1601",
+        "nome": "GILSON TORRES DOS SANTOS LIMA",
+        "fone": "+55 84999826972 (+55 999628177)",
+        "tipo": "Proprietário",
+        "cpf": "75199483404",
+        "email": "heloisa@marpas.com.br"
+      },
+      {
+        "apto": "1602",
+        "nome": "CAROLINA BEZERRA LOPES LEITE",
+        "fone": "+55 999846794",
+        "tipo": "Proprietário",
+        "cpf": "00967582440",
+        "email": "carolinabezerra@hotmail.com"
+      },
+      {
+        "apto": "1701",
+        "nome": "ANA MARIA DE FARIAS",
+        "tipo": "Proprietário",
+        "fone": "",
+        "email": "Tel.: (84)3234-0110/(84)99189-9192 / E-mail: atendimento.pratika.natal@gmail.com"
+      },
+      {
+        "apto": "1702",
+        "nome": "JOÃO TAVARES C. FILHO",
+        "tipo": "Proprietário",
+        "fone": "",
+        "email": "jtc40@uol.com.br"
+      },
+      {
+        "apto": "0101",
+        "nome": "THIAGO LUIZ LOPES MAIA DE",
+        "fone": "+55 994312268",
+        "tipo": "Proprietário",
+        "cpf": "04683042401",
+        "email": "thiagomaia99@gmail.com"
+      },
+      {
+        "apto": "0102",
+        "nome": "MARIA REMEDIOS BARRETO",
+        "fone": "84 98014855  84 94065891 (+55",
+        "tipo": "Proprietário",
+        "cpf": "02316500439",
+        "email": "salutarisvacinas@gmail.com"
+      },
+      {
+        "apto": "0201",
+        "nome": "DENILTON SILVEIRA DE OLIVEIRA &",
+        "fone": "+55 84999130116",
+        "tipo": "Proprietário",
+        "cpf": "04758769893",
+        "email": "den@denilton.org"
+      },
+      {
+        "apto": "0202",
+        "nome": "PRISCILA LUANA FRANCO COSTA",
+        "tipo": "Proprietário",
+        "fone": "",
+        "email": "nilogouveia@gmail.com"
+      },
+      {
+        "apto": "0301",
+        "nome": "ANÍSIO HENRIQUE LEITE SANTANA",
+        "fone": "8432015328    999320117 (+55",
+        "tipo": "Proprietário",
+        "cpf": "49846876491",
+        "email": "luciana@rigare.com.br"
+      },
+      {
+        "apto": "0302",
+        "nome": "RICARDO JOSÉ BARBALHO",
+        "fone": "+55 8432315203 (84996186913",
+        "tipo": "Proprietário",
+        "cpf": "32277695491",
+        "email": "rjb1962@hotmail.com"
+      },
+      {
+        "apto": "0401",
+        "nome": "WILSON JOSÉ FERREIRA",
+        "fone": "+55 32313437",
+        "tipo": "Proprietário",
+        "cpf": "02483367461",
+        "email": "jaguarari@padariasaomiguel.com.br"
+      },
+      {
+        "apto": "0402",
+        "nome": "JOSÉ GONÇALVES DE ANDRADE",
+        "fone": "+55 8432136892 (+55 84988456892)",
+        "tipo": "Proprietário",
+        "cpf": "14882175487",
+        "email": "CamilloMedeiros@hotmail.com"
+      },
+      {
+        "apto": "0501",
+        "nome": "FERNANDO ANDRÉ TAVARES DE",
+        "fone": "+55 84994316225",
+        "tipo": "Proprietário",
+        "cpf": "00069481466",
+        "email": "fernandoandretm@gmail.com"
+      },
+      {
+        "apto": "0502",
+        "nome": "ESTELINA DE SOUSA CAMARA",
+        "tipo": "Proprietário",
+        "fone": "",
+        "email": "cooontatooo@gmail.com"
+      },
+      {
+        "apto": "0601",
+        "nome": "EDNA DE CASTRO CALLADO",
+        "fone": "+55 84999349590",
+        "tipo": "Proprietário",
+        "cpf": "10134646304",
+        "email": "Tel.: (84)3234-0110/(84)99189-9192 / E-mail: atendimento.pratika.natal@gmail.com"
+      },
+      {
+        "apto": "0602",
+        "nome": "ANTONIO JOSÉ DE ARAÚJO",
+        "fone": "+55 8432067796 (+55 84999830215)",
+        "tipo": "Proprietário",
+        "cpf": "04393988353",
+        "email": "araujo@rn.gov.br;ajajaraujo@gmail.com"
+      },
+      {
+        "apto": "0701",
+        "nome": "JOSÉ EVANGELISTA ALBANO",
+        "fone": "+55 8432113712 (+55 84999816105)",
+        "tipo": "Proprietário",
+        "cpf": "02000539491",
+        "email": "macalbano@bol.com.br"
+      },
+      {
+        "apto": "0702",
+        "nome": "FRANCISCO DE SALES DANTAS",
+        "fone": "+55 996710043",
+        "tipo": "Proprietário",
+        "cpf": "23010126468",
+        "email": "jeronimoneto676@hotmail.com"
+      },
+      {
+        "apto": "0801",
+        "nome": "TÂNIA MARIA FREIRE DE CASTRO",
+        "fone": "+55 8432076009",
+        "tipo": "Proprietário",
+        "cpf": "75112515449",
+        "email": "taniamfcastro@gmail.com"
+      },
+      {
+        "apto": "0802",
+        "nome": "JOSÉ DE ALCÂNTARA RIBEIRO",
+        "fone": "+55 8432065278 (+55 84999249946)",
+        "tipo": "Proprietário",
+        "cpf": "73868485872",
+        "email": "soriedemcargas@gmail.com"
+      },
+      {
+        "apto": "0901",
+        "nome": "ELIZABETE MARIA DANTAS LOPES",
+        "fone": "+55 84 94105684",
+        "tipo": "Proprietário",
+        "cpf": "30724058400"
+      },
+      {
+        "apto": "0902",
+        "nome": "ROBERTO ALADIM DE ARAÚJO",
+        "tipo": "Proprietário",
+        "fone": "",
+        "email": "bobaladim@gmail.com"
+      },
+      {
+        "apto": "1001",
+        "nome": "MARIA JOSÉ FREITAS SOUTO",
+        "fone": "+55 84987039905 (+55 84999361978)",
+        "tipo": "Proprietário",
+        "cpf": "68456840491",
+        "email": "mariaperola@hotmail.com"
+      },
+      {
+        "apto": "1002",
+        "nome": "LEVI GOMES",
+        "fone": "+55 84994236632",
+        "tipo": "Proprietário",
+        "cpf": "01229028404",
+        "email": "heulermatos@hotmail.com"
+      },
+      {
+        "apto": "1101",
+        "nome": "CRISTIANA LIMA DE CARVALHO",
+        "fone": "+55 84 999550170",
+        "tipo": "Proprietário",
+        "cpf": "00223024767",
+        "email": "cristianacarvalho2005@gmail.com"
+      },
+      {
+        "apto": "1102",
+        "nome": "PAULO CUNHA DIOGENES",
+        "fone": "+55 8432177788 (84991030660",
+        "tipo": "Proprietário",
+        "cpf": "01012147401",
+        "email": "laurissa@yahoo.com.br"
+      },
+      {
+        "apto": "1201",
+        "nome": "FELIPE ENGRACIO DA SILVA /",
+        "tipo": "Proprietário",
+        "fone": "",
+        "email": "lelaynedutra@gmail.com"
+      },
+      {
+        "apto": "1202",
+        "nome": "RENAN AGUIAR DE GARCIA MAIA",
+        "tipo": "Proprietário",
+        "fone": "",
+        "email": "adv.renanmaia@gmail.com"
+      },
+      {
+        "apto": "0401",
+        "nome": "MANOEL FELIPE NETO",
+        "fone": "+55 84 999860819",
+        "tipo": "Proprietário",
+        "cpf": "05010306468",
+        "email": "memilia8@hotmail.com;"
+      },
+      {
+        "apto": "0402",
+        "nome": "MARIA DE FÁTIMA BENEDETTO",
+        "fone": "+55 84 987222821",
+        "tipo": "Proprietário"
+      },
+      {
+        "apto": "0502",
+        "nome": "FABIO AUGUSTO KAMADA",
+        "tipo": "Proprietário",
+        "fone": "",
+        "email": "fabiokamada@hotmail.com"
+      },
+      {
+        "apto": "0601",
+        "nome": "DANIEL PEREIRA DE OLIVEIRA",
+        "fone": "55 84 991049994",
+        "tipo": "Proprietário",
+        "cpf": "05254068400",
+        "email": "daniel_poliv@yahoo.com.br"
+      },
+      {
+        "apto": "0602",
+        "nome": "TATIANA VILAR DE SALES OLIVEIRA",
+        "fone": "+55 988648910",
+        "tipo": "Proprietário",
+        "cpf": "72192208472",
+        "email": "Pablo@pabloramonarquitetos.com.br"
+      },
+      {
+        "apto": "0702",
+        "nome": "LAIO ALCEU PEREIRA DE MEDEIROS",
+        "fone": "+55 84 988956005",
+        "tipo": "Proprietário",
+        "cpf": "00317578472",
+        "email": "laio.a@terra.com.br"
+      },
+      {
+        "apto": "0801",
+        "nome": "DANIEL ANDREAS SODERBERG",
+        "fone": "+55 84 96025533",
+        "tipo": "Proprietário",
+        "cpf": "01603099484",
+        "email": "alanasampaio_@hotmail.com"
+      },
+      {
+        "apto": "0802",
+        "nome": "MARIA DE FÁTIMA BENEDETTO",
+        "fone": "+55 84 987222821",
+        "tipo": "Proprietário"
+      },
+      {
+        "apto": "0902",
+        "nome": "GERALDO MARCELO C. DE SOUZA",
+        "fone": "+55 84 32237606 (+55 84 94511762)",
+        "tipo": "Proprietário",
+        "cpf": "42563275091",
+        "email": "gmarcelos@gmail.com"
+      },
+      {
+        "apto": "1001",
+        "nome": "WALLACE ANDRINO DA SILVA",
+        "fone": "+55 84 981067252",
+        "tipo": "Proprietário",
+        "cpf": "06510196484",
+        "email": "aline_mpinheiro@yahoo.com.br"
+      },
+      {
+        "apto": "1002",
+        "nome": "ANGELO HENRIQUE FARIAS DE",
+        "fone": "+55 8491080483",
+        "tipo": "Proprietário",
+        "cpf": "01197132414",
+        "email": "adm@habitacionalonline.com.br"
+      },
+      {
+        "apto": "1102",
+        "nome": "MANOEL FELIPE NETO",
+        "fone": "+55 84 999860819",
+        "tipo": "Proprietário",
+        "cpf": "05010306468",
+        "email": "marciolp@hotmail.com"
+      },
+      {
+        "apto": "1201",
+        "nome": "TALES ALBUQUERQUE VARELA",
+        "fone": "+55 84 994131264",
+        "tipo": "Proprietário",
+        "cpf": "08399318400",
+        "email": "kalina_medeiros@hotmail.com"
+      },
+      {
+        "apto": "1202",
+        "nome": "GERALDO MARCELO C. DE SOUZA",
+        "fone": "+55 84 32237606 (+55 84 94511762)",
+        "tipo": "Proprietário",
+        "cpf": "42563275091",
+        "email": "gmarcelos@gmail.com"
+      },
+      {
+        "apto": "1302",
+        "nome": "CLAUDIA COLAÇO",
+        "fone": "+55 84991361885",
+        "tipo": "Proprietário",
+        "cpf": "20521553415",
+        "email": "viniciuslcmedeiros@hotmail.com"
+      },
+      {
+        "apto": "1401",
+        "nome": "KATHERINE BEZERRA CARVALHO",
+        "fone": "+55 84 991149550",
+        "tipo": "Proprietário",
+        "cpf": "01353044408",
+        "email": "katherine_carvalho@hotmail.com"
+      },
+      {
+        "apto": "1402",
+        "nome": "RENATO BEZERRA SOARES",
+        "fone": "+55 84 996517770",
+        "tipo": "Proprietário",
+        "cpf": "00833154460",
+        "email": "valleriapaiva@hotmail.com"
+      },
+      {
+        "apto": "1502",
+        "nome": "EVANEIDE JUSTINO DE SOUZA",
+        "fone": "+55 84 987201099",
+        "tipo": "Proprietário",
+        "cpf": "01018271481",
+        "email": "evajustinosouza@gmail.com"
+      },
+      {
+        "apto": "1601",
+        "nome": "ARTHUR COSTA RODRIGUES",
+        "fone": "+55 84 999030012",
+        "tipo": "Proprietário",
+        "cpf": "00941880419",
+        "email": "bellisacaldas@gmail.com"
+      },
+      {
+        "apto": "1602",
+        "nome": "ERICK WANDERLEY GURGEL",
+        "fone": "+55 84 999550140",
+        "tipo": "Proprietário",
+        "cpf": "90411340425",
+        "email": "financeiro@execom.net.br"
+      },
+      {
+        "apto": "1702",
+        "nome": "GILBERTO IVAN MEIRA SILVA",
+        "fone": "+55 84994511762",
+        "tipo": "Proprietário",
+        "cpf": "15640035404",
+        "email": "gilbertoivan847@gmail.com"
+      },
+      {
+        "apto": "1801",
+        "nome": "JOSE MANUEL PERALES SANCHEZ",
+        "fone": "+55 84996650001",
+        "tipo": "Proprietário",
+        "cpf": "00895147424",
+        "email": "marisa2104@aim.com"
+      },
+      {
+        "apto": "1802",
+        "nome": "JORDÃO BEZERRA VIANA",
+        "fone": "+55 84 999130785",
+        "tipo": "Proprietário",
+        "cpf": "09734275402",
+        "email": "Jordao.bezerra10@hotmail.com"
+      },
+      {
+        "apto": "1902",
+        "nome": "GUSTAVO HENRIQUE LIMA DE",
+        "fone": "+55 84 981040888",
+        "tipo": "Proprietário",
+        "cpf": "26128470491",
+        "email": "gustavocarvalho4588@gmail.com"
+      },
+      {
+        "apto": "2001",
+        "nome": "ALUIZIO HENRIQUE DUTRA DE",
+        "fone": "+55 84 988054824",
+        "tipo": "Proprietário",
+        "cpf": "01066845409",
+        "email": "ALUIZIODF@YAHOO.COM.BR"
+      },
+      {
+        "apto": "2002",
+        "nome": "CHRISTOPHE BEZERRA ANSELMO",
+        "fone": "+55 84 998052222",
+        "tipo": "Proprietário",
+        "cpf": "06182594497",
+        "email": "caroltrb@gmail.com"
+      },
+      {
+        "apto": "2102",
+        "nome": "MANOEL FELIPE NETO",
+        "fone": "+55 84 999860819",
+        "tipo": "Proprietário",
+        "cpf": "05010306468",
+        "email": "marciolp@hotmail.com"
+      },
+      {
+        "apto": "2201",
+        "nome": "CONSTRUTORA VECON LTDA",
+        "fone": "+55 55 84 87042703 (+55 32139118)",
+        "tipo": "Proprietário",
+        "cpf": "03414699000124",
+        "email": "dayana@vecon.com.br;vital@vecon."
+      },
+      {
+        "apto": "2202",
+        "nome": "TONY ELBERT SOUZA DO VALE",
+        "tipo": "Proprietário",
+        "fone": "",
+        "email": "financeiro@clinicatonyelbert.com.br"
+      },
+      {
+        "apto": "0101",
+        "nome": "FLORENCE",
+        "fone": "+55 996411144",
+        "tipo": "Proprietário",
+        "cpf": "05827327433",
+        "email": "bebel.medeiros.m@gmail.com"
+      },
+      {
+        "apto": "0102",
+        "nome": "FLORENCE",
+        "fone": "55 55 84 94842528 (55 84994964108)",
+        "tipo": "Proprietário",
+        "cpf": "91406285404",
+        "email": "keyrla520@gmail.com"
+      },
+      {
+        "apto": "0103",
+        "nome": "FLORENCE",
+        "fone": "+55 55 84994964108;+55 55 84",
+        "tipo": "Proprietário",
+        "cpf": "02771862425",
+        "email": "mariosocorrista@gmail.com"
+      },
+      {
+        "apto": "0104",
+        "nome": "FLORENCE",
+        "fone": "+55 84 987222909",
+        "tipo": "Proprietário",
+        "cpf": "32405049449",
+        "email": "rodrigo_eufrasio@hotmail.com"
+      },
+      {
+        "apto": "0105",
+        "nome": "FLORENCE",
+        "fone": "+55 84999129520",
+        "tipo": "Proprietário",
+        "cpf": "08593469434",
+        "email": "didemarciapitanga@hotmail.com"
+      },
+      {
+        "apto": "0106",
+        "nome": "FLORENCE",
+        "fone": "+55 999194912",
+        "tipo": "Proprietário",
+        "cpf": "05827332437",
+        "email": "fernandormmachado@hotmail.com"
+      },
+      {
+        "apto": "0107",
+        "nome": "FLORENCE",
+        "fone": "+55 21969199018",
+        "tipo": "Proprietário",
+        "cpf": "73928283804",
+        "email": "cleodomilson@gmail.com"
+      },
+      {
+        "apto": "0108",
+        "nome": "FLORENCE",
+        "fone": "+55 8432314500 (+55 988946209)",
+        "tipo": "Proprietário",
+        "cpf": "20046499415",
+        "email": "jussier2002@yahoo.com.br"
+      },
+      {
+        "apto": "0201",
+        "nome": "FLORENCE",
+        "fone": "+55 8436131302 (+55 84999811411)",
+        "tipo": "Proprietário",
+        "cpf": "37941046415",
+        "email": "joaomariabezerra@hotmail.com"
+      },
+      {
+        "apto": "0202",
+        "nome": "FLORENCE",
+        "fone": "55 84 999023428",
+        "tipo": "Proprietário",
+        "cpf": "70131067478",
+        "email": "dayanadayse01@hotmail.com"
+      },
+      {
+        "apto": "0203",
+        "nome": "FLORENCE",
+        "fone": "+55 84 994579565 (+55 84 996010233)",
+        "tipo": "Proprietário",
+        "cpf": "10650703499",
+        "email": "icaro15923@gmail.com"
+      },
+      {
+        "apto": "0204",
+        "nome": "FLORENCE",
+        "fone": "+55 8432175746 (+55 84999873106)",
+        "tipo": "Proprietário",
+        "cpf": "06753621482",
+        "email": "luizfernando.ufrn@gmail.com"
+      },
+      {
+        "apto": "0205",
+        "nome": "ELIANE FERREIRA DE OLIVEIRA",
+        "tipo": "Proprietário",
+        "fone": "",
+        "email": "Tel.: (84)3234-0110/(84)99189-9192 / E-mail: atendimento.pratika.natal@gmail.com"
+      },
+      {
+        "apto": "0206",
+        "nome": "FLORENCE",
+        "fone": "+55 84 998522225",
+        "tipo": "Proprietário",
+        "cpf": "70453988407",
+        "email": "emillysantos9491@gmail.com"
+      },
+      {
+        "apto": "0207",
+        "nome": "FLORENCE",
+        "tipo": "Proprietário",
+        "fone": "",
+        "email": "katia.cristina.santana@gmail.com"
+      },
+      {
+        "apto": "0208",
+        "nome": "FLORENCE",
+        "fone": "+55 84 94275402 (+55 55 84 96540609)",
+        "tipo": "Proprietário",
+        "cpf": "15695697468",
+        "email": "gabrielferliti@gmail.com"
+      },
+      {
+        "apto": "0301",
+        "nome": "FLORENCE",
+        "fone": "+55 8432312841",
+        "tipo": "Proprietário",
+        "cpf": "01228926409",
+        "email": "wilza.dantas@gmail.com"
+      },
+      {
+        "apto": "0302",
+        "nome": "FLORENCE",
+        "fone": "+55 99659 8940",
+        "tipo": "Proprietário",
+        "cpf": "00961390484",
+        "email": "caugusta198@gmail.com"
+      },
+      {
+        "apto": "0303",
+        "nome": "FLORENCE",
+        "fone": "+55 84 987086302;+55 84 988165264",
+        "tipo": "Proprietário",
+        "cpf": "05001245400",
+        "email": "diegok205@hotmail.com"
+      },
+      {
+        "apto": "0304",
+        "nome": "FLORENCE",
+        "fone": "+55 8436531159 (+55 84987011401)",
+        "tipo": "Proprietário",
+        "cpf": "00898711460",
+        "email": "rcmelomelo@gmail.com"
+      },
+      {
+        "apto": "0305",
+        "nome": "FLORENCE",
+        "fone": "+55 84 88165264",
+        "tipo": "Proprietário",
+        "cpf": "01222463490",
+        "email": "rgnplacas@hotmail.com"
+      },
+      {
+        "apto": "0306",
+        "nome": "FLORENCE",
+        "fone": "+55 84 991001001",
+        "tipo": "Proprietário",
+        "cpf": "97017175468",
+        "email": "lenilsonn@yahoo.com.br"
+      },
+      {
+        "apto": "0307",
+        "nome": "FLORENCE",
+        "fone": "+55 84 9 9106 9044",
+        "tipo": "Proprietário",
+        "cpf": "00960929479",
+        "email": "alexandreaquinoadv@outlook.com"
+      },
+      {
+        "apto": "0308",
+        "nome": "FLORENCE",
+        "fone": "+55 987357549 (+55 988963462)",
+        "tipo": "Proprietário",
+        "cpf": "01277310408",
+        "email": "financeiro3@imobiliariabrasil.com"
+      },
+      {
+        "apto": "0401",
+        "nome": "FLORENCE",
+        "fone": "+55 84 987370607",
+        "tipo": "Proprietário",
+        "cpf": "07309772423",
+        "email": "enfajessicaleopoldo@gmail.com"
+      },
+      {
+        "apto": "0402",
+        "nome": "FLORENCE",
+        "tipo": "Proprietário",
+        "fone": "",
+        "email": "zidenize.d@gmail.com"
+      },
+      {
+        "apto": "0403",
+        "nome": "FLORENCE",
+        "fone": "+55 84991014687 (+55 84991115983)",
+        "tipo": "Proprietário",
+        "cpf": "54142750410",
+        "email": "adriandearaujobf@hotmail.com"
+      },
+      {
+        "apto": "0404",
+        "nome": "FLORENCE",
+        "tipo": "Proprietário",
+        "fone": "",
+        "email": "kiviaoliv@yahoo.com.br"
+      },
+      {
+        "apto": "0405",
+        "nome": "FLORENCE",
+        "fone": "+55 84 988291393;+55 84 981013830",
+        "tipo": "Proprietário",
+        "cpf": "16025901767",
+        "email": "fgsozs2024@gmail.com"
+      },
+      {
+        "apto": "0406",
+        "nome": "FLORENCE",
+        "fone": "+55 84987177878",
+        "tipo": "Proprietário",
+        "cpf": "42330173415",
+        "email": "marconifilgueira@gmail.com"
+      },
+      {
+        "apto": "0407",
+        "nome": "FLORENCE",
+        "tipo": "Proprietário",
+        "fone": "",
+        "email": "joaomarcos.jmno.nog@gmail.com"
+      },
+      {
+        "apto": "0408",
+        "nome": "FLORENCE",
+        "fone": "+55 988642300",
+        "tipo": "Proprietário",
+        "cpf": "01208075489",
+        "email": "pauloriandro@gmail.com"
+      },
+      {
+        "apto": "0101",
+        "nome": "VANESKA CARVALHO DE AMORIM",
+        "tipo": "Proprietário",
+        "fone": "",
+        "email": "Tel.: (84)3234-0110/(84)99189-9192 / E-mail: atendimento.pratika.natal@gmail.com"
+      },
+      {
+        "apto": "0102",
+        "nome": "PALERMO",
+        "tipo": "Proprietário",
+        "fone": ""
+      },
+      {
+        "apto": "0103",
+        "nome": "PALERMO",
+        "fone": "+55 84 998382110",
+        "tipo": "Proprietário",
+        "cpf": "70434583405",
+        "email": "maria.cruz.camara@gmail.com"
+      },
+      {
+        "apto": "0104",
+        "nome": "PALERMO",
+        "fone": "+55 32193446 (+55 994818782)",
+        "tipo": "Proprietário",
+        "cpf": "08574170453"
+      },
+      {
+        "apto": "0105",
+        "nome": "PALERMO",
+        "fone": "+55 32194407",
+        "tipo": "Proprietário",
+        "cpf": "00837227429",
+        "email": "cmarialeite7@gmail.com"
+      },
+      {
+        "apto": "0106",
+        "nome": "PALERMO",
+        "fone": "+55 32112850",
+        "tipo": "Proprietário",
+        "cpf": "29646960472",
+        "email": "vanercialopes@gmail.com"
+      },
+      {
+        "apto": "0107",
+        "nome": "PALERMO",
+        "fone": "+55 996033871 (+55 85998473333)",
+        "tipo": "Proprietário",
+        "cpf": "47123648404"
+      },
+      {
+        "apto": "0108",
+        "nome": "PALERMO",
+        "fone": "+55 998046250",
+        "tipo": "Proprietário",
+        "cpf": "06689838412",
+        "email": "givonaldojp@yahoo.com.br"
+      },
+      {
+        "apto": "0201",
+        "nome": "PALERMO",
+        "fone": "+55 84987190280",
+        "tipo": "Proprietário",
+        "cpf": "08384033447",
+        "email": "fotografiasged@gmail.com"
+      },
+      {
+        "apto": "0202",
+        "nome": "PALERMO",
+        "fone": "+55 32061104",
+        "tipo": "Proprietário",
+        "cpf": "07852995489",
+        "email": "laryambiental2@gmail.com"
+      },
+      {
+        "apto": "0203",
+        "nome": "PALERMO",
+        "fone": "+55 999829983",
+        "tipo": "Proprietário",
+        "cpf": "41311183434",
+        "email": "frannasc@hotmail.com"
+      },
+      {
+        "apto": "0204",
+        "nome": "PALERMO",
+        "fone": "+55 999121898",
+        "tipo": "Proprietário",
+        "cpf": "03164409494",
+        "email": "filipequintaes@hotmail.com"
+      },
+      {
+        "apto": "0205",
+        "nome": "PALERMO",
+        "fone": "+55 8498350688;+55 84 98350688",
+        "tipo": "Proprietário",
+        "cpf": "08023067486",
+        "email": "Samaramedeiros2015@hotmail.com"
+      },
+      {
+        "apto": "0206",
+        "nome": "PALERMO",
+        "fone": "+55 84 991439530",
+        "tipo": "Proprietário",
+        "cpf": "76027660325",
+        "email": "hugogmmelo@hotmail.com.br"
+      },
+      {
+        "apto": "0207",
+        "nome": "PALERMO",
+        "fone": "+55 84996099570",
+        "tipo": "Proprietário",
+        "cpf": "07645905450",
+        "email": "felipe_fg89@hotmail.com"
+      },
+      {
+        "apto": "0208",
+        "nome": "PALERMO",
+        "fone": "+55 40093900;+55 40093904 (+55",
+        "tipo": "Proprietário",
+        "cpf": "32720980200"
+      },
+      {
+        "apto": "0301",
+        "nome": "PALERMO",
+        "fone": "+55 986216238",
+        "tipo": "Proprietário",
+        "cpf": "10760210420"
+      },
+      {
+        "apto": "0302",
+        "nome": "PALERMO",
+        "fone": "+55 32064029",
+        "tipo": "Proprietário",
+        "cpf": "53822188468",
+        "email": "adriano_av@yahoo.com.br"
+      },
+      {
+        "apto": "0303",
+        "nome": "PALERMO",
+        "fone": "+55 33182608 (+55 987948274)",
+        "tipo": "Proprietário",
+        "cpf": "40620816449",
+        "email": "viniciussaxavier@gmail.com"
+      },
+      {
+        "apto": "0304",
+        "nome": "PALERMO",
+        "fone": "+55 36181304",
+        "tipo": "Proprietário",
+        "cpf": "56572450406",
+        "email": "Tel.: (84)3234-0110/(84)99189-9192 / E-mail: atendimento.pratika.natal@gmail.com"
+      },
+      {
+        "apto": "0305",
+        "nome": "PALERMO",
+        "fone": "+55 32181176",
+        "tipo": "Proprietário",
+        "cpf": "83852581400",
+        "email": "pedro@gmail.com"
+      },
+      {
+        "apto": "0306",
+        "nome": "PALERMO",
+        "fone": "+55 30828020",
+        "tipo": "Proprietário",
+        "cpf": "89749057449",
+        "email": "rosegodeiro2016@yahoo.com"
+      },
+      {
+        "apto": "0307",
+        "nome": "PALERMO",
+        "fone": "+55 84996025087",
+        "tipo": "Proprietário",
+        "cpf": "02197771442"
+      },
+      {
+        "apto": "0308",
+        "nome": "PALERMO",
+        "fone": "+55 988668139",
+        "tipo": "Proprietário",
+        "cpf": "44445407453",
+        "email": "caetano@unidadekumon.com.br"
+      },
+      {
+        "apto": "0401",
+        "nome": "PALERMO",
+        "fone": "+55 36910075 (+55 988634546)",
+        "tipo": "Proprietário",
+        "cpf": "02147902403",
+        "email": "sergioflubrasil@gmail.com"
+      },
+      {
+        "apto": "0402",
+        "nome": "PALERMO",
+        "fone": "+55 84996024880",
+        "tipo": "Proprietário",
+        "cpf": "59583649449"
+      },
+      {
+        "apto": "0403",
+        "nome": "PALERMO",
+        "fone": "+55 84 996720552 (+55 84 32171984)",
+        "tipo": "Proprietário",
+        "cpf": "55344763468"
+      },
+      {
+        "apto": "0404",
+        "nome": "PALERMO",
+        "fone": "+55 84 81139328",
+        "tipo": "Proprietário",
+        "cpf": "01803848480",
+        "email": "leonardodavidbandeira@outlook.com"
+      },
+      {
+        "apto": "0405",
+        "nome": "PALERMO",
+        "fone": "+55 988016778",
+        "tipo": "Proprietário",
+        "cpf": "14242273487",
+        "email": "luciadefatimagf@gmail.com"
+      },
+      {
+        "apto": "0406",
+        "nome": "PALERMO",
+        "fone": "+55 36615745",
+        "tipo": "Proprietário",
+        "cpf": "49747827549",
+        "email": "sandrodsp@yahoo.com.br"
+      },
+      {
+        "apto": "0407",
+        "nome": "PALERMO",
+        "fone": "+55 999142532",
+        "tipo": "Proprietário",
+        "cpf": "01130918424",
+        "email": "queniachaves@yahoo.com.br"
+      },
+      {
+        "apto": "0408",
+        "nome": "PALERMO",
+        "fone": "+55 30849689 (+55 988017058)",
+        "tipo": "Proprietário",
+        "cpf": "10946418470",
+        "email": "dboraellen15@gmail.com"
+      },
+      {
+        "apto": "0101",
+        "nome": "PESCARA",
+        "fone": "+55 84 986353605",
+        "tipo": "Proprietário",
+        "cpf": "70812588401"
+      },
+      {
+        "apto": "0102",
+        "nome": "PESCARA",
+        "fone": "55 84 999098940",
+        "tipo": "Proprietário",
+        "cpf": "05018858460",
+        "email": "eriquisamorim@gmail.com"
+      },
+      {
+        "apto": "0103",
+        "nome": "PESCARA",
+        "fone": "+55 32341119",
+        "tipo": "Proprietário",
+        "cpf": "17006155487"
+      },
+      {
+        "apto": "0104",
+        "nome": "PESCARA",
+        "fone": "+55 84999340347",
+        "tipo": "Proprietário",
+        "cpf": "06264729469",
+        "email": "Tel.: (84)3234-0110/(84)99189-9192 / E-mail: atendimento.pratika.natal@gmail.com"
+      },
+      {
+        "apto": "0105",
+        "nome": "PESCARA",
+        "fone": "55 84 996467309",
+        "tipo": "Proprietário",
+        "cpf": "91768934053"
+      },
+      {
+        "apto": "0106",
+        "nome": "PESCARA",
+        "fone": "+55 996062244;+55 8496662242",
+        "tipo": "Proprietário",
+        "cpf": "19053241000127",
+        "email": "edna1@gmail.com"
+      },
+      {
+        "apto": "0107",
+        "nome": "PESCARA",
+        "fone": "+55 988552465",
+        "tipo": "Proprietário",
+        "cpf": "67232680406",
+        "email": "scristina.mfreitas@gmail.com"
+      },
+      {
+        "apto": "0108",
+        "nome": "PESCARA",
+        "fone": "+55 84 88084929;+55 84 999540733",
+        "tipo": "Proprietário",
+        "cpf": "03856683410",
+        "email": "prialianca@gmail.com"
+      },
+      {
+        "apto": "0201",
+        "nome": "PESCARA",
+        "fone": "+55 84 96662136",
+        "tipo": "Proprietário",
+        "cpf": "12853879453",
+        "email": "rod_paiva@hotmail.com"
+      },
+      {
+        "apto": "0202",
+        "nome": "PESCARA",
+        "fone": "+55 88019746",
+        "tipo": "Proprietário",
+        "cpf": "49899651400",
+        "email": "roxanelima@gmail.com"
+      },
+      {
+        "apto": "0203",
+        "nome": "PESCARA",
+        "tipo": "Proprietário",
+        "fone": "",
+        "email": "jenifferarruda20@gmail.com"
+      },
+      {
+        "apto": "0204",
+        "nome": "PESCARA",
+        "fone": "+55 24 999852843",
+        "tipo": "Proprietário",
+        "cpf": "34818014753",
+        "email": "ricardojp1704@gmail.com"
+      },
+      {
+        "apto": "0205",
+        "nome": "PESCARA",
+        "fone": "+55 987984893 (+55 994681758)",
+        "tipo": "Proprietário",
+        "cpf": "20219415404"
+      },
+      {
+        "apto": "0206",
+        "nome": "PESCARA",
+        "tipo": "Proprietário",
+        "fone": "",
+        "email": "elvas@hotmail.com"
+      },
+      {
+        "apto": "0207",
+        "nome": "PESCARA",
+        "fone": "+55 321808001 (+55 999142512)",
+        "tipo": "Proprietário",
+        "cpf": "02677117436",
+        "email": "anacynthia3@gmail.com"
+      },
+      {
+        "apto": "0208",
+        "nome": "PESCARA",
+        "fone": "+55 84 96662136",
+        "tipo": "Proprietário",
+        "cpf": "12853879453",
+        "email": "rod_paiva@hotmail.com"
+      },
+      {
+        "apto": "0301",
+        "nome": "PESCARA",
+        "fone": "+55 34722255",
+        "tipo": "Proprietário",
+        "cpf": "37838652472",
+        "email": "medeirosefarias@hotmail.com"
+      },
+      {
+        "apto": "0302",
+        "nome": "PESCARA",
+        "fone": "+55 84 99812518",
+        "tipo": "Proprietário",
+        "cpf": "18302653420",
+        "email": "bompasto@msn.com"
+      },
+      {
+        "apto": "0303",
+        "nome": "PESCARA",
+        "fone": "+55 84 987398854 (+55 84 991612344)",
+        "tipo": "Proprietário",
+        "cpf": "01187453447"
+      },
+      {
+        "apto": "0304",
+        "nome": "PESCARA",
+        "fone": "+55 32181654 (+55 988217900)",
+        "tipo": "Proprietário",
+        "cpf": "02848255498",
+        "email": "luciamb321@gmail.com"
+      },
+      {
+        "apto": "0305",
+        "nome": "PESCARA",
+        "fone": "+55 999915922",
+        "tipo": "Proprietário",
+        "cpf": "11271795434",
+        "email": "deusa@dabrn.com.br;r.dyogo@gmail."
+      },
+      {
+        "apto": "0306",
+        "nome": "PESCARA",
+        "fone": "+55 991614251 (+55 988929833)",
+        "tipo": "Proprietário",
+        "cpf": "87660008404"
+      },
+      {
+        "apto": "0307",
+        "nome": "ENEAS DE OLIVEIRA MAIA NETO",
+        "tipo": "Proprietário",
+        "fone": "",
+        "email": "Tel.: (84)3234-0110/(84)99189-9192 / E-mail: atendimento.pratika.natal@gmail.com"
+      },
+      {
+        "apto": "0308",
+        "nome": "PESCARA",
+        "tipo": "Proprietário",
+        "fone": "",
+        "email": "administracao@perfilnegocios.com"
+      },
+      {
+        "apto": "0401",
+        "nome": "PESCARA",
+        "fone": "+55 32066011",
+        "tipo": "Proprietário",
+        "cpf": "91248221400",
+        "email": "wallacediniz1975@gmail.com"
+      },
+      {
+        "apto": "0402",
+        "nome": "PESCARA",
+        "fone": "+55 84997017000",
+        "tipo": "Proprietário",
+        "cpf": "12299744401"
+      },
+      {
+        "apto": "0403",
+        "nome": "PESCARA",
+        "fone": "+55 84988798084",
+        "tipo": "Proprietário",
+        "cpf": "56549857449"
+      },
+      {
+        "apto": "0404",
+        "nome": "PESCARA",
+        "fone": "+55 84998295342",
+        "tipo": "Proprietário",
+        "cpf": "08405401407",
+        "email": "sayonaraleitels@gmail.com"
+      },
+      {
+        "apto": "0405",
+        "nome": "PESCARA",
+        "fone": "+55 84 987502359",
+        "tipo": "Proprietário",
+        "cpf": "70853971447",
+        "email": "alex22.vinicius@hotmail.com"
+      },
+      {
+        "apto": "0406",
+        "nome": "PESCARA",
+        "fone": "+55 8499135252",
+        "tipo": "Proprietário",
+        "cpf": "17598591415",
+        "email": "mm.pinheiro@uol.com.br"
+      },
+      {
+        "apto": "0407",
+        "nome": "PESCARA",
+        "fone": "+55 997004933",
+        "tipo": "Proprietário",
+        "cpf": "42970342472",
+        "email": "michellynealbuquerque@gmail.com"
+      },
+      {
+        "apto": "0408",
+        "nome": "PESCARA",
+        "fone": "+55 84991876959;+55 84991445353",
+        "tipo": "Proprietário",
+        "cpf": "01674891431",
+        "email": "andreadauto_92@yahoo.com.br"
+      },
+      {
+        "apto": "0101",
+        "nome": "RAVENNA",
+        "fone": "+55 84999270318",
+        "tipo": "Proprietário",
+        "cpf": "39230449415",
+        "email": "sueldesaraujo@yahoo.com.br"
+      },
+      {
+        "apto": "0102",
+        "nome": "RAVENNA",
+        "fone": "+55 84991281362",
+        "tipo": "Proprietário",
+        "cpf": "50446614491",
+        "email": "eletrico3@gmail.com"
+      },
+      {
+        "apto": "0103",
+        "nome": "RAVENNA",
+        "fone": "+55 8436538275 (+55 84999858911)",
+        "tipo": "Proprietário",
+        "cpf": "02151996425",
+        "email": "talesleonardo91@gmail.com"
+      },
+      {
+        "apto": "0104",
+        "nome": "RAVENNA",
+        "fone": "+55 84 997044140",
+        "tipo": "Proprietário",
+        "cpf": "06537970440",
+        "email": "brunohlds@hotmail.com"
+      },
+      {
+        "apto": "0105",
+        "nome": "RAVENNA",
+        "fone": "+55 8432137739 (+55 991420714)",
+        "tipo": "Proprietário",
+        "cpf": "04357417481",
+        "email": "ludimilladuarte@yahoo.com.br"
+      },
+      {
+        "apto": "0106",
+        "nome": "RAVENNA",
+        "fone": "+55 8130722024",
+        "tipo": "Proprietário",
+        "cpf": "06830102391",
+        "email": "acn_iluminado46@hotmail.com"
+      },
+      {
+        "apto": "0107",
+        "nome": "RAVENNA",
+        "fone": "+55 988014092",
+        "tipo": "Proprietário",
+        "cpf": "03829767463",
+        "email": "xanda2025.1@outlook.com"
+      },
+      {
+        "apto": "0108",
+        "nome": "RAVENNA",
+        "fone": "+55 84 987758103",
+        "tipo": "Proprietário",
+        "cpf": "96800615404",
+        "email": "sheyllacmelo@gmail.com"
+      },
+      {
+        "apto": "0201",
+        "nome": "RAVENNA",
+        "fone": "+55 84988893215",
+        "tipo": "Proprietário",
+        "cpf": "07760605463",
+        "email": "Tel.: (84)3234-0110/(84)99189-9192 / E-mail: atendimento.pratika.natal@gmail.com"
+      },
+      {
+        "apto": "0202",
+        "nome": "RAVENNA",
+        "fone": "+55 84998985555",
+        "tipo": "Proprietário",
+        "cpf": "06520447439",
+        "email": "lucalisboakrause@gmail.com"
+      },
+      {
+        "apto": "0203",
+        "nome": "RAVENNA",
+        "fone": "+55 84996290530 (+55 8499526679)",
+        "tipo": "Proprietário",
+        "cpf": "05002243401",
+        "email": "marcioccet@gmail.com"
+      },
+      {
+        "apto": "0204",
+        "nome": "RAVENNA",
+        "fone": "+55 84 88378938",
+        "tipo": "Proprietário",
+        "cpf": "70011659483",
+        "email": "hellenlailatavares@gmail.com"
+      },
+      {
+        "apto": "0205",
+        "nome": "RAVENNA",
+        "fone": "+55 84998368121",
+        "tipo": "Proprietário",
+        "cpf": "75142490444",
+        "email": "mariliapereiradasilvapereira@gmail.com"
+      },
+      {
+        "apto": "0206",
+        "nome": "RAVENNA",
+        "fone": "+55 84 999861098 (+55 84 32073094)",
+        "tipo": "Proprietário",
+        "cpf": "02598214463"
+      },
+      {
+        "apto": "0207",
+        "nome": "RAVENNA",
+        "fone": "+55 84987463538 (+55 84996025794)",
+        "tipo": "Proprietário",
+        "cpf": "06555539402",
+        "email": "socorromevlima@gmail.com"
+      },
+      {
+        "apto": "0208",
+        "nome": "RAVENNA",
+        "fone": "+55 84996495601",
+        "tipo": "Proprietário",
+        "cpf": "06567716827",
+        "email": "cta.holanda@gmail.com"
+      },
+      {
+        "apto": "0301",
+        "nome": "RAVENNA",
+        "tipo": "Proprietário",
+        "fone": ""
+      },
+      {
+        "apto": "0302",
+        "nome": "RAVENNA",
+        "tipo": "Proprietário",
+        "fone": ""
+      },
+      {
+        "apto": "0303",
+        "nome": "RAVENNA",
+        "fone": "+55 351 939813103",
+        "tipo": "Proprietário",
+        "cpf": "81218907487",
+        "email": "ivelizebandeira@gmail.com"
+      },
+      {
+        "apto": "0304",
+        "nome": "RAVENNA",
+        "fone": "+55 996691708",
+        "tipo": "Proprietário",
+        "cpf": "27893472200",
+        "email": "oliveirayns@gmail.com"
+      },
+      {
+        "apto": "0305",
+        "nome": "RAVENNA",
+        "fone": "+55 84 996340795",
+        "tipo": "Proprietário",
+        "cpf": "02295922879",
+        "email": "cleuber8000@gmail.com"
+      },
+      {
+        "apto": "0306",
+        "nome": "RAVENNA",
+        "fone": "+55 991041252",
+        "tipo": "Proprietário",
+        "cpf": "18287522404",
+        "email": "isaildaalves87@gmail.com"
+      },
+      {
+        "apto": "0307",
+        "nome": "RAVENNA",
+        "fone": "+55 8432065996 (+55 84988055996)",
+        "tipo": "Proprietário",
+        "cpf": "01025135466",
+        "email": "jperesg@yahoo.com.br"
+      },
+      {
+        "apto": "0308",
+        "nome": "RAVENNA",
+        "fone": "+55 84 997053607;+55 84 999741558",
+        "tipo": "Proprietário",
+        "cpf": "02480031438"
+      },
+      {
+        "apto": "0401",
+        "nome": "RAVENNA",
+        "fone": "+55 8432185716",
+        "tipo": "Proprietário",
+        "cpf": "50065076400"
+      },
+      {
+        "apto": "0402",
+        "nome": "RAVENNA",
+        "tipo": "Proprietário",
+        "fone": ""
+      },
+      {
+        "apto": "0403",
+        "nome": "RAVENNA",
+        "fone": "+55 84991082354 (+55 987148414)",
+        "tipo": "Proprietário",
+        "cpf": "87811316404",
+        "email": "Tel.: (84)3234-0110/(84)99189-9192 / E-mail: atendimento.pratika.natal@gmail.com"
+      },
+      {
+        "apto": "0404",
+        "nome": "RAVENNA",
+        "fone": "+55 84991488668",
+        "tipo": "Proprietário",
+        "cpf": "08936915428",
+        "email": "rn@hotmail.com"
+      },
+      {
+        "apto": "0405",
+        "nome": "RAVENNA",
+        "fone": "+55 84999949133",
+        "tipo": "Proprietário",
+        "cpf": "10563319410",
+        "email": "oseas_rocha@hotmail.com"
+      },
+      {
+        "apto": "0406",
+        "nome": "RAVENNA",
+        "fone": "+55 8432181700 (+55 84991217301)",
+        "tipo": "Proprietário",
+        "cpf": "53646568887"
+      },
+      {
+        "apto": "0407",
+        "nome": "RAVENNA",
+        "fone": "+55 84 999223973",
+        "tipo": "Proprietário",
+        "cpf": "01742162460",
+        "email": "annapaulanasi@gmail.com"
+      },
+      {
+        "apto": "0408",
+        "nome": "RAVENNA",
+        "fone": "+55 84 988190062 (+55 84 999689935)",
+        "tipo": "Proprietário",
+        "cpf": "09967994436",
+        "email": "mihnathalia@outlook.com"
+      }
+    ]
+  },
+  {
+    "nome": "URUACU IV",
+    "slug": "uruacu-iv",
+    "residentes": [
+      {
+        "apto": "0101",
+        "nome": "CLAUDIO HENRIQUE M. DE MOURA",
+        "fone": "+55 32024138 (+55 991627000)",
+        "tipo": "Proprietário",
+        "cpf": "02677737493",
+        "email": "ebras@hotmail.com.br"
+      },
+      {
+        "apto": "0102",
+        "nome": "LUZIA MACEDO ALMEIDA",
+        "tipo": "Proprietário",
+        "fone": "",
+        "cpf": "09804323400",
+        "email": "almeidaluzia1955@bol.com.br"
+      },
+      {
+        "apto": "0103",
+        "nome": "MARIA JOSÉ DE FREITAS",
+        "tipo": "Proprietário",
+        "fone": "",
+        "email": "mariamagalhaes3@hotmail.com"
+      },
+      {
+        "apto": "0104",
+        "nome": "PATRICIA CRISTINA G. DE OLIVEIRA",
+        "fone": "+55 991921830",
+        "tipo": "Proprietário",
+        "cpf": "02389724450",
+        "email": "ago494@hotmail.com"
+      },
+      {
+        "apto": "0201",
+        "nome": "DILZA MARTINS DE SOUZA",
+        "tipo": "Proprietário",
+        "fone": "",
+        "email": "waldetemaria1965@gmail.com"
+      },
+      {
+        "apto": "0202",
+        "nome": "HERÁCLITO MARIA SOARES JUNIOR",
+        "fone": "+55 987888809",
+        "tipo": "Proprietário",
+        "cpf": "50333100468",
+        "email": "erismar_pereira@hotmail.com"
+      },
+      {
+        "apto": "0203",
+        "nome": "ADEMIR FRANCISCO DA SILVA",
+        "fone": "+55 30815479 (+55 994818383)",
+        "tipo": "Proprietário",
+        "cpf": "09737863453",
+        "email": "nanynhaaa@hotmail.com"
+      },
+      {
+        "apto": "0204",
+        "nome": "JOSÉ AIRTON CAVALCANTE",
+        "fone": "+55 87 996551222",
+        "tipo": "Proprietário",
+        "cpf": "63803143420",
+        "email": "direito@gmail.com"
+      },
+      {
+        "apto": "0301",
+        "nome": "EDJANE MELO DOS REIS",
+        "tipo": "Proprietário",
+        "fone": "",
+        "email": "edjane.melo2010@hotmail.com"
+      },
+      {
+        "apto": "0302",
+        "nome": "MARIA DE FATIMA MACEDO",
+        "fone": "+55 8499107 7219",
+        "tipo": "Proprietário",
+        "cpf": "14072394491",
+        "email": "mariadefatimamacedo.bb@gmail.com"
+      },
+      {
+        "apto": "0303",
+        "nome": "MARLENE RODRIGUES MAIA",
+        "tipo": "Proprietário",
+        "fone": "",
+        "email": "marlenemaia291148@gmail.com"
+      },
+      {
+        "apto": "0304",
+        "nome": "EVA MARIA CORTEZ",
+        "fone": "+55 84987261905",
+        "tipo": "Proprietário",
+        "cpf": "13111094472",
+        "email": "rapha-daya@hotmail.com"
+      },
+      {
+        "apto": "0401",
+        "nome": "SEVERINO MENDES DA SILVA",
+        "fone": "+55 84 994172254",
+        "tipo": "Proprietário",
+        "cpf": "54830702753",
+        "email": "rapha.ro2011@gmail.com"
+      },
+      {
+        "apto": "0402",
+        "nome": "HERMANO JOSÉ DE MOURA",
+        "fone": "+55 996441177 (+55 9 8823 5875)",
+        "tipo": "Proprietário",
+        "cpf": "50058924434",
+        "email": "hermano.moura@bol.com.br"
+      },
+      {
+        "apto": "0403",
+        "nome": "IRANI BEZERRA DE MEDEIROS",
+        "fone": "+55 996849090 (+55 996084320)",
+        "tipo": "Proprietário",
+        "cpf": "31295177404",
+        "email": "bezerrairanir24@gmail.com"
+      },
+      {
+        "apto": "0404",
+        "nome": "KARINA K. FURTADO DE MACEDO",
+        "tipo": "Proprietário",
+        "fone": "",
+        "email": "karinna@centeratacado.com.br"
+      },
+      {
+        "apto": "0501",
+        "nome": "VALENTINA AIRES DE ARAÚJO",
+        "tipo": "Proprietário",
+        "fone": "",
+        "email": "celiatessio@gmail.com"
+      },
+      {
+        "apto": "0502",
+        "nome": "MARLENE DA SILVA LIRA",
+        "fone": "+55 999842694 (+55 9 9173 7933)",
+        "tipo": "Proprietário",
+        "cpf": "17600138468",
+        "email": "moninha235235@gmail.com"
+      },
+      {
+        "apto": "0503",
+        "nome": "FRANCISCO SALES ALVES",
+        "tipo": "Proprietário",
+        "fone": ""
+      },
+      {
+        "apto": "0504",
+        "nome": "IVANALDO SOARES DA SILVA",
+        "tipo": "Proprietário",
+        "fone": "",
+        "email": "ivanaldo.soares@uol.com.br"
+      },
+      {
+        "apto": "0601",
+        "nome": "JOSÉ HENRIQUE TEXEIRA DE",
+        "fone": "+55 84994818090 (+55 84991019910)",
+        "tipo": "Proprietário",
+        "cpf": "27362221800",
+        "email": "ilanacruz@hotmail.com"
+      },
+      {
+        "apto": "0602",
+        "nome": "ROMILDO VILAR RIBEIRO DANTAS",
+        "fone": "+55 999847450 (+55 999299868)",
+        "tipo": "Proprietário",
+        "cpf": "42165075491",
+        "email": "romildovilar1@gmail.com"
+      },
+      {
+        "apto": "0603",
+        "nome": "CLAUDIO CESAR A. FLORÊNCIO",
+        "tipo": "Proprietário",
+        "fone": "",
+        "email": "ccaflorencio@hotmail.com"
+      },
+      {
+        "apto": "0604",
+        "nome": "JOÃO PAULO SEGUNDO",
+        "fone": "+55 996453316",
+        "tipo": "Proprietário",
+        "cpf": "85283096491"
+      },
+      {
+        "apto": "0701",
+        "nome": "JUCIANE HENRIQUE DA SILVA",
+        "fone": "+55 996282314 (+55 84998647307)",
+        "tipo": "Proprietário",
+        "cpf": "67218997449",
+        "email": "juciane_henriques@hotmail.com"
+      },
+      {
+        "apto": "0702",
+        "nome": "ANTERCIO PEREIRA DA SILVA FILHO",
+        "fone": "+55 84 92087291",
+        "tipo": "Proprietário",
+        "cpf": "70015892417",
+        "email": "morganaaleixo4@gmail.com"
+      },
+      {
+        "apto": "0703",
+        "nome": "FABRICIA ABRANTES F. DA ROCHA",
+        "fone": "+55 84998562000",
+        "tipo": "Proprietário",
+        "cpf": "88463567487",
+        "email": "alexandro.vladno@gmail.com"
+      },
+      {
+        "apto": "0704",
+        "nome": "RITA DE CASIA FARIAS P. BARROS",
+        "fone": "+55 999839678",
+        "tipo": "Proprietário",
+        "cpf": "02582481491",
+        "email": "rcassiabarros@hotmail.com"
+      },
+      {
+        "apto": "0801",
+        "nome": "Maria Eliene Morais Beserra",
+        "fone": "+55 84999865777",
+        "tipo": "Proprietário",
+        "cpf": "20171102487",
+        "email": "elienebeserra@uol.com.br"
+      },
+      {
+        "apto": "0802",
+        "nome": "Luciene Alves de Melo",
+        "tipo": "Proprietário",
+        "fone": ""
+      },
+      {
+        "apto": "0803",
+        "nome": "ROBERTO ANTÔNIO DA SILVA",
+        "fone": "+55 32236724 (+55 991291525)",
+        "tipo": "Proprietário",
+        "cpf": "14068559449",
+        "email": "roberto@potycimento.com.br"
+      },
+      {
+        "apto": "0804",
+        "nome": "JOSÉ HÉLIO SOARES",
+        "tipo": "Proprietário",
+        "fone": "",
+        "email": "hhbsoares@gmail.com"
+      },
+      {
+        "apto": "0901",
+        "nome": "JOSEANE BERNARDO DA SILVA",
+        "tipo": "Proprietário",
+        "fone": "",
+        "email": "josianebernardo@yahoo.com.br"
+      },
+      {
+        "apto": "0902",
+        "nome": "MARIA DO CÉU SILVA MARTINS",
+        "fone": "+55 991667261 (+55 988522411)",
+        "tipo": "Proprietário",
+        "cpf": "70367930404",
+        "email": "andrey_yuri@hotmail.com"
+      },
+      {
+        "apto": "0903",
+        "nome": "DIACUI GONÇALVES DE OLIVEIRA",
+        "fone": "+55 999841402",
+        "tipo": "Proprietário",
+        "cpf": "09739530478",
+        "email": "diacuigo@gmail.com"
+      },
+      {
+        "apto": "0904",
+        "nome": "PAULO CESAR CABRAL DE ALMEIDA",
+        "fone": "+55 33113601;+55 33113600 (+55",
+        "tipo": "Proprietário",
+        "cpf": "62587382491",
+        "email": "Gracielemandu19@gmail.com"
+      },
+      {
+        "apto": "1001",
+        "nome": "MARIA CONCEIÇÃO S. BEZERRA /",
+        "fone": "+55 84 92214114",
+        "tipo": "Proprietário",
+        "cpf": "29751063434",
+        "email": "amariles.camara@ig.com.br"
+      },
+      {
+        "apto": "1002",
+        "nome": "WILMA CLAUDIA DE O. NASCIMENTO",
+        "fone": "+55 41414571 (+55 991578159)",
+        "tipo": "Proprietário",
+        "cpf": "44428367449",
+        "email": "eleinepmg@hotmail.com"
+      },
+      {
+        "apto": "1003",
+        "nome": "SELMA REJANE DA SILVA GOMES",
+        "tipo": "Proprietário",
+        "fone": ""
+      },
+      {
+        "apto": "1004",
+        "nome": "HELDER JANSEN R. DE OLIVEIRA",
+        "fone": "55 84981202282",
+        "tipo": "Proprietário",
+        "cpf": "51234980444",
+        "email": "cata.suporte@gmail.com"
+      },
+      {
+        "apto": "1101",
+        "nome": "DIACUI GALVÃO DE LIMA MARQUES",
+        "fone": "+55 999428224",
+        "tipo": "Proprietário",
+        "cpf": "24232394400",
+        "email": "alineparelhas@yahoo.com.br"
+      },
+      {
+        "apto": "1102",
+        "nome": "LUCIANE SILVA CAMARA DE",
+        "tipo": "Proprietário",
+        "fone": "",
+        "cpf": "02261872410",
+        "email": "lilianecamara2007@hotmail.com"
+      },
+      {
+        "apto": "1103",
+        "nome": "JOANA DARC DE OLIVEIRA",
+        "fone": "+55 84996229070 (+55 84996229070)",
+        "tipo": "Proprietário",
+        "cpf": "03429601487",
+        "email": "paulojr@gmail.com;pmsjunior@icloud."
+      },
+      {
+        "apto": "1104",
+        "nome": "ADEILSON BEZERRA DE MEDEIROS",
+        "tipo": "Proprietário",
+        "fone": "",
+        "email": "carolmedeiroseng@gmail.com"
+      }
+    ]
+  }
+];
+var condAtivo = CONDOMINIOS[0].slug;
+
+function render() {
+  var busca = document.getElementById('searchInput').value.toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g, '');
+  var cond = CONDOMINIOS.find(function(c) { return c.slug === condAtivo; });
+  if (!cond) return;
+  
+  var lista = cond.residentes;
+  if (busca) {
+    lista = lista.filter(function(r) {
+      return (r.nome || '').toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g, '').indexOf(busca) !== -1 ||
+             (r.apto || '').indexOf(busca) !== -1 ||
+             (r.fone || '').indexOf(busca) !== -1;
+    });
+  }
+  
+  document.getElementById('container').innerHTML = lista.map(function(r) {
+    var ini = (r.nome || '?').charAt(0);
+    var fone = r.fone || '';
+    return '<div class="residente-card"><div class="avatar">' + ini + '</div><div class="info"><h4>' + r.nome + '</h4><div class="meta"><b>Apto:</b> ' + (r.apto || '') + (fone ? ' | <b>Tel:</b> ' + fone : ' | ⚠️ Sem telefone') + (r.email ? ' | 📧 ' + r.email : '') + '</div></div></div>';
+  }).join('');
+}
+
+// Render tabs
+document.getElementById('condTabs').innerHTML = CONDOMINIOS.map(function(c) {
+  return '<button class="cond-tab' + (c.slug === condAtivo ? ' active' : '') + '" onclick="switchCond(\'' + c.slug + '\')">🏢 ' + c.nome + ' <span class="count">' + c.residentes.length + '</span></button>';
+}).join('');
+
+function switchCond(slug) {
+  condAtivo = slug;
+  document.querySelectorAll('.cond-tab').forEach(function(t) { t.classList.remove('active'); });
+  event.target.classList.add('active');
+  render();
+}
+
+// Stats
+var total = 0, wpp = 0;
+CONDOMINIOS.forEach(function(c) { c.residentes.forEach(function(r) { total++; if (r.fone) wpp++; }); });
+document.getElementById('statsRow').innerHTML = '<div class="stat-card"><div class="num">' + CONDOMINIOS.length + '</div><div class="label">Condomínios</div></div><div class="stat-card"><div class="num">' + total + '</div><div class="label">Condôminos</div></div><div class="stat-card green"><div class="num">' + wpp + '</div><div class="label">Com Telefone</div></div><div class="stat-card"><div class="num">' + (total - wpp) + '</div><div class="label">Sem Telefone</div></div>';
+
+render();
+</script>
+</body>
+</html>

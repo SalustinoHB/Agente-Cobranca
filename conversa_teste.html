@@ -1,0 +1,270 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>💬 Simular Conversa - Agente Cobrança</title>
+<style>
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif; background: #0f0f1a; color: #e0e0e0; padding: 20px; height: 100vh; display: flex; }
+    
+    .container { max-width: 900px; margin: 0 auto; display: flex; gap: 20px; width: 100%; height: 100%; }
+    
+    .chat-panel { flex: 1; background: #1a1a2e; border: 1px solid #2a2a4a; border-radius: 12px; display: flex; flex-direction: column; overflow: hidden; }
+    .chat-header { padding: 15px 20px; background: #16213e; border-bottom: 1px solid #2a2a4a; display: flex; align-items: center; gap: 12px; }
+    .chat-header .avatar { width: 40px; height: 40px; border-radius: 50%; background: #00d4aa; display: flex; align-items: center; justify-content: center; color: #000; font-weight: 700; }
+    .chat-header .info h3 { font-size: 0.95em; color: #fff; }
+    .chat-header .info p { font-size: 0.75em; color: #888; }
+    .chat-header .status { margin-left: auto; font-size: 0.75em; padding: 4px 10px; border-radius: 10px; background: #1a3a2e; color: #00d4aa; }
+    
+    .chat-messages { flex: 1; padding: 15px; overflow-y: auto; display: flex; flex-direction: column; gap: 8px; }
+    .msg { max-width: 80%; padding: 10px 14px; border-radius: 12px; font-size: 0.9em; line-height: 1.4; animation: fadeIn 0.3s ease; }
+    .msg.morador { background: #2a2a5a; align-self: flex-end; border-bottom-right-radius: 4px; }
+    .msg.agente { background: #1a3a2e; border: 1px solid #2a5a3e; align-self: flex-start; border-bottom-left-radius: 4px; }
+    .msg .time { font-size: 0.65em; color: #666; margin-top: 4px; text-align: right; }
+    .msg .label { font-size: 0.7em; color: #888; margin-bottom: 3px; }
+
+    @keyframes fadeIn { from { opacity: 0; transform: translateY(5px); } to { opacity: 1; transform: translateY(0); } }
+    @keyframes typing { 0%,100% { opacity: 0.3; } 50% { opacity: 1; } }
+
+    .chat-input { padding: 15px; border-top: 1px solid #2a2a4a; display: flex; gap: 8px; }
+    .chat-input select { flex: 1; padding: 10px 14px; border-radius: 8px; border: 1px solid #333; background: #12121e; color: #e0e0e0; font-size: 0.9em; outline: none; }
+    .chat-input button { padding: 10px 20px; border-radius: 8px; border: none; background: #00d4aa; color: #000; font-weight: 600; cursor: pointer; transition: 0.2s; }
+    .chat-input button:hover { background: #00e6b8; }
+    .chat-input button:disabled { opacity: 0.4; cursor: not-allowed; }
+
+    .side-panel { width: 300px; display: flex; flex-direction: column; gap: 15px; }
+    .card { background: #1a1a2e; border: 1px solid #2a2a4a; border-radius: 12px; padding: 15px; }
+    .card h3 { font-size: 0.85em; color: #00d4aa; margin-bottom: 10px; }
+    .card label { display: block; font-size: 0.78em; color: #888; margin-bottom: 3px; }
+    .card input, .card textarea { width: 100%; padding: 8px 10px; border-radius: 6px; border: 1px solid #333; background: #12121e; color: #e0e0e0; font-size: 0.82em; margin-bottom: 8px; outline: none; }
+    .card input:focus, .card textarea:focus { border-color: #00d4aa; }
+
+    .typing-indicator { align-self: flex-start; background: #1a3a2e; border: 1px solid #2a5a3e; border-radius: 12px; border-bottom-left-radius: 4px; padding: 10px 16px; display: none; }
+    .typing-dot { display: inline-block; width: 6px; height: 6px; border-radius: 50%; background: #00d4aa; margin: 0 2px; animation: typing 1.4s infinite; }
+    .typing-dot:nth-child(2) { animation-delay: 0.2s; }
+    .typing-dot:nth-child(3) { animation-delay: 0.4s; }
+
+    .log { font-size: 0.75em; color: #666; max-height: 200px; overflow-y: auto; }
+    .log div { padding: 2px 0; border-bottom: 1px solid #1a1a2e; }
+</style>
+</head>
+<body>
+<div class="container">
+    <div class="chat-panel">
+        <div class="chat-header">
+            <div class="avatar">R</div>
+            <div class="info">
+                <h3>Agente Renaissance</h3>
+                <p>Pratika Administradora</p>
+            </div>
+            <div class="status" id="statusBadge">🟢 Online</div>
+        </div>
+        <div class="chat-messages" id="chatMessages">
+            <div class="msg agente">
+                <div class="label">🤖 Agente Renaissance</div>
+                Olá! Aqui é da Pratika Administradora, sobre o condomínio Renaissance. Como posso ajudar?
+                <div class="time">18/05/2026 19:00</div>
+            </div>
+        </div>
+        <div class="chat-input">
+            <select id="fraseSelect">
+                <option value="">✏️ Escolha uma frase...</option>
+                <option value="Oi, tudo bem?">👋 "Oi, tudo bem?"</option>
+                <option value="Já paguei o boleto">💰 "Já paguei o boleto"</option>
+                <option value="Vou pagar amanhã">📅 "Vou pagar amanhã"</option>
+                <option value="Manda a 2ª via do boleto">📄 "Manda a 2ª via"</option>
+                <option value="Quero parcelar">🤝 "Quero parcelar"</option>
+                <option value="Isso é engano, não devo nada">😠 "Isso é engano"</option>
+                <option value="Teste aleatório 123">❓ "Teste aleatório"</option>
+                <option value="">✏️ Digitar próprio texto</option>
+            </select>
+            <input type="text" id="textoCustom" placeholder="Ou digite aqui..." style="flex:1; display:none; padding:10px 14px; border-radius:8px; border:1px solid #333; background:#12121e; color:#e0e0e0; outline:none;">
+            <button id="enviarBtn" onclick="enviarMensagem()">Enviar</button>
+        </div>
+    </div>
+
+    <div class="side-panel">
+        <div class="card">
+            <h3>⚙️ Resultado da IA</h3>
+            <div id="resultadoIA">
+                <p style="color:#666;font-size:0.8em;">Aguardando mensagem...</p>
+            </div>
+        </div>
+        <div class="card">
+            <h3>📋 Conversas Recentes</h3>
+            <div class="log" id="log">
+                <div style="color:#555;">Nenhuma conversa ainda</div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+const API_LOCAL = "http://localhost:5005";
+let contactNum = "5584991627655";
+
+async function enviarMensagem() {
+    const select = document.getElementById('fraseSelect');
+    const custom = document.getElementById('textoCustom');
+    const texto = select.value || custom.value;
+    if (!texto.trim()) return;
+
+    const btn = document.getElementById('enviarBtn');
+    btn.disabled = true;
+    addMessage('morador', texto);
+    adicionarLog(`Voce: texto`);
+    mostrarResultado("Processando", "Aguardando resposta...");
+
+    try {
+        const r1 = await fetch(API_LOCAL + '/api/webhook/zapi', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ phone: contactNum, messageId: 'WEB_' + Date.now(), text: texto, fromMe: false, senderName: 'Murilo' })
+        });
+        const respostaIA = await r1.json();
+        const intent = respostaIA.intencao || '?';
+        const resposta = respostaIA.resposta_texto || '(sem resposta)';
+        mostrarResultado(intent, resposta);
+        adicionarLog('IA: ' + intent);
+
+        document.getElementById('typing')?.remove();
+        const typingDiv = document.createElement('div');
+        typingDiv.className = 'typing-indicator';
+        typingDiv.id = 'typingIndicator';
+        typingDiv.innerHTML = '<span class="typing-dot"></span><span class="typing-dot"></span><span class="typing-dot"></span>';
+        document.getElementById('chatMessages').appendChild(typingDiv);
+        document.getElementById('chatMessages').scrollTop = document.getElementById('chatMessages').scrollHeight;
+
+        await new Promise(r => setTimeout(r, 2000 + Math.random() * 2000));
+        document.getElementById('typingIndicator')?.remove();
+        addMessage('agente', resposta, 'Intencao: ' + intent);
+        adicionarLog('Agente: ' + resposta.substring(0, 40));
+    } catch (err) {
+        mostrarResultado('Erro', 'API offline ou CORS bloqueado. Rode a API: python -m uvicorn agente.api:app --host 0.0.0.0 --port 5005');
+        addMessage('agente', 'API offline - veja o terminal do PowerShell');
+        adicionarLog('Erro: API offline');
+    }
+    btn.disabled = false;
+    select.value = '';
+    custom.value = '';
+    custom.style.display = 'none';
+}
+</script>
+
+let conversaAtiva = true;
+let contactNum = "5584991627655";  // Número do Murilo pra teste
+
+document.getElementById('fraseSelect').addEventListener('change', function() {
+    const custom = document.getElementById('textoCustom');
+    if (this.value === "") {
+        custom.style.display = 'block';
+        custom.focus();
+    } else {
+        custom.style.display = 'none';
+    }
+});
+
+function addMessage(tipo, texto, extra = '') {
+    const chat = document.getElementById('chatMessages');
+    const div = document.createElement('div');
+    div.className = `msg ${tipo}`;
+    const label = tipo === 'morador' ? '👤 Você' : '🤖 Agente Renaissance';
+    const time = new Date().toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit' });
+    div.innerHTML = `<div class="label">${label}</div>${texto.replace(/\n/g, '<br>')}${extra ? '<br><span style="font-size:0.7em;color:#666;">' + extra + '</span>' : ''}<div class="time">${time}</div>`;
+    chat.appendChild(div);
+    chat.scrollTop = chat.scrollHeight;
+}
+
+function showTyping(show) {
+    const el = document.getElementById('typingIndicator');
+    if (!el) return;
+    el.style.display = show ? 'block' : 'none';
+}
+
+function adicionarLog(texto) {
+    const log = document.getElementById('log');
+    const time = new Date().toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit' });
+    const div = document.createElement('div');
+    div.textContent = `[${time}] ${texto}`;
+    log.insertBefore(div, log.firstChild);
+    if (log.children.length > 20) log.removeChild(log.lastChild);
+}
+
+function mostrarResultado(intencao, resposta) {
+    const el = document.getElementById('resultadoIA');
+    el.innerHTML = `
+        <div style="margin-bottom:8px;"><span style="color:#888;">🧠 Intenção:</span> <strong style="color:#00d4aa;">${intencao}</strong></div>
+        <div style="margin-bottom:8px;"><span style="color:#888;">💬 Resposta:</span></div>
+        <div style="background:#12121e; padding:10px; border-radius:8px; font-size:0.85em; line-height:1.4; white-space:pre-wrap;">${resposta}</div>
+    `;
+}
+
+async function enviarMensagem() {
+    const select = document.getElementById('fraseSelect');
+    const custom = document.getElementById('textoCustom');
+    const texto = select.value || custom.value;
+    if (!texto.trim()) return;
+
+    const btn = document.getElementById('enviarBtn');
+    btn.disabled = true;
+
+    // Mostra no chat
+    addMessage('morador', texto);
+    adicionarLog(`📤 Você: "${texto.substring(0, 40)}..."`);
+    mostrarResultado("⏳ Processando...", "Aguardando resposta do agente...");
+
+    try {
+        // 1. Envia pro webhook LOCAL primeiro (classifica + gera resposta)
+        const r1 = await fetch(`${API_LOCAL}/api/webhook/zapi`, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+                phone: contactNum,
+                messageId: "WEB_" + Date.now(),
+                text: texto,
+                fromMe: false,
+                senderName: "Murilo"
+            })
+        });
+        const respostaIA = await r1.json();
+        
+        const intent = respostaIA.intencao || "desconhecida";
+        const resposta = respostaIA.resposta_texto || "(sem resposta gerada)";
+        
+        // Mostra resultado
+        mostrarResultado(intent, resposta);
+        adicionarLog(`🤖 IA detectou: ${intent}`);
+
+        // 2. Mostra "digitando" no chat
+        const typingDiv = document.createElement('div');
+        typingDiv.className = 'typing-indicator';
+        typingDiv.id = 'typingIndicator';
+        typingDiv.innerHTML = '<span class="typing-dot"></span><span class="typing-dot"></span><span class="typing-dot"></span>';
+        document.getElementById('chatMessages').appendChild(typingDiv);
+        document.getElementById('chatMessages').scrollTop = document.getElementById('chatMessages').scrollHeight;
+
+        // 3. Delay de 2-4s simulando processamento
+        await new Promise(r => setTimeout(r, 2000 + Math.random() * 2000));
+
+        // Remove typing
+        document.getElementById('typingIndicator')?.remove();
+
+        // 4. Mostra resposta no chat
+        addMessage('agente', resposta, `🧠 Intenção: ${intent}`);
+        adicionarLog(`🤖 Agente respondeu: "${resposta.substring(0, 50)}..."`);
+
+    } catch (err) {
+        mostrarResultado("❌ Erro", err.message);
+        addMessage('agente', `❌ Erro ao processar: ${err.message}`);
+        adicionarLog(`❌ Erro: ${err.message}`);
+    }
+
+    btn.disabled = false;
+    select.value = "";
+    custom.value = "";
+    custom.style.display = 'none';
+}
+</script>
+</body>
+</html>

@@ -1,0 +1,528 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Pratika - Teste de Envio Z-API</title>
+<style>
+  * { box-sizing: border-box; }
+  body {
+    font-family: -apple-system, system-ui, 'Segoe UI', Roboto, sans-serif;
+    margin: 0;
+    background: #0a0a0a;
+    color: #fff;
+    padding: 24px;
+  }
+  .header {
+    max-width: 1100px;
+    margin: 0 auto 24px;
+    padding: 20px 24px;
+    background: linear-gradient(135deg, #25D366 0%, #1ba551 100%);
+    border-radius: 14px;
+    color: #000;
+  }
+  .header h1 { margin: 0 0 6px; font-size: 24px; }
+  .header .sub { font-size: 14px; opacity: 0.85; }
+  .config-section {
+    max-width: 1100px;
+    margin: 0 auto 24px;
+    padding: 20px 24px;
+    background: #1a1a1a;
+    border-radius: 12px;
+    border: 1px solid #2a2a2a;
+  }
+  .config-section h2 {
+    margin: 0 0 16px;
+    font-size: 16px;
+    color: #25D366;
+  }
+  .config-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+    gap: 12px;
+  }
+  .config-field {
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+  }
+  .config-field label {
+    font-size: 12px;
+    color: #aaa;
+    font-weight: 600;
+  }
+  .config-field input {
+    padding: 10px 12px;
+    border-radius: 8px;
+    border: 1px solid #333;
+    background: #0a0a0a;
+    color: #fff;
+    font-size: 13px;
+    font-family: monospace;
+  }
+  .config-field input:focus {
+    outline: none;
+    border-color: #25D366;
+  }
+  .stats {
+    display: flex;
+    gap: 16px;
+    max-width: 1100px;
+    margin: 0 auto 20px;
+  }
+  .stat {
+    flex: 1;
+    background: #1a1a1a;
+    padding: 16px 20px;
+    border-radius: 10px;
+    border-left: 4px solid #25D366;
+  }
+  .stat .num { font-size: 26px; font-weight: 700; color: #25D366; }
+  .stat .label { font-size: 13px; color: #aaa; margin-top: 4px; }
+  .container {
+    max-width: 1100px;
+    margin: 0 auto;
+  }
+  .card {
+    background: #1a1a1a;
+    border-radius: 12px;
+    margin-bottom: 16px;
+    overflow: hidden;
+    border-left: 4px solid #25D366;
+  }
+  .card.sent { border-left-color: #1ba551; opacity: 0.7; }
+  .card.failed { border-left-color: #ff4444; }
+  .card-header {
+    padding: 18px 22px;
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    gap: 20px;
+  }
+  .card-info h3 {
+    margin: 0 0 6px;
+    font-size: 17px;
+    color: #fff;
+  }
+  .card-info .meta {
+    font-size: 13px;
+    color: #aaa;
+    line-height: 1.6;
+  }
+  .card-info .meta b { color: #fff; }
+  .tag {
+    display: inline-block;
+    padding: 3px 10px;
+    border-radius: 12px;
+    font-size: 11px;
+    font-weight: 600;
+    margin-left: 6px;
+  }
+  .tag-green { background: #25D366; color: #000; }
+  .tag-red { background: #ff4444; color: #fff; }
+  .message {
+    padding: 0 22px;
+    margin-bottom: 14px;
+  }
+  .message-preview {
+    background: #0a0a0a;
+    padding: 14px 16px;
+    border-radius: 8px;
+    font-size: 13px;
+    line-height: 1.55;
+    white-space: pre-wrap;
+    color: #ddd;
+    border: 1px solid #2a2a2a;
+    font-family: inherit;
+    width: 100%;
+    min-height: 120px;
+    resize: vertical;
+  }
+  .message-preview:focus {
+    outline: none;
+    border-color: #25D366;
+  }
+  .actions {
+    padding: 14px 22px 18px;
+    display: flex;
+    gap: 10px;
+    flex-wrap: wrap;
+    border-top: 1px solid #2a2a2a;
+  }
+  .btn {
+    padding: 9px 18px;
+    border-radius: 7px;
+    border: none;
+    font-size: 13px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.15s;
+  }
+  .btn-approve {
+    background: #25D366;
+    color: #000;
+  }
+  .btn-approve:hover { background: #1ba551; }
+  .btn-approve:disabled {
+    background: #1a4d2e;
+    color: #666;
+    cursor: not-allowed;
+  }
+  .btn-edit {
+    background: #333;
+    color: #fff;
+  }
+  .btn-edit:hover { background: #444; }
+  .btn-skip {
+    background: transparent;
+    color: #888;
+    border: 1px solid #333;
+  }
+  .btn-skip:hover { color: #fff; border-color: #555; }
+  .footer-actions {
+    max-width: 1100px;
+    margin: 30px auto;
+    padding: 24px;
+    background: #1a1a1a;
+    border-radius: 12px;
+    display: flex;
+    gap: 14px;
+    justify-content: center;
+  }
+  .btn-big {
+    padding: 14px 32px;
+    font-size: 15px;
+    font-weight: 700;
+  }
+  .btn-big.approve-all {
+    background: #25D366;
+    color: #000;
+  }
+  .btn-big.approve-all:disabled {
+    background: #1a4d2e;
+    color: #666;
+    cursor: not-allowed;
+  }
+  .status-badge {
+    display: inline-block;
+    padding: 4px 10px;
+    border-radius: 12px;
+    font-size: 11px;
+    font-weight: 600;
+    margin-left: 8px;
+  }
+  .approved { background: #25D366; color: #000; }
+  .failed { background: #ff4444; color: #fff; }
+  .skipped { background: #555; color: #fff; }
+  #toast {
+    position: fixed;
+    bottom: 24px;
+    right: 24px;
+    background: #25D366;
+    color: #000;
+    padding: 14px 20px;
+    border-radius: 10px;
+    font-weight: 600;
+    box-shadow: 0 6px 24px rgba(0,0,0,0.4);
+    display: none;
+    z-index: 100;
+  }
+  .spinner {
+    display: inline-block;
+    width: 14px;
+    height: 14px;
+    border: 2px solid rgba(0,0,0,0.3);
+    border-radius: 50%;
+    border-top-color: #000;
+    animation: spin 1s linear infinite;
+    margin-right: 6px;
+    vertical-align: middle;
+  }
+  @keyframes spin { to { transform: rotate(360deg); } }
+</style>
+</head>
+<body>
+
+<div class="header">
+  <h1>📱 Pratika - Teste de Envio Z-API</h1>
+  <div class="sub">Envio manual para contatos pessoais · 18/05/2026</div>
+</div>
+
+<!-- Configuração Z-API -->
+<div class="config-section">
+  <h2>⚙️ Configuração Z-API (já preenchida - edite se necessário)</h2>
+  <div class="config-grid">
+    <div class="config-field">
+      <label>Client-Token (Segurança da Conta)</label>
+      <input type="text" id="clientToken" value="F45886bf7d2c54c2385c46c92e3c5c259S">
+    </div>
+    <div class="config-field">
+      <label>Instance ID</label>
+      <input type="text" id="instanceId" value="3F3504716F44324E0D095EE982B712E3">
+    </div>
+    <div class="config-field">
+      <label>Instance Token (Token da Instância)</label>
+      <input type="text" id="instanceToken" value="EB69BCFE629B94E3AAC8D8E9">
+    </div>
+  </div>
+</div>
+
+<div class="stats">
+  <div class="stat">
+    <div class="num" id="stat-total">4</div>
+    <div class="label">Contatos para teste</div>
+  </div>
+  <div class="stat">
+    <div class="num" id="stat-approved">0</div>
+    <div class="label">Enviadas</div>
+  </div>
+  <div class="stat">
+    <div class="num" id="stat-failed">0</div>
+    <div class="label">Falhas</div>
+  </div>
+  <div class="stat">
+    <div class="num" id="stat-pending">4</div>
+    <div class="label">Pendentes</div>
+  </div>
+</div>
+
+<div class="container">
+
+  <!-- Card 1 - Thaynan -->
+  <div class="card" data-id="1" data-phone="5584999656443">
+    <div class="card-header">
+      <div class="card-info">
+        <h3>Thaynan <span class="tag tag-green">Contato Pessoal</span></h3>
+        <div class="meta">
+          <b>WhatsApp:</b> +55 84 99656-4443
+        </div>
+      </div>
+    </div>
+    <div class="message">
+      <textarea class="message-preview" id="msg-1">Oi Thaynan! Tudo bem?
+
+Este é um teste do sistema de cobrança do condomínio Renaissance usando Z-API.
+
+Se você recebeu esta mensagem, tudo está funcionando perfeitamente! ✅
+
+Obrigado por ajudar no teste!
+
+Pratika Administradora</textarea>
+    </div>
+    <div class="actions">
+      <button class="btn btn-approve" id="btn-send-1" onclick="enviar(1)">📤 Enviar WhatsApp</button>
+      <button class="btn btn-skip" onclick="pular(1)">❌ Pular</button>
+    </div>
+  </div>
+
+  <!-- Card 2 - Nathan -->
+  <div class="card" data-id="2" data-phone="5584988712914">
+    <div class="card-header">
+      <div class="card-info">
+        <h3>Nathan <span class="tag tag-green">Contato Pessoal</span></h3>
+        <div class="meta">
+          <b>WhatsApp:</b> +55 84 98871-2914
+        </div>
+      </div>
+    </div>
+    <div class="message">
+      <textarea class="message-preview" id="msg-2">Oi Nathan! Tudo bem?
+
+Este é um teste do sistema de cobrança do condomínio Renaissance usando Z-API.
+
+Se você recebeu esta mensagem, tudo está funcionando perfeitamente! ✅
+
+Obrigado por ajudar no teste!
+
+Pratika Administradora</textarea>
+    </div>
+    <div class="actions">
+      <button class="btn btn-approve" id="btn-send-2" onclick="enviar(2)">📤 Enviar WhatsApp</button>
+      <button class="btn btn-skip" onclick="pular(2)">❌ Pular</button>
+    </div>
+  </div>
+
+  <!-- Card 3 - Mauricio -->
+  <div class="card" data-id="3" data-phone="5584988150857">
+    <div class="card-header">
+      <div class="card-info">
+        <h3>Mauricio <span class="tag tag-green">Contato Pessoal</span></h3>
+        <div class="meta">
+          <b>WhatsApp:</b> +55 84 98815-0857
+        </div>
+      </div>
+    </div>
+    <div class="message">
+      <textarea class="message-preview" id="msg-3">Oi Mauricio! Tudo bem?
+
+Este é um teste do sistema de cobrança do condomínio Renaissance usando Z-API.
+
+Se você recebeu esta mensagem, tudo está funcionando perfeitamente! ✅
+
+Obrigado por ajudar no teste!
+
+Pratika Administradora</textarea>
+    </div>
+    <div class="actions">
+      <button class="btn btn-approve" id="btn-send-3" onclick="enviar(3)">📤 Enviar WhatsApp</button>
+      <button class="btn btn-skip" onclick="pular(3)">❌ Pular</button>
+    </div>
+  </div>
+
+  <!-- Card 4 - Joao -->
+  <div class="card" data-id="4" data-phone="5584999209430">
+    <div class="card-header">
+      <div class="card-info">
+        <h3>João <span class="tag tag-green">Contato Pessoal</span></h3>
+        <div class="meta">
+          <b>WhatsApp:</b> +55 84 99209-4430
+        </div>
+      </div>
+    </div>
+    <div class="message">
+      <textarea class="message-preview" id="msg-4">Oi João! Tudo bem?
+
+Este é um teste do sistema de cobrança do condomínio Renaissance usando Z-API.
+
+Se você recebeu esta mensagem, tudo está funcionando perfeitamente! ✅
+
+Obrigado por ajudar no teste!
+
+Pratika Administradora</textarea>
+    </div>
+    <div class="actions">
+      <button class="btn btn-approve" id="btn-send-4" onclick="enviar(4)">📤 Enviar WhatsApp</button>
+      <button class="btn btn-skip" onclick="pular(4)">❌ Pular</button>
+    </div>
+  </div>
+
+</div>
+
+<div class="footer-actions">
+  <button class="btn btn-big approve-all" id="btn-send-all" onclick="enviarTodas()">📤 Enviar TODAS (4)</button>
+  <button class="btn btn-big cancel-all" onclick="pularTodas()">❌ Pular TODAS</button>
+</div>
+
+<div id="toast"></div>
+
+<script>
+function toast(msg, type = 'success') {
+  const t = document.getElementById('toast');
+  t.textContent = msg;
+  t.style.background = type === 'error' ? '#ff4444' : '#25D366';
+  t.style.color = type === 'error' ? '#fff' : '#000';
+  t.style.display = 'block';
+  setTimeout(() => { t.style.display = 'none'; }, 4000);
+}
+
+function getBaseUrl() {
+  const instanceId = document.getElementById('instanceId').value.trim();
+  const instanceToken = document.getElementById('instanceToken').value.trim();
+  return `https://api.z-api.io/instances/${instanceId}/token/${instanceToken}`;
+}
+
+function getClientToken() {
+  return document.getElementById('clientToken').value.trim();
+}
+
+async function enviar(id) {
+  const card = document.querySelector(`.card[data-id="${id}"]`);
+  const phone = card.getAttribute('data-phone');
+  const textarea = document.getElementById(`msg-${id}`);
+  const message = textarea.value.trim();
+  const btn = document.getElementById(`btn-send-${id}`);
+
+  if (!message) {
+    toast('Mensagem vazia! Escreva algo antes de enviar.', 'error');
+    return;
+  }
+
+  btn.disabled = true;
+  btn.innerHTML = '<span class="spinner"></span> Enviando...';
+
+  try {
+    const baseUrl = getBaseUrl();
+    const clientToken = getClientToken();
+
+    const response = await fetch(`${baseUrl}/send-text`, {
+      method: 'POST',
+      headers: {
+        'Client-Token': clientToken,
+        'Content-Type': 'application/json'
+      },
+      body: JSON.stringify({
+        phone: phone,
+        message: message,
+        delayMessage: 1
+      })
+    });
+
+    const data = await response.json();
+
+    if (response.ok && (data.messageId || data.zaapId)) {
+      const actions = card.querySelector('.actions');
+      actions.innerHTML = '<span class="status-badge approved">✅ Enviado com sucesso</span>';
+      card.classList.add('sent');
+      toast(`Mensagem ${id} enviada! ID: ${data.messageId || data.zaapId}`);
+    } else {
+      throw new Error(data.error || 'Erro desconhecido');
+    }
+  } catch (err) {
+    btn.disabled = false;
+    btn.textContent = '📤 Tentar novamente';
+    card.classList.add('failed');
+    toast(`Erro no envio ${id}: ${err.message}`, 'error');
+    console.error(err);
+  }
+
+  atualizarStats();
+}
+
+function pular(id) {
+  const card = document.querySelector(`.card[data-id="${id}"]`);
+  const actions = card.querySelector('.actions');
+  actions.innerHTML = '<span class="status-badge skipped">❌ Pulado</span>';
+  card.style.opacity = '0.4';
+  toast(`Mensagem ${id} pulada`);
+  atualizarStats();
+}
+
+async function enviarTodas() {
+  if (!confirm('Enviar mensagens para TODOS os 4 contatos?')) return;
+
+  const btn = document.getElementById('btn-send-all');
+  btn.disabled = true;
+  btn.innerHTML = '<span class="spinner"></span> Enviando...';
+
+  for (let i = 1; i <= 4; i++) {
+    const card = document.querySelector(`.card[data-id="${i}"]`);
+    if (card && !card.classList.contains('sent') && !card.classList.contains('skipped')) {
+      await enviar(i);
+      if (i < 4) await new Promise(r => setTimeout(r, 3000));
+    }
+  }
+
+  btn.disabled = false;
+  btn.textContent = '📤 Enviar TODAS (4)';
+  toast('Envio em lote concluído!');
+}
+
+function pularTodas() {
+  if (!confirm('Pular TODAS as mensagens? Nada será enviado.')) return;
+  for (let i = 1; i <= 4; i++) pular(i);
+}
+
+function atualizarStats() {
+  const sent = document.querySelectorAll('.card.sent').length;
+  const failed = document.querySelectorAll('.card.failed').length;
+  const skipped = document.querySelectorAll('.status-badge.skipped').length;
+  const total = 4;
+
+  document.getElementById('stat-approved').textContent = sent;
+  document.getElementById('stat-failed').textContent = failed;
+  document.getElementById('stat-pending').textContent = total - sent - skipped;
+}
+</script>
+
+</body>
+</html>

@@ -1,0 +1,209 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Painel de Condomínios - Pratika</title>
+<style>
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body { font-family: -apple-system, system-ui, 'Segoe UI', Roboto, sans-serif; background: #0a0a0a; color: #fff; padding: 20px; }
+  .header { max-width: 1100px; margin: 0 auto 20px; padding: 24px 28px; background: linear-gradient(135deg, #1e3a8a 0%, #4f46e5 100%); border-radius: 14px; color: #fff; }
+  .header h1 { margin: 0 0 6px; font-size: 26px; }
+  .header .sub { font-size: 14px; opacity: 0.85; }
+  .header .data-ref { font-size: 12px; opacity: 0.6; margin-top: 8px; }
+  .stats-row { display: flex; gap: 12px; max-width: 1100px; margin: 0 auto 20px; flex-wrap: wrap; }
+  .stat-card { flex: 1; min-width: 130px; background: #1a1a1a; padding: 14px 18px; border-radius: 10px; border-left: 4px solid #4f46e5; }
+  .stat-card .num { font-size: 24px; font-weight: 700; color: #4f46e5; }
+  .stat-card .label { font-size: 12px; color: #aaa; margin-top: 4px; }
+  .stat-card.red { border-left-color: #dc2626; }
+  .stat-card.red .num { color: #dc2626; }
+  .stat-card.green { border-left-color: #16a34a; }
+  .stat-card.green .num { color: #16a34a; }
+  .search-box { max-width: 1100px; margin: 0 auto 16px; }
+  .search-box input { width: 100%; padding: 10px 14px; border-radius: 8px; border: 1px solid #333; background: #1a1a1a; color: #fff; font-size: 14px; }
+  .search-box input:focus { outline: none; border-color: #4f46e5; }
+  .cond-tabs { display: flex; gap: 8px; max-width: 1100px; margin: 0 auto 16px; flex-wrap: wrap; }
+  .cond-tab { padding: 12px 20px; border-radius: 8px; border: 1px solid #333; background: transparent; color: #aaa; cursor: pointer; font-size: 14px; font-weight: 600; transition: all 0.2s; }
+  .cond-tab:hover { border-color: #4f46e5; color: #4f46e5; }
+  .cond-tab.active { background: #4f46e5; color: #fff; border-color: #4f46e5; }
+  .cond-tab .count { display: inline-block; background: rgba(255,255,255,0.15); padding: 1px 8px; border-radius: 10px; font-size: 11px; margin-left: 6px; }
+  .cond-tab.active .count { background: rgba(0,0,0,0.2); }
+  .container { max-width: 1100px; margin: 0 auto; }
+  .residente-card { background: #1a1a1a; border-radius: 10px; margin-bottom: 8px; border: 1px solid #2a2a2a; display: flex; align-items: center; padding: 12px 16px; gap: 12px; }
+  .residente-card:hover { border-color: #444; }
+  .residente-card .avatar { width: 40px; height: 40px; border-radius: 50%; background: linear-gradient(135deg, #1e3a8a, #4f46e5); display: flex; align-items: center; justify-content: center; font-weight: 700; font-size: 16px; flex-shrink: 0; }
+  .residente-card .info { flex: 1; min-width: 0; }
+  .residente-card .info h4 { font-size: 14px; color: #fff; margin-bottom: 2px; }
+  .residente-card .info .meta { font-size: 11px; color: #888; line-height: 1.4; }
+  .residente-card .info .meta b { color: #ccc; }
+  .badge { display: inline-block; padding: 2px 7px; border-radius: 6px; font-size: 10px; font-weight: 600; white-space: nowrap; }
+  .badge-wpp { background: #14532d; color: #22c55e; }
+  .badge-nowpp { background: #450a0a; color: #ef4444; }
+  .badge-dia { background: #14532d; color: #22c55e; }
+  .badge-atraso { background: #451a0a; color: #f97316; }
+  .badge-acordo { background: #45350a; color: #eab308; }
+  .badge-juridico { background: #450a0a; color: #ef4444; }
+  .filtros { display: flex; gap: 8px; max-width: 1100px; margin: 0 auto 16px; flex-wrap: wrap; }
+  .filtro-btn { padding: 7px 14px; border-radius: 6px; border: 1px solid #333; background: transparent; color: #888; cursor: pointer; font-size: 12px; font-weight: 600; }
+  .filtro-btn:hover { border-color: #4f46e5; color: #4f46e5; }
+  .filtro-btn.active { background: #4f46e5; color: #fff; border-color: #4f46e5; }
+  .footer { max-width: 1100px; margin: 24px auto; text-align: center; color: #555; font-size: 12px; }
+</style>
+</head>
+<body>
+<div class="header">
+  <h1>🏢 Painel de Condomínios - Pratika</h1>
+  <div class="sub">Relação completa de condomínios e seus condôminos</div>
+  <div class="data-ref" id="dataRef"></div>
+</div>
+
+<div class="stats-row" id="statsRow"></div>
+<div class="search-box"><input type="text" id="searchInput" placeholder="🔍 Buscar por nome do condômino, unidade ou telefone..." oninput="atualizar()"></div>
+<div class="cond-tabs" id="condTabs"></div>
+<div class="container" id="container"></div>
+<div class="footer">Pratika Administradora · Dados extraídos do sistema Superlógica</div>
+
+<script>
+const CONDOMINIOS = [
+  {
+    nome: "Edifício Moacyr Maia (Renaissance)",
+    slug: "moacyr-maia",
+    total_units: 29,
+    inadimplentes: 5,
+    residentes: [
+      {apt:"0101",nome:"BRUNO TORRES MIRANDA",fone:"+55 55 2030-0177",email:"brunotmiranda@hotmail.com",status:"dia"},
+      {apt:"0102",nome:"JOÃO TOSCANO DELGADO",fone:"+55 99914-1530",email:"joaoalbertodelgado@hotmail.com",status:"dia",obs:"sem DDD"},
+      {apt:"0201",nome:"ROBERTO TEIXEIRA JUNIOR",fone:"+55 3235-4218",email:"rtjcrc@yahoo.com.br",status:"dia"},
+      {apt:"0202",nome:"FELIPE MACIEL PINHEIRO BARRO",fone:"+55 84 99650-5000",email:"felipemaciel@hotmail.com",status:"dia"},
+      {apt:"0301",nome:"ADAY REGINA DE SOUSA",fone:"+55 84 9411-9441",status:"dia"},
+      {apt:"0302",nome:"SIMONE SOUTO MAIA MALBOUISSON DE MELO",fone:"+55 3301-2443",status:"dia"},
+      {apt:"0401",nome:"MARÍLIA SILVEIRA DE MEDEIROS BARROS DANTAS",fone:"+55 99985-5595",status:"dia",obs:"sem DDD"},
+      {apt:"0402",nome:"ALEXANDRE MOTTA CÂMERA",fone:"+55 99981-1187",status:"dia",obs:"sem DDD"},
+      {apt:"0501",nome:"HELIO SANTA ROSA MAFRA",email:"hsrmafra@gmail.com",status:"dia",obs:"sem fone"},
+      {apt:"0502",nome:"FV INVESTIMENTOS IMOBILIÁRIOS LTDA",fone:"+55 99139-0699",email:"fred@imocapital.com.br",status:"dia",obs:"PJ"},
+      {apt:"0601",nome:"JOSÉ LUIS ARGIZ JUSTO",fone:"+55 3231-7940",email:"jlargis@uol.com.br",status:"dia"},
+      {apt:"0602",nome:"MARCO ANTONIO MARTINS RIBEIRO DE ALMEIDA",fone:"+55 84 99981-5955",email:"contato@clinicama.com.br",status:"inadimplente",obs:"R$ 1.596,04 - 7d atraso"},
+      {apt:"0701",nome:"JOÃO PAULO FERREIRA DE SOUZA DE VIVEIROS",fone:"+55 3222-0907",email:"jp_viveiros@hotmail.com",status:"dia"},
+      {apt:"0702",nome:"ANTONIO TITO DE MIRANDA TORRES",fone:"+55 13 3249-1419",email:"antitos1000@gmail.com",status:"dia",obs:"SP"},
+      {apt:"0801",nome:"PAULO EDUARDO DE MORAES CAVALCANTE",fone:"+55 99982-8117",email:"paulo@birocroqui.com.br",status:"inadimplente",obs:"R$ 1.697,39 - 7d atraso - sem DDD"},
+      {apt:"0802",nome:"LUCIANA GUERRA BRANDÃO",fone:"+55 84 98118-4849",email:"gconstroi@hotmail.com",status:"acordo",obs:"2 boletos R$ 6.133,46"},
+      {apt:"0901",nome:"ANDRÉS DE MEDEIROS LEITE",email:"leite.am@gmail.com",status:"dia",obs:"sem fone"},
+      {apt:"1001",nome:"JOAO MARCELO TERTULIANO FERNANDES PIRES",fone:"+55 81 99636-0696",email:"jmtfp@msn.com",status:"dia"},
+      {apt:"1002",nome:"FRANCISCO SIDNEY LOPES",fone:"+55 99407-3036",status:"dia",obs:"sem DDD"},
+      {apt:"1101",nome:"JOSÉ PAULO ROCHA RASCH",fone:"+55 51 3331-5001",status:"dia",obs:"RS"},
+      {apt:"1102",nome:"ERIKA VIDAL COSTA REGO",fone:"+55 3201-8149",status:"dia"},
+      {apt:"1201",nome:"TAIANNY TORRES",fone:"+55 81 98171-7416",email:"taiannytorres@hotmail.com",status:"dia"},
+      {apt:"1302",nome:"BRUNO HENRIQUE DE PAULA GOIS",fone:"+55 84 99124-3898",status:"dia"},
+      {apt:"1501",nome:"VINÍCIUS FERNANDO DA LUZ",fone:"+55 84 9921-3838",status:"dia"},
+      {apt:"1502",nome:"VERA KARINA PEREIRA DA ROCHA FARIAS",fone:"+55 84 8888-2409",status:"dia"},
+      {apt:"1802",nome:"GUSTAVO HENRIQUE VIDAL BARBOSA TAVARES DE MELO",fone:"+55 84 99451-7783",status:"dia"},
+      {apt:"1902",nome:"PEDRO DE ALCANTARA FARIAS SEGUNDO",fone:"+55 84 99988-7331",status:"dia"},
+      {apt:"2001",nome:"ELISTENIO RICHARDSON GUEDES TINOCO",fone:"+55 84 99979-8000",status:"dia"},
+      {apt:"2201",nome:"ISAAC LIMA MEDEIROS",fone:"+55 84 99617-6666",status:"dia"},
+      {apt:"2301",nome:"CARMEN LUCIA PAULA DE MEDEIROS",fone:"+55 84 99981-0138",status:"dia"},
+      {apt:"2602",nome:"BRUNALDO BIGI",fone:"+55 11 99951-2022",email:"brunaldobigi@hotmail.com",status:"cronico",obs:"4 boletos R$ 6.844,68 - SP"},
+      {apt:"2702",nome:"RAIMUNDO NONATO DA FONSECA",fone:"+55 55 3525-2235",email:"mileidebaia@hotmail.com",status:"juridico",obs:"adv: Katiuscia Fonseca - RS"},
+    ]
+  },
+  {
+    nome: "Uruaçu IV",
+    slug: "uruacu-iv",
+    total_units: 58,
+    residentes: [
+      {apt:"0101",nome:"CLAUDIO HENRIQUE M. DE MOURA",fone:"+55 32024138",email:"ebras@hotmail.com.br",status:"dia"},
+      {apt:"0102",nome:"LUZIA MACEDO ALMEIDA",email:"almeidaluzia1955@bol.com.br",status:"dia"},
+      {apt:"0103",nome:"MARIA JOSÉ DE FREITAS MAGALHÃES",email:"mariamagalhaes3@hotmail.com",status:"dia"},
+      {apt:"0104",nome:"PATRICIA CRISTINA G. DE OLIVEIRA",fone:"+55 991921830",email:"ago494@hotmail.com",status:"dia"},
+      {apt:"0201",nome:"MARIA DO PERPÉTUO SOCORRO SOARES",fone:"+55 32024326",status:"dia"},
+      {apt:"0202",nome:"JOÃO MARIA GOMES NETO",fone:"+55 991067802",email:"joaomgn@hotmail.com",status:"dia"},
+      {apt:"0203",nome:"ANTONIO MARCOS P. DE OLIVEIRA",fone:"+55 991703763",status:"dia"},
+      {apt:"0204",nome:"JOSÉ EDIVALDO GOMES DA SILVA",fone:"+55 988671900",status:"dia"},
+      {apt:"0301",nome:"TATIANA GOMES DA SILVA",fone:"+55 988721545",email:"tatygomess@hotmail.com",status:"dia"},
+      {apt:"0302",nome:"ANDERSON LUIZ MARTINS BARRETO",fone:"+55 991596767",email:"andersonalyson@hotmail.com",status:"dia"},
+    ]
+  }
+];
+
+let condAtivo = CONDOMINIOS[0].slug;
+
+function render() {
+  // Stats gerais
+  let total = 0, comWpp = 0, inadimplentes = 0;
+  CONDOMINIOS.forEach(c => {
+    c.residentes.forEach(r => {
+      total++;
+      if (r.fone) comWpp++;
+      if (r.status && r.status !== 'dia') inadimplentes++;
+    });
+  });
+  document.getElementById('dataRef').textContent = 'Atualizado: ' + new Date().toLocaleString('pt-BR') + ' · ' + total + ' condôminos cadastrados';
+  document.getElementById('statsRow').innerHTML = `
+    <div class="stat-card"><div class="num">${total}</div><div class="label">Total Condôminos</div></div>
+    <div class="stat-card red"><div class="num">${inadimplentes}</div><div class="label">Pendentes</div></div>
+    <div class="stat-card green"><div class="num">${comWpp}</div><div class="label">Com WhatsApp</div></div>
+    <div class="stat-card"><div class="num">${total - comWpp}</div><div class="label">Sem WhatsApp</div></div>
+    <div class="stat-card"><div class="num">${CONDOMINIOS.length}</div><div class="label">Condomínios</div></div>
+  `;
+  
+  // Abas
+  document.getElementById('condTabs').innerHTML = CONDOMINIOS.map(c => `
+    <button class="cond-tab${c.slug === condAtivo ? ' active' : ''}" onclick="switchCond('${c.slug}')">
+      🏢 ${c.nome} <span class="count">${c.residentes.length}</span>
+    </button>
+  `).join('');
+  
+  atualizar();
+}
+
+function switchCond(slug) {
+  condAtivo = slug;
+  document.querySelectorAll('.cond-tab').forEach(t => t.classList.remove('active'));
+  event.target.classList.add('active');
+  atualizar();
+}
+
+function atualizar() {
+  const busca = (document.getElementById('searchInput').value || '').toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g, '');
+  const cond = CONDOMINIOS.find(c => c.slug === condAtivo);
+  if (!cond) return;
+  
+  let lista = [...cond.residentes];
+  if (busca) {
+    lista = lista.filter(r => 
+      r.nome.toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g, '').includes(busca) ||
+      r.apt.includes(busca) ||
+      (r.fone||'').includes(busca) ||
+      (r.email||'').toLowerCase().includes(busca)
+    );
+  }
+  
+  document.getElementById('container').innerHTML = lista.map(r => {
+    const ini = r.nome.charAt(0);
+    let badge = '';
+    if (r.status === 'inadimplente') badge = '<span class="badge badge-atraso">🔴 Inadimplente</span>';
+    else if (r.status === 'acordo') badge = '<span class="badge badge-acordo">🟡 Acordo</span>';
+    else if (r.status === 'cronico') badge = '<span class="badge badge-atraso">🔴 Crônico</span>';
+    else if (r.status === 'juridico') badge = '<span class="badge badge-juridico">⚖️ Jurídico</span>';
+    else badge = '<span class="badge badge-dia">✅ Em dia</span>';
+    
+    return `
+      <div class="residente-card">
+        <div class="avatar">${ini}</div>
+        <div class="info">
+          <h4>${r.nome} ${badge}</h4>
+          <div class="meta">
+            <b>Apto:</b> ${r.apt}
+            ${r.fone ? ' &nbsp;|&nbsp; 📞 ' + r.fone : ' &nbsp;|&nbsp; ⚠️ Sem telefone'}
+            ${r.email ? ' &nbsp;|&nbsp; 📧 ' + r.email : ''}
+            ${r.obs ? ' &nbsp;|&nbsp; 📌 ' + r.obs : ''}
+          </div>
+        </div>
+      </div>
+    `;
+  }).join('');
+}
+
+render();
+</script>
+</body>
+</html>

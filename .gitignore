@@ -1,0 +1,61 @@
+# ============================================================
+# Agente Cobrança Renaissance — .gitignore
+# ============================================================
+
+# Ambiente
+.env
+.env.local
+venv/
+.venv/
+
+# Dados sensíveis
+agente/data/state.db
+agente/data/*.log
+agente/data/backups/
+logs/
+data/
+
+# Cache Python
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+.Python
+
+# Arquivos temporários de extração
+_texto_pdf_extraido.txt
+_texto_completo.txt
+_texto_pdf_extraido.txt
+_todos_dados.json
+_todos_condominios.json
+_dados_finais.json
+_dados_condominios.json
+
+# Scripts de análise temporários
+_analisar.py
+_analisar_dados.py
+_analisar_dados.py
+_extrair_pdf.py
+_extrair_tudo.py
+_gerar_dados_html.py
+_gerar_html_final.py
+_gerar_painel_final.py
+_listar_condominios.py
+_parsear_pdf.py
+_parser_final.py
+_processar_dados.py
+_ver_primeiras.py
+_contar.py
+_contar_respostas.py
+_check.py
+
+# IDE
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+
+# OS
+.DS_Store
+Thumbs.db

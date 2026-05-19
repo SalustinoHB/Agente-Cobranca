@@ -1,0 +1,102 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Painel de Cobrança - Pratika</title>
+<style>
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body { font-family: -apple-system, system-ui, 'Segoe UI', Roboto, sans-serif; background: #0a0a0a; color: #fff; padding: 20px; }
+  .header { max-width: 1000px; margin: 0 auto 20px; padding: 24px 28px; background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); border-radius: 14px; color: #fff; }
+  .header h1 { margin: 0 0 6px; font-size: 26px; }
+  .header .sub { font-size: 14px; opacity: 0.85; }
+  .header .data-ref { font-size: 12px; opacity: 0.6; margin-top: 8px; }
+  .config-section { max-width: 1000px; margin: 0 auto 20px; padding: 16px 20px; background: #1a1a1a; border-radius: 10px; border: 1px solid #2a2a2a; }
+  .config-section h3 { font-size: 14px; color: #667eea; margin-bottom: 12px; }
+  .config-grid { display: flex; gap: 12px; flex-wrap: wrap; }
+  .config-field { flex: 1; min-width: 200px; }
+  .config-field label { font-size: 11px; color: #888; display: block; margin-bottom: 4px; }
+  .config-field input { width: 100%; padding: 8px 10px; border-radius: 6px; border: 1px solid #333; background: #0a0a0a; color: #fff; font-size: 12px; font-family: monospace; }
+  .config-field input:focus { outline: none; border-color: #667eea; }
+  .stats-row { display: flex; gap: 12px; max-width: 1000px; margin: 0 auto 20px; flex-wrap: wrap; }
+  .stat-card { flex: 1; min-width: 120px; background: #1a1a1a; padding: 14px 18px; border-radius: 10px; border-left: 4px solid #667eea; }
+  .stat-card .num { font-size: 24px; font-weight: 700; color: #667eea; }
+  .stat-card .label { font-size: 12px; color: #aaa; margin-top: 4px; }
+  .stat-card.red { border-left-color: #ff4444; }
+  .stat-card.red .num { color: #ff4444; }
+  .stat-card.green { border-left-color: #00d4aa; }
+  .stat-card.green .num { color: #00d4aa; }
+  .filtros { max-width: 1000px; margin: 0 auto 16px; display: flex; gap: 10px; flex-wrap: wrap; }
+  .filtro-btn { padding: 8px 16px; border-radius: 6px; border: 1px solid #333; background: transparent; color: #888; cursor: pointer; font-size: 12px; font-weight: 600; }
+  .filtro-btn:hover { border-color: #667eea; color: #667eea; }
+  .filtro-btn.active { background: #667eea; color: #fff; border-color: #667eea; }
+  .filtro-btn .count { background: rgba(255,255,255,0.15); padding: 1px 6px; border-radius: 8px; font-size: 11px; margin-left: 4px; }
+  .search-box { max-width: 1000px; margin: 0 auto 16px; }
+  .search-box input { width: 100%; padding: 10px 14px; border-radius: 8px; border: 1px solid #333; background: #1a1a1a; color: #fff; font-size: 14px; }
+  .search-box input:focus { outline: none; border-color: #667eea; }
+  .container { max-width: 1000px; margin: 0 auto; }
+  .contato-card { background: #1a1a1a; border-radius: 12px; margin-bottom: 16px; overflow: hidden; border: 1px solid #2a2a2a; }
+  .contato-card.todos-pagos { opacity: 0.5; }
+  .contato-card .contato-header { padding: 16px 20px; display: flex; justify-content: space-between; align-items: center; background: #222; cursor: pointer; border-bottom: 1px solid #2a2a2a; }
+  .contato-card .contato-header h3 { font-size: 16px; color: #fff; }
+  .contato-card .contato-header .meta { font-size: 12px; color: #888; }
+  .badge { display: inline-block; padding: 2px 10px; border-radius: 10px; font-size: 11px; font-weight: 600; }
+  .badge-wpp { background: #1a4d2e; color: #00d4aa; }
+  .badge-nowpp { background: #4d1a1a; color: #ff4444; }
+  .badge-info { background: #333; color: #aaa; }
+  .boleto-item { padding: 12px 20px; display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 8px; border-bottom: 1px solid #1a1a1a; }
+  .boleto-item:last-child { border-bottom: none; }
+  .boleto-item:hover { background: #1e1e1e; }
+  .boleto-info { font-size: 13px; color: #ccc; }
+  .boleto-info b { color: #fff; }
+  .boleto-actions { display: flex; gap: 6px; align-items: center; }
+  .btn { padding: 6px 12px; border-radius: 6px; border: none; font-size: 12px; font-weight: 600; cursor: pointer; transition: all 0.15s; }
+  .btn-send { background: #667eea; color: #fff; }
+  .btn-send:hover { background: #5a6fd6; }
+  .btn-send:disabled { background: #333; color: #666; cursor: not-allowed; }
+  .btn-skip { background: transparent; color: #888; border: 1px solid #333; }
+  .btn-skip:hover { color: #fff; border-color: #555; }
+  .msg-expand { display: none; padding: 0 20px 14px; }
+  .msg-expand.open { display: block; }
+  .msg-textarea { width: 100%; min-height: 70px; padding: 10px 12px; border-radius: 6px; border: 1px solid #333; background: #0a0a0a; color: #ddd; font-size: 12px; font-family: inherit; resize: vertical; }
+  .msg-textarea:focus { outline: none; border-color: #667eea; }
+  .footer-actions { max-width: 1000px; margin: 24px auto; padding: 20px; background: #1a1a1a; border-radius: 10px; display: flex; gap: 12px; justify-content: center; flex-wrap: wrap; }
+  .btn-big { padding: 12px 24px; font-size: 14px; font-weight: 700; }
+  .btn-big.send-all { background: #667eea; color: #fff; }
+  .btn-big.skip-all { background: transparent; color: #888; border: 1px solid #444; }
+  .status { display: inline-block; padding: 2px 8px; border-radius: 8px; font-size: 11px; font-weight: 600; }
+  .status-enviado { background: #1a4d2e; color: #00d4aa; }
+  .status-pulado { background: #333; color: #888; }
+  .tag { display: inline-block; padding: 1px 6px; border-radius: 6px; font-size: 10px; font-weight: 600; }
+  .tag-pago { background: #1a4d2e; color: #00d4aa; }
+  .tag-atraso { background: #4d1a1a; color: #ff4444; }
+  .tag-dia { background: #4d3d1a; color: #ffaa00; }
+  #toast { position: fixed; bottom: 24px; right: 24px; background: #667eea; color: #fff; padding: 12px 18px; border-radius: 8px; font-weight: 600; box-shadow: 0 6px 24px rgba(0,0,0,0.4); display: none; z-index: 100; }
+  .spinner { display: inline-block; width: 12px; height: 12px; border: 2px solid rgba(255,255,255,0.3); border-radius: 50%; border-top-color: #fff; animation: spin 1s linear infinite; margin-right: 4px; vertical-align: middle; }
+  @keyframes spin { to { transform: rotate(360deg); } }
+</style>
+</head>
+<body>
+<div class="header"><h1>📋 Painel de Cobrança - Pratika</h1><div class="sub">Contatos agrupados com boletos · Envio manual via WhatsApp</div><div class="data-ref" id="dataRef">Carregando...</div></div>
+<div class="config-section"><h3>⚙️ Z-API</h3><div class="config-grid">
+  <div class="config-field"><label>Client-Token</label><input type="text" id="clientToken" value="F45886bf7d2c54c2385c46c92e3c5c259S"></div>
+  <div class="config-field"><label>Instance ID</label><input type="text" id="instanceId" value="3F3504716F44324E0D095EE982B712E3"></div>
+  <div class="config-field"><label>Instance Token</label><input type="text" id="instanceToken" value="EB69BCFE629B94E3AAC8D8E9"></div>
+</div></div>
+<div class="stats-row" id="statsRow"></div>
+<div class="search-box"><input type="text" id="searchInput" placeholder="🔍 Buscar por nome, unidade, telefone..." oninput="filtrar()"></div>
+<div class="filtros" id="filtros">
+  <button class="filtro-btn active" onclick="setF('todos')">📋 Todos</button>
+  <button class="filtro-btn" onclick="setF('pendentes')">⚠️ Pendentes</button>
+  <button class="filtro-btn" onclick="setF('com_wpp')">📱 Com WhatsApp</button>
+  <button class="filtro-btn" onclick="setF('sem_wpp')">📵 Sem WhatsApp</button>
+  <button class="filtro-btn" onclick="setF('pagos')">✅ Pagos</button>
+</div>
+<div class="container" id="container"></div>
+<div class="footer-actions">
+  <button class="btn btn-big send-all" id="btnSendAll" onclick="enviarTodos()">📤 Enviar TODOS pendentes</button>
+  <button class="btn btn-big skip-all" onclick="pularTodos()">❌ Pular TODOS</button>
+</div>
+<div id="toast"></div>
+</body>
+</html>

@@ -1,0 +1,29 @@
+version: "3.9"
+
+# ============================================================
+# Stack: Agente Cobrança Renaissance — Z-API Edition
+# Não sobe Evolution/Postgres/Redis (Z-API é SaaS externo)
+# Roda na AWS EC2 (recomendado t3.micro ou t3.small)
+# ============================================================
+
+services:
+  # ─── Agente Python (API REST :5000 + Scheduler) ───
+  agente:
+    build:
+      context: ./agente
+      dockerfile: Dockerfile
+    restart: unless-stopped
+    env_file: .env
+    ports:
+      - "5000:5000"      # API REST
+    volumes:
+      - ./agente/data:/data
+    networks:
+      - cobranca
+
+volumes:
+  agente_data:
+
+networks:
+  cobranca:
+    driver: bridge

@@ -1,0 +1,92 @@
+version: "3.9"
+
+# ============================================================
+# Stack: Evolution API + Agente Cobrança Renaissance
+# Roda na AWS EC2 (recomendado t3.small ou Lightsail US$ 5)
+# ============================================================
+
+services:
+  # ─── Evolution API (WhatsApp) ───
+  evolution:
+    image: atendai/evolution-api:v2.1.1
+    restart: unless-stopped
+    ports:
+      - "8080:8080"
+    environment:
+      - SERVER_TYPE=http
+      - SERVER_PORT=8080
+      - CORS_ORIGIN=*
+      - AUTHENTICATION_API_KEY=${EVOLUTION_API_KEY}
+      - DATABASE_ENABLED=true
+      - DATABASE_PROVIDER=postgresql
+      - DATABASE_CONNECTION_URI=postgresql://evolution:${POSTGRES_PASSWORD:-evolution}@postgres:5432/evolution
+      - DATABASE_SAVE_DATA_INSTANCE=true
+      - DATABASE_SAVE_DATA_NEW_MESSAGE=true
+      - DATABASE_SAVE_MESSAGE_UPDATE=true
+      - DATABASE_SAVE_DATA_CONTACTS=true
+      - DATABASE_SAVE_DATA_CHATS=true
+      - CACHE_REDIS_ENABLED=true
+      - CACHE_REDIS_URI=redis://redis:6379
+      - CACHE_REDIS_PREFIX_KEY=evolution
+      - CACHE_REDIS_SAVE_INSTANCES=true
+      - LANGUAGE=pt-BR
+      - WEBHOOK_GLOBAL_URL=${EVOLUTION_WEBHOOK_URL:-}
+      - WEBHOOK_GLOBAL_ENABLED=false
+      - DEL_INSTANCE=false
+      - QRCODE_LIMIT=30
+      - TYPEBOT_API_VERSION=latest
+    volumes:
+      - evolution_instances:/evolution/instances
+    networks:
+      - cobranca
+    depends_on:
+      - postgres
+      - redis
+
+  postgres:
+    image: postgres:15-alpine
+    restart: unless-stopped
+    environment:
+      - POSTGRES_USER=evolution
+      - POSTGRES_PASSWORD=${POSTGRES_PASSWORD:-evolution}
+      - POSTGRES_DB=evolution
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    networks:
+      - cobranca
+
+  redis:
+    image: redis:7-alpine
+    restart: unless-stopped
+    volumes:
+      - redis_data:/data
+    networks:
+      - cobranca
+
+  # ─── Agente Python (cron jobs + API REST :5000) ───
+  agente:
+    build:
+      context: ./agente
+      dockerfile: Dockerfile
+    restart: unless-stopped
+    env_file: .env
+    environment:
+      - EVOLUTION_URL=http://evolution:8080
+    ports:
+      - "5000:5000"      # API REST
+    volumes:
+      - agente_data:/data
+    depends_on:
+      - evolution
+    networks:
+      - cobranca
+
+volumes:
+  evolution_instances:
+  postgres_data:
+  redis_data:
+  agente_data:
+
+networks:
+  cobranca:
+    driver: bridge

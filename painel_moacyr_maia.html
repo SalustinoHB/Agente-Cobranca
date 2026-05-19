@@ -1,0 +1,215 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Condomínio Moacyr Maia — Condôminos</title>
+<style>
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body { font-family: -apple-system, system-ui, 'Segoe UI', Roboto, sans-serif; background: #0a0a0a; color: #fff; padding: 20px; }
+  .header { max-width: 1000px; margin: 0 auto 20px; padding: 24px 28px; background: linear-gradient(135deg, #1e3a8a 0%, #4f46e5 100%); border-radius: 14px; color: #fff; }
+  .header h1 { margin: 0 0 6px; font-size: 26px; }
+  .header .sub { font-size: 14px; opacity: 0.85; }
+  .header .data-ref { font-size: 12px; opacity: 0.6; margin-top: 8px; }
+  .stats-row { display: flex; gap: 12px; max-width: 1000px; margin: 0 auto 20px; flex-wrap: wrap; }
+  .stat-card { flex: 1; min-width: 120px; background: #1a1a1a; padding: 14px 18px; border-radius: 10px; border-left: 4px solid #4f46e5; }
+  .stat-card .num { font-size: 24px; font-weight: 700; color: #4f46e5; }
+  .stat-card .label { font-size: 12px; color: #aaa; margin-top: 4px; }
+  .stat-card.red { border-left-color: #dc2626; }
+  .stat-card.red .num { color: #dc2626; }
+  .stat-card.green { border-left-color: #16a34a; }
+  .stat-card.green .num { color: #16a34a; }
+  .stat-card.yellow { border-left-color: #ca8a04; }
+  .stat-card.yellow .num { color: #ca8a04; }
+  .search-box { max-width: 1000px; margin: 0 auto 16px; }
+  .search-box input { width: 100%; padding: 10px 14px; border-radius: 8px; border: 1px solid #333; background: #1a1a1a; color: #fff; font-size: 14px; }
+  .search-box input:focus { outline: none; border-color: #4f46e5; }
+  .container { max-width: 1000px; margin: 0 auto; }
+  .residente-card { background: #1a1a1a; border-radius: 10px; margin-bottom: 10px; overflow: hidden; border: 1px solid #2a2a2a; display: flex; align-items: center; padding: 14px 18px; gap: 14px; }
+  .residente-card:hover { border-color: #444; }
+  .residente-card .avatar { width: 44px; height: 44px; border-radius: 50%; background: linear-gradient(135deg, #1e3a8a, #4f46e5); display: flex; align-items: center; justify-content: center; font-weight: 700; font-size: 18px; flex-shrink: 0; }
+  .residente-card .info { flex: 1; min-width: 0; }
+  .residente-card .info h4 { font-size: 15px; color: #fff; margin-bottom: 3px; }
+  .residente-card .info .meta { font-size: 11.5px; color: #888; line-height: 1.5; }
+  .residente-card .info .meta b { color: #ccc; }
+  .residente-card .badges { display: flex; gap: 5px; flex-shrink: 0; flex-wrap: wrap; justify-content: flex-end; }
+  .badge { display: inline-block; padding: 2px 8px; border-radius: 8px; font-size: 10px; font-weight: 600; white-space: nowrap; }
+  .badge-wpp { background: #14532d; color: #22c55e; }
+  .badge-nowpp { background: #450a0a; color: #ef4444; }
+  .badge-dia { background: #14532d; color: #22c55e; }
+  .badge-inadimplente { background: #451a0a; color: #f97316; }
+  .badge-acordo { background: #45350a; color: #eab308; }
+  .badge-juridico { background: #450a0a; color: #ef4444; }
+  .badge-sp { background: #1e1b4b; color: #818cf8; }
+  .badge-rs { background: #1e1b4b; color: #818cf8; }
+  .badge-pe { background: #1e1b4b; color: #818cf8; }
+  .badge-pj { background: #1a1a4b; color: #a78bfa; }
+  .badge-ddd { background: #452a0a; color: #f59e0b; }
+  .badge-semfone { background: #1f1f1f; color: #6b7280; }
+  .badge-cronico { background: #450a0a; color: #ef4444; }
+  .filtros { display: flex; gap: 8px; max-width: 1000px; margin: 0 auto 16px; flex-wrap: wrap; }
+  .filtro-btn { padding: 7px 14px; border-radius: 6px; border: 1px solid #333; background: transparent; color: #888; cursor: pointer; font-size: 12px; font-weight: 600; }
+  .filtro-btn:hover { border-color: #4f46e5; color: #4f46e5; }
+  .filtro-btn.active { background: #4f46e5; color: #fff; border-color: #4f46e5; }
+  .filtro-btn .count { background: rgba(255,255,255,0.15); padding: 0 6px; border-radius: 6px; margin-left: 4px; font-size: 11px; }
+  .footer { max-width: 1000px; margin: 24px auto; text-align: center; color: #555; font-size: 12px; }
+</style>
+</head>
+<body>
+<div class="header">
+  <h1>🏢 Condomínio Moacyr Maia (Renaissance)</h1>
+  <div class="sub">Pratika Administradora · Relatório completo dos condôminos</div>
+  <div class="data-ref" id="dataRef">Carregando...</div>
+</div>
+
+<div class="stats-row" id="statsRow"></div>
+<div class="filtros" id="filtros">
+  <button class="filtro-btn active" onclick="setF('todos',this)">📋 Todos</button>
+  <button class="filtro-btn" onclick="setF('inadimplente',this)">🔴 Inadimplentes</button>
+  <button class="filtro-btn" onclick="setF('dia',this)">✅ Em dia</button>
+  <button class="filtro-btn" onclick="setF('wpp',this)">📱 Com WhatsApp</button>
+  <button class="filtro-btn" onclick="setF('nowpp',this)">📵 Sem WhatsApp</button>
+</div>
+<div class="search-box"><input type="text" id="searchInput" placeholder="🔍 Buscar por nome, apto, telefone..." oninput="render()"></div>
+<div class="container" id="container"></div>
+<div class="footer">Pratika Administradora · Edifício Moacyr Maia · Total de 29 unidades</div>
+
+<script>
+const COND_DATA = [
+  {apt:"0101",nome:"BRUNO TORRES MIRANDA",cpf:"790.984.444-15",fone:"+55 55 2030-0177 / 99981-0595",email:"brunotmiranda@hotmail.com",status:"dia",tags:["sp"]},
+  {apt:"0102",nome:"JOÃO TOSCANO DELGADO",cpf:"156.686.814-91",fone:"+55 99914-1530 (sem DDD)",email:"joaoalbertodelgado@hotmail.com",status:"dia",tags:["ddd"]},
+  {apt:"0201",nome:"ROBERTO TEIXEIRA JUNIOR",cpf:"069.512.647-40",fone:"+55 3235-4218 / 98878-1410",email:"rtjcrc@yahoo.com.br / rtjunior@petrobras.com.br",status:"dia",tags:["ddd"]},
+  {apt:"0202",nome:"FELIPE MACIEL PINHEIRO BARRO",cpf:"012.642.524-80",fone:"+55 84 99650-5000",email:"felipemaciel@hotmail.com",status:"dia",tags:["wpp"]},
+  {apt:"0301",nome:"ADAY REGINA DE SOUSA",cpf:"673.043.384-15",fone:"+55 84 9411-9441",email:"alderimartins@bol.com.br",status:"dia",tags:["wpp"]},
+  {apt:"0302",nome:"SIMONE SOUTO MAIA MALBOUISSON DE MELO",cpf:"349.894.205-00",fone:"+55 3301-2443 / 98735-0318",email:"simone_souto_mello@hotmail.com",status:"dia",tags:["ddd"]},
+  {apt:"0401",nome:"MARÍLIA SILVEIRA DE MEDEIROS BARROS DANTAS",cpf:"655.305.944-68",fone:"+55 99985-5595 / 99971-7996 (sem DDD)",email:"joaojuniorrn@yahoo.com.br",status:"dia",tags:["ddd"]},
+  {apt:"0402",nome:"ALEXANDRE MOTTA CÂMERA",cpf:"538.596.694-00",fone:"+55 99981-1187 (sem DDD)",email:"alexmottacamara@hotmail.com",status:"dia",tags:["ddd"]},
+  {apt:"0501",nome:"HELIO SANTA ROSA MAFRA",cpf:"144.256.291-91",fone:"—",email:"hsrmafra@gmail.com",status:"dia",tags:["semfone"]},
+  {apt:"0502",nome:"FV INVESTIMENTOS IMOBILIÁRIOS LTDA",cpf:"35.660.072/0001-40",fone:"+55 99139-0699 (sem DDD)",email:"fred@imocapital.com.br",status:"dia",tags:["pj","ddd"]},
+  {apt:"0601",nome:"JOSÉ LUIS ARGIZ JUSTO",cpf:"021.632.744-03",fone:"+55 3231-7940 / 99952-0254",email:"jlargis@uol.com.br",status:"dia",tags:["ddd"]},
+  {apt:"0602",nome:"MARCO ANTONIO MARTINS RIBEIRO DE ALMEIDA",cpf:"456.831.740-15",fone:"+55 84 99981-5955",email:"contato@clinicama.com.br",status:"inadimplente",tags:["wpp","obs:7d atraso R$1.596,04 - Residente: Jeovane Aguilar"]},
+  {apt:"0701",nome:"JOÃO PAULO FERREIRA DE SOUZA DE VIVEIROS",cpf:"018.608.964-30",fone:"+55 3222-0907 / 99991-5600",email:"jp_viveiros@hotmail.com",status:"dia",tags:[]},
+  {apt:"0702",nome:"ANTONIO TITO DE MIRANDA TORRES",cpf:"263.234.431-04",fone:"+55 13 3249-1419 / 99170-6565",email:"antitos1000@gmail.com",status:"dia",tags:["sp"]},
+  {apt:"0801",nome:"PAULO EDUARDO DE MORAES CAVALCANTE",cpf:"838.956.804-78",fone:"+55 99982-8117 / 99924-5385 (sem DDD)",email:"paulo@birocroqui.com.br",status:"inadimplente",tags:["ddd","obs:7d atraso R$1.697,39 - DDD ausente"]},
+  {apt:"0802",nome:"LUCIANA GUERRA BRANDÃO",cpf:"026.535.984-85",fone:"+55 84 98118-4849 / 99131-4899",email:"gconstroi@hotmail.com",status:"acordo",tags:["wpp","obs:2 boletos R$5.201,81 + R$931,65 - em acordo"]},
+  {apt:"0901",nome:"ANDRÉS DE MEDEIROS LEITE",cpf:"003.539.197-99",fone:"—",email:"leite.am@gmail.com",status:"dia",tags:["semfone","incompleto"]},
+  {apt:"1001",nome:"JOAO MARCELO TERTULIANO FERNANDES PIRES",cpf:"037.806.654-41",fone:"+55 81 99636-0696 / 84 98183-0505",email:"jmtfp@msn.com",status:"dia",tags:["wpp","pe"]},
+  {apt:"1002",nome:"FRANCISCO SIDNEY LOPES",cpf:"785.890.704-25",fone:"+55 99407-3036 (sem DDD)",email:"sidneycorreia@hotmail.com",status:"dia",tags:["ddd"]},
+  {apt:"1101",nome:"JOSÉ PAULO ROCHA RASCH",cpf:"198.034.780-87",fone:"+55 51 3331-5001 / 99982-3686",email:"atlantica.escritorio@hotmail.com",status:"dia",tags:["rs"]},
+  {apt:"1102",nome:"ERIKA VIDAL COSTA REGO",cpf:"034.228.064-31",fone:"+55 3201-8149 / 99407-5115",email:"anacvidal1@hotmail.com",status:"dia",tags:["ddd"]},
+  {apt:"1201",nome:"TAIANNY TORRES",cpf:"051.002.954-06",fone:"+55 81 98171-7416",email:"taiannytorres@hotmail.com",status:"dia",tags:["wpp","pe"]},
+  {apt:"1202",nome:"BRUNO BARROS GOMES DA CAMARA",cpf:"010.135.424-01",fone:"+55 99981-9725 (sem DDD)",email:"bruno_bgc@hotmail.com",status:"dia",tags:["ddd"]},
+  {apt:"1301",nome:"DIRCEU FONSECA DE MIRANDA",cpf:"010.794.374-36",fone:"—",email:"dirceu.fm@hotmail.com",status:"dia",tags:["semfone"]},
+  {apt:"1302",nome:"BRUNO HENRIQUE DE PAULA GOIS",cpf:"046.013.694-10",fone:"+55 84 99124-3898",email:"Brunohpgois@yahoo.com.br",status:"dia",tags:["wpp"]},
+  {apt:"1401",nome:"JOÃO MARIA CARNEIRO",cpf:"200.300.374-68",fone:"+55 98812-7065 / 98899-1072 (sem DDD)",email:"mariadocarmosilva24@gmail.com",status:"dia",tags:["ddd"]},
+  {apt:"1402",nome:"CARLOS AUGUSTO QUEIROZ DA SILVA",cpf:"056.422.484-72",fone:"+55 11 2092-9311 / 99979-3054",email:"carloskeiroz@terra.com.br",status:"dia",tags:["sp"]},
+  {apt:"1501",nome:"VINÍCIUS FERNANDO DA LUZ",cpf:"047.946.784-60",fone:"+55 84 9921-3838",email:"viniciusfernando@yahoo.com.br",status:"dia",tags:["wpp"]},
+  {apt:"1502",nome:"VERA KARINA PEREIRA DA ROCHA FARIAS",cpf:"852.826.424-68",fone:"+55 84 8888-2409",email:"j.l_imoveis@hotmail.com",status:"dia",tags:["wpp"]},
+  {apt:"1601",nome:"CESAR LUIS SOARES",cpf:"569.693.507-97",fone:"+55 3211-1205 / 99989-1232",email:"cesarluis@uol.com.br",status:"dia",tags:["ddd"]},
+  {apt:"1602",nome:"KARLA KARINE GURGEL CABRAL",cpf:"000.725.074-62",fone:"+55 99992-8400 (sem DDD)",email:"karlakarine@yahoo.com.br",status:"dia",tags:["ddd"]},
+  {apt:"1701",nome:"DEA DE MIRANDA MAC DOWELL",cpf:"263.036.201-91",fone:"+55 98844-9998 / 98824-0589 (sem DDD)",email:"ac@macdowell.adm.br",status:"dia",tags:["ddd"]},
+  {apt:"1702",nome:"THIAGO GALVÃO SIMONETTI",cpf:"036.732.724-46",fone:"—",email:"thiagosimonetti@yahoo.com.br",status:"dia",tags:["semfone"]},
+  {apt:"1801",nome:"VALENTINA DE ARAÚJO MONTE OLIVEIRA",cpf:"915.897.114-91",fone:"+55 3211-8180 / 99431-2703",email:"valentina@monteneto.com.br",status:"dia",tags:["ddd"]},
+  {apt:"1802",nome:"GUSTAVO HENRIQUE VIDAL BARBOSA TAVARES DE MELO",cpf:"068.242.584-23",fone:"+55 84 99451-7783",email:"elianevbarbosa@hotmail.com",status:"dia",tags:["wpp"]},
+  {apt:"1901",nome:"MELINA TERTULINO DE LIMA MEDEIROS",cpf:"009.222.825-95",fone:"—",email:"sqmedeiros@gmail.com",status:"dia",tags:["semfone"]},
+  {apt:"1902",nome:"PEDRO DE ALCANTARA FARIAS SEGUNDO",cpf:"027.241.164-70",fone:"+55 84 99988-7331",email:"pedrosyoko@yahoo.com.br",status:"dia",tags:["wpp"]},
+  {apt:"2001",nome:"ELISTENIO RICHARDSON GUEDES TINOCO",cpf:"024.401.174-55",fone:"+55 84 99979-8000",email:"viladaliana@gmail.com",status:"dia",tags:["wpp"]},
+  {apt:"2002",nome:"MARIA RITA MANZARRA DE MOURA GARCIA",cpf:"648.582.783-87",fone:"+55 55 99934-9777",email:"mariaritamanzarra@gmail.com",status:"dia",tags:["rs"]},
+  {apt:"2101",nome:"TANIA MARIA DANTAS DE FARIA",cpf:"056.182.154-20",fone:"+55 3201-8762",email:"—",status:"dia",tags:["sememail"]},
+  {apt:"2102",nome:"MAELBA RODRIGUES ALVES RAMALHO",cpf:"475.671.554-00",fone:"+55 99984-6605 / 99902-1151 (sem DDD)",email:"maelbara@yahoo.com.br",status:"dia",tags:["ddd"]},
+  {apt:"2201",nome:"ISAAC LIMA MEDEIROS",cpf:"011.873.204-80",fone:"+55 84 99617-6666",email:"divaneidelima@outlook.com",status:"dia",tags:["wpp"]},
+  {apt:"2202",nome:"RUBIA VALERIA XAVIER FONTES",cpf:"506.536.363-34",fone:"+55 99141-9090 / 99651-3824 (sem DDD)",email:"rubiavaleria29@gmail.com",status:"dia",tags:["ddd"]},
+  {apt:"2301",nome:"CARMEN LUCIA PAULA DE MEDEIROS",cpf:"524.014.564-49",fone:"+55 84 99981-0138 / 3222-2866 / 99659-2244",email:"carmen@nataltravel.com.br",status:"dia",tags:["wpp"]},
+  {apt:"2302",nome:"ERIKA VIDAL COSTA RÊGO",cpf:"034.228.064-31",fone:"—",email:"erikavcrego@gmail.com",status:"dia",tags:["semfone"]},
+  {apt:"2401",nome:"CLAYTON BARRETO DE OLIVEIRA",cpf:"977.468.605-59",fone:"+55 99935-6750 / 99913-7940 (sem DDD)",email:"c.barreto17@yahoo.com.br",status:"dia",tags:["ddd"]},
+  {apt:"2402",nome:"TANIA VALDELICE MACIEL DE ANDRADE OLIVEIRA",cpf:"084.060.814-49",fone:"+55 98877-6552 / 99941-3920 (sem DDD)",email:"tanizoliver@gmail.com",status:"dia",tags:["ddd"]},
+  {apt:"2501",nome:"HINDENBURG COSTA GOMES",cpf:"369.983.204-00",fone:"+55 3613-0528 / 98853-3494",email:"hi-gomes@hotmail.com",status:"dia",tags:["ddd"]},
+  {apt:"2502",nome:"RODRIGO FERREIRA ABDALA",cpf:"259.309.428-11",fone:"+55 98164-4433 (sem DDD)",email:"rodrigoabdala@gmail.com",status:"dia",tags:["ddd"]},
+  {apt:"2602",nome:"BRUNALDO BIGI",cpf:"015.060.434-37",fone:"+55 11 99951-2022",email:"brunaldobigi@hotmail.com",status:"cronico",tags:["sp","cronico","obs:4 boletos R$6.844,68 - contato humano"]},
+  {apt:"2702",nome:"RAIMUNDO NONATO DA FONSECA",cpf:"130.049.804-87",fone:"+55 55 3525-2235 / 98812-2235",email:"mileidebaia@hotmail.com / katiusciafonseca.adv@gmail.com",status:"juridico",tags:["rs","advogada:Katiuscia Fonseca"]},
+];
+
+let filtroAtivo = 'todos';
+
+function setF(f, el) {
+  filtroAtivo = f;
+  document.querySelectorAll('.filtro-btn').forEach(b => b.classList.remove('active'));
+  el.classList.add('active');
+  render();
+}
+
+function render() {
+  const busca = (document.getElementById('searchInput').value || '').toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g, '');
+  
+  let lista = [...COND_DATA];
+  
+  if (filtroAtivo === 'inadimplente') lista = lista.filter(r => ['inadimplente','acordo','cronico','juridico'].includes(r.status));
+  else if (filtroAtivo === 'dia') lista = lista.filter(r => r.status === 'dia');
+  else if (filtroAtivo === 'wpp') lista = lista.filter(r => r.tags.includes('wpp'));
+  else if (filtroAtivo === 'nowpp') lista = lista.filter(r => !r.tags.includes('wpp') && r.status === 'dia');
+  
+  if (busca) {
+    lista = lista.filter(r => 
+      r.nome.toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g, '').includes(busca) ||
+      r.apt.includes(busca) ||
+      (r.fone||'').includes(busca) ||
+      (r.email||'').toLowerCase().includes(busca)
+    );
+  }
+  
+  // Stats
+  const total = lista.length;
+  const comWpp = lista.filter(r => r.tags.includes('wpp')).length;
+  document.getElementById('dataRef').textContent = 'Atualizado: ' + new Date().toLocaleString('pt-BR') + ' · ' + total + ' exibidos';
+  document.getElementById('statsRow').innerHTML = `
+    <div class="stat-card"><div class="num">${total}</div><div class="label">Exibidos</div></div>
+    <div class="stat-card green"><div class="num">${lista.filter(r=>r.status==='dia').length}</div><div class="label">Em dia</div></div>
+    <div class="stat-card red"><div class="num">${lista.filter(r=>['inadimplente','acordo','cronico','juridico'].includes(r.status)).length}</div><div class="label">Pendentes</div></div>
+    <div class="stat-card"><div class="num">${comWpp}</div><div class="label">Com WhatsApp</div></div>
+  `;
+  
+  // Cards
+  document.getElementById('container').innerHTML = lista.map(r => {
+    const ini = r.nome.charAt(0);
+    let badgeStatus = '';
+    if (r.status === 'inadimplente') badgeStatus = '<span class="badge badge-inadimplente">🔴 Inadimplente</span>';
+    else if (r.status === 'acordo') badgeStatus = '<span class="badge badge-acordo">🟡 Em acordo</span>';
+    else if (r.status === 'cronico') badgeStatus = '<span class="badge badge-cronico">🔴 Crônico</span>';
+    else if (r.status === 'juridico') badgeStatus = '<span class="badge badge-juridico">⚖️ Jurídico</span>';
+    else badgeStatus = '<span class="badge badge-dia">✅ Em dia</span>';
+    
+    let tagsExtra = r.tags.filter(t => !['wpp','sp','rs','pe','ddd','pj','semfone','sememail','cronico','incompleto'].includes(t) && !t.startsWith('obs') && !t.startsWith('adv'));
+    let obsText = r.tags.filter(t => t.startsWith('obs:') || t.startsWith('adv'));
+    
+    const temObs = obsText.length > 0;
+    
+    return `
+      <div class="residente-card">
+        <div class="avatar">${ini}</div>
+        <div class="info">
+          <h4>${r.nome} ${badgeStatus}</h4>
+          <div class="meta">
+            <b>Apto:</b> ${r.apt} &nbsp;|&nbsp; <b>CPF:</b> ${r.cpf}
+            ${r.fone !== '—' ? '&nbsp;|&nbsp; 📞 ' + r.fone : '&nbsp;|&nbsp; ⚠️ Sem telefone'}
+            ${r.email !== '—' ? '<br>📧 ' + r.email : ''}
+            ${temObs ? '<br>📌 ' + obsText.join(' · ') : ''}
+          </div>
+        </div>
+        <div class="badges">
+          ${r.tags.includes('wpp') ? '<span class="badge badge-wpp">📱 WhatsApp</span>' : (r.status === 'dia' ? '<span class="badge badge-nowpp">📵 Sem WPP</span>' : '')}
+          ${r.tags.includes('sp') ? '<span class="badge badge-sp">📍 SP</span>' : ''}
+          ${r.tags.includes('rs') ? '<span class="badge badge-rs">📍 RS</span>' : ''}
+          ${r.tags.includes('pe') ? '<span class="badge badge-pe">📍 PE</span>' : ''}
+          ${r.tags.includes('pj') ? '<span class="badge badge-pj">🏢 PJ</span>' : ''}
+          ${r.tags.includes('ddd') ? '<span class="badge badge-ddd">⚠️ DDD ausente</span>' : ''}
+          ${r.tags.includes('semfone') ? '<span class="badge badge-semfone">📵 Sem fone</span>' : ''}
+        </div>
+      </div>
+    `;
+  }).join('');
+}
+
+render();
+</script>
+</body>
+</html>
